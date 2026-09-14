@@ -115,6 +115,16 @@
       avis('avis-vigie',
         "L'effectif est à jour. La présence en direct demande d'activer le widget dans les paramètres du serveur Discord.",
         'tiede');
+    } else if (pre.perime && pre.releve) {
+      /* Discord limite la fréquence des appels au widget. Plutôt que
+         d'effacer les chiffres, on les garde en datant le relevé. */
+      avis('avis-vigie',
+        'Effectif à jour. Présence relevée à ' + heure.format(new Date(pre.releve)) + '.',
+        'discret');
+    } else if (!pre.disponible) {
+      avis('avis-vigie',
+        "L'effectif est à jour. La présence en direct est momentanément indisponible.",
+        'discret');
     } else if (d.maj) {
       avis('avis-vigie', 'Relevé du ' + jourMois.format(new Date(d.maj)) +
         ' à ' + heure.format(new Date(d.maj)) + '.', 'discret');

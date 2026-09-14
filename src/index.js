@@ -191,37 +191,55 @@ async function lireIdentiteBot(jeton, guilde) {
   return noms;
 }
 
-async function lirePresence(guilde, nomsBot) {
-  /* Le widget est une route publique, mais Discord attend quand même
-     un User-Agent : sans lui, la réponse peut être refusée. Et on
-     court-circuite le cache de zone, qui figerait un échec passager
-     pendant des heures sur le domaine. */
-  let r;
-  try {
-    r = await fetch(API + '/guilds/' + guilde + '/widget.json', {
-      headers: {
+async function lirePresence(guilde, nomsBot, jeton, cache, origine) {
+  const clePresence = new Request(origine + '/interne/derniere-presence', { method: 'GET' });
+
+  let w = null;
+  let echec = null;
+
+  /* Deux tentatives, dans cet ordre.
+     Authentifiée d'abord : Discord compte alors par jeton de bot.
+     Sans jeton, il compte par adresse IP, et les Workers sortent par
+     des IP partagées avec d'autres clients Cloudflare : on hérite de
+     leur quota et on se fait refuser en 429 sans rien avoir demandé. */
+  for (const authentifie of [true, false]) {
+    try {
+      const entetes = {
         Accept: 'application/json',
         'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)',
-      },
-      cf: { cacheTtl: 30, cacheEverything: false },
-    });
-  } catch (e) {
-    return { disponible: false, raison: 'reseau', detail: String((e && e.message) || e) };
+      };
+      if (authentifie) entetes.Authorization = 'Bot ' + jeton;
+
+      const r = await fetch(API + '/guilds/' + guilde + '/widget.json', {
+        headers: entetes,
+        cf: { cacheTtl: 30, cacheEverything: false },
+      });
+
+      if (r.status === 403) {
+        return { disponible: false, raison: 'widget-desactive' };
+      }
+      if (!r.ok) {
+        echec = { raison: 'refus', statut: r.status };
+        continue;
+      }
+      w = await r.json();
+      break;
+    } catch (e) {
+      echec = { raison: 'reseau', detail: String((e && e.message) || e) };
+    }
   }
 
-  if (!r.ok) {
-    return {
-      disponible: false,
-      raison: r.status === 403 ? 'widget-desactive' : 'refus',
-      statut: r.status,
-    };
-  }
-
-  let w;
-  try {
-    w = await r.json();
-  } catch (e) {
-    return { disponible: false, raison: 'reponse-illisible', detail: String((e && e.message) || e) };
+  /* Rien obtenu : plutôt qu'un bloc vide, on ressert le dernier relevé
+     connu en le signalant comme tel. Une présence d'il y a dix minutes
+     vaut mieux qu'un écran muet. */
+  if (!w) {
+    const vieux = await cache.match(clePresence);
+    if (vieux) {
+      const p = await vieux.json();
+      p.perime = true;
+      return p;
+    }
+    return Object.assign({ disponible: false }, echec || { raison: 'indisponible' });
   }
 
   const salons = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
@@ -254,12 +272,23 @@ async function lirePresence(guilde, nomsBot) {
     ? Math.max(0, w.presence_count - nbBots)
     : humains.length;
 
-  return {
+  const presence = {
     disponible: true,
+    releve: new Date().toISOString(),
     enLigne: enLigne,
     enVocal: humains.filter((m) => m.channel_id).length,
     salons: occupes.slice(0, 6),
   };
+
+  /* Gardé une demi-heure, uniquement comme filet en cas de refus. */
+  await cache.put(clePresence, new Response(JSON.stringify(presence), {
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=1800, s-maxage=1800',
+    },
+  }));
+
+  return presence;
 }
 
 /* --------------------------------------------------------
@@ -311,7 +340,7 @@ async function servirOrdre(request, env, ctx) {
   const resultats = await Promise.allSettled([
     lireEffectif(jeton, guilde, avecNoms),
     lireOperations(jeton, guilde),
-    lirePresence(guilde, nomsBot),
+    lirePresence(guilde, nomsBot, jeton, cache, new URL(request.url).origin),
   ]);
 
   const [eff, ope, pre] = resultats;
