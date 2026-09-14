@@ -10,6 +10,30 @@
   var tactile = window.matchMedia('(hover: none)').matches;
 
   /* ---------------------------------------------------------
+     Titre du seuil, lettre à lettre
+     ---------------------------------------------------------
+     Chaque caractère devient un span animé avec son propre
+     retard. Le texte lisible reste dans aria-label : un
+     lecteur d'écran n'a pas à épeler.
+     --------------------------------------------------------- */
+  document.querySelectorAll('[data-lettres]').forEach(function (n) {
+    var texte = n.textContent;
+    n.setAttribute('aria-label', texte);
+    if (doux) { return; }
+    var retard = parseInt(n.dataset.retard || '0', 10);
+    n.textContent = '';
+    for (var i = 0; i < texte.length; i++) {
+      var c = texte[i];
+      var s = document.createElement('span');
+      s.className = 'l' + (c === ' ' ? ' l--espace' : '');
+      s.setAttribute('aria-hidden', 'true');
+      s.textContent = c === ' ' ? '\u00a0' : c;
+      s.style.animationDelay = (retard + i * 55) + 'ms';
+      n.appendChild(s);
+    }
+  });
+
+  /* ---------------------------------------------------------
      Révélations
      --------------------------------------------------------- */
   var aReveler = document.querySelectorAll('.revele');
@@ -32,14 +56,6 @@
   /* cascade sur les cartes de division */
   var cartes = document.querySelectorAll('.grille .carte');
   cartes.forEach(function (c, i) { c.dataset.retard = String(i * 70); });
-
-  /* section Règle : agrandissement de l'image */
-  var regle = document.getElementById('regle');
-  if (regle && 'IntersectionObserver' in window) {
-    new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) { regle.classList.add('vu'); } });
-    }, { threshold: 0.2 }).observe(regle);
-  }
 
   /* ---------------------------------------------------------
      Rail d'actes + barre haute

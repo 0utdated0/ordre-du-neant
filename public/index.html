@@ -41,31 +41,29 @@
 
 <body>
 
-<a class="saut" href="#manifeste">Aller au contenu</a>
+<a class="saut" href="#approche">Aller au contenu</a>
 
-<!-- couches persistantes -->
 <canvas id="neant" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 <div class="vignettage" aria-hidden="true"></div>
 
-<!-- barre haute apparaissant apres le seuil -->
 <div class="barre" id="barre" aria-hidden="true">
   <a class="barre__sceau" href="#seuil"><img src="assets/embleme.webp" alt="" width="900" height="1251"></a>
   <span class="barre__nom">L'Ordre du Néant</span>
   <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre</a>
 </div>
 
-<!-- rail de navigation -->
 <nav class="rail" id="rail" aria-label="Actes">
   <a href="#seuil" data-cible="seuil"><span>I</span><em>Seuil</em></a>
-  <a href="#manifeste" data-cible="manifeste"><span>II</span><em>Manifeste</em></a>
+  <a href="#approche" data-cible="approche"><span>II</span><em>Approche</em></a>
   <a href="#divisions" data-cible="divisions"><span>III</span><em>Divisions</em></a>
-  <a href="#ascension" data-cible="ascension"><span>IV</span><em>Ascension</em></a>
-  <a href="#vigie" data-cible="vigie"><span>V</span><em>Vigie</em></a>
-  <a href="#operations" data-cible="operations"><span>VI</span><em>Opérations</em></a>
-  <a href="#galerie" data-cible="galerie"><span>VII</span><em>Galerie</em></a>
-  <a href="#regle" data-cible="regle"><span>VIII</span><em>Règle</em></a>
-  <a href="#passage" data-cible="passage"><span>IX</span><em>Passage</em></a>
+  <a href="#flotte" data-cible="flotte"><span>IV</span><em>Flotte</em></a>
+  <a href="#ascension" data-cible="ascension"><span>V</span><em>Ascension</em></a>
+  <a href="#vigie" data-cible="vigie"><span>VI</span><em>Vigie</em></a>
+  <a href="#operations" data-cible="operations"><span>VII</span><em>Opérations</em></a>
+  <a href="#galerie" data-cible="galerie"><span>VIII</span><em>Galerie</em></a>
+  <a href="#regle" data-cible="regle"><span>IX</span><em>Règle</em></a>
+  <a href="#passage" data-cible="passage"><span>X</span><em>Passage</em></a>
 </nav>
 
 <!-- =========================================================
@@ -73,10 +71,18 @@
      ========================================================= -->
 <header class="acte acte--seuil" id="seuil">
   <div class="seuil__coeur">
-    <img src="assets/embleme.webp" alt="Emblème de l'Ordre du Néant" class="sceau" width="900" height="1251" fetchpriority="high">
-    <h1><span class="petit">L'Ordre du</span><span class="grand">Néant</span></h1>
+    <div class="sceau__cadre">
+      <img src="assets/embleme.webp" alt="Emblème de l'Ordre du Néant" class="sceau" width="900" height="1251" fetchpriority="high">
+      <span class="sceau__balayage" aria-hidden="true"></span>
+    </div>
+
+    <h1>
+      <span class="petit" data-lettres>L'Ordre du</span>
+      <span class="grand" data-lettres data-retard="420">Néant</span>
+    </h1>
     <p class="devise">Tout n'est que passage</p>
     <p class="situe">Organisation Star Citizen francophone</p>
+
     <div class="portes">
       <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
       <a class="porte" href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">Voir la page RSI</a>
@@ -88,30 +94,39 @@
 <main>
 
 <!-- =========================================================
-     ACTE II - LE MANIFESTE
+     ACTE II - L'APPROCHE  (défilement piloté)
      ========================================================= -->
-<section class="acte acte--image" id="manifeste">
-  <div class="fond" data-vitesse="0.22">
-    <img src="assets/sc-astre.webp" alt="" width="1672" height="941" loading="lazy" decoding="async">
-  </div>
-  <div class="scrim scrim--gauche" aria-hidden="true"></div>
+<section class="approche" id="approche" aria-label="Acte II, l'Approche">
+  <div class="approche__collant">
+    <div class="approche__scene" id="approche-scene"></div>
+    <div class="approche__voile" aria-hidden="true"></div>
 
-  <div class="contenu contenu--gauche">
-    <p class="acte__num revele">Acte II</p>
-    <h2 class="revele">Rien ne dure,<br>et c'est très bien ainsi</h2>
+    <div class="approche__jauge" id="approche-jauge" aria-hidden="true"><span></span></div>
+
+    <p class="approche__num" aria-hidden="true">Acte II</p>
+
+    <div class="approche__textes">
+      <p class="fragment"><span>Les vaisseaux brûlent.</span></p>
+      <p class="fragment"><span>Les cargaisons se perdent.</span></p>
+      <p class="fragment"><span>Les équipages se dispersent.</span></p>
+      <p class="fragment fragment--long"><span>Ce qui reste, c'est la manière dont on s'est tenu pendant que ça arrivait.</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="acte acte--manifeste" id="manifeste">
+  <div class="contenu contenu--centre">
+    <h2 class="revele balaye">Rien ne dure, et c'est très bien ainsi</h2>
     <p class="chapeau revele">
-      Les vaisseaux brûlent. Les cargaisons se perdent. Les équipages se dispersent.
-      Ce qui reste, c'est la manière dont on s'est tenu pendant que ça arrivait.
+      L'Ordre du Néant ne court pas après le nombre. Nous recrutons lentement,
+      nous structurons soigneusement, et nous attendons des gens qu'ils soient
+      réellement présents.
     </p>
     <p class="revele">
-      L'Ordre du Néant ne court pas après le nombre. Nous recrutons lentement, nous
-      structurons soigneusement, et nous attendons des gens qu'ils soient réellement
-      présents. Une corpo de quatre cents membres dont douze se connectent ne vaut pas
-      vingt pilotes qui répondent quand on les appelle.
-    </p>
-    <p class="revele">
-      Nous jouons en français, entre adultes, sans exiger d'exclusivité. Vous pouvez
-      garder vos autres organisations. Nous ne sommes pas possessifs, nous sommes exigeants.
+      Une corpo de quatre cents membres dont douze se connectent ne vaut pas vingt
+      pilotes qui répondent quand on les appelle. Nous jouons en français, entre
+      adultes, sans exiger d'exclusivité. Vous pouvez garder vos autres
+      organisations. Nous ne sommes pas possessifs, nous sommes exigeants.
     </p>
   </div>
 </section>
@@ -120,14 +135,10 @@
      ACTE III - LES DIVISIONS
      ========================================================= -->
 <section class="acte acte--divisions" id="divisions">
-  <div class="fond fond--sourd" data-vitesse="0.12">
-    <img src="assets/sc-vaisseaux.webp" alt="" width="480" height="821" loading="lazy" decoding="async">
-  </div>
-
   <div class="contenu contenu--large">
     <div class="entete revele">
       <p class="acte__num">Acte III</p>
-      <h2>Huit divisions</h2>
+      <h2 class="balaye">Huit divisions</h2>
       <p class="intro">
         Chaque division a ses salons, ses référents et ses opérations. Vous en choisissez
         librement, la plupart des membres en suivent deux ou trois.
@@ -188,14 +199,50 @@
 </section>
 
 <!-- =========================================================
-     ACTE IV - L'ASCENSION
+     ACTE IV - LA FLOTTE  (hologrammes)
+     ========================================================= -->
+<section class="acte acte--flotte" id="flotte">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">Acte IV</p>
+      <h2 class="balaye">La flotte</h2>
+      <p class="intro">
+        Quatre appareils de la classification interne de l'Ordre, projetés en hologramme.
+        Faites-les tourner, approchez la souris.
+      </p>
+    </div>
+
+    <div class="holo revele">
+      <div class="holo__onglets" id="flotte-onglets" role="tablist" aria-label="Appareils"></div>
+
+      <div class="holo__table">
+        <div class="holo__scene" id="flotte-scene"></div>
+        <span class="holo__coin holo__coin--hg" aria-hidden="true"></span>
+        <span class="holo__coin holo__coin--hd" aria-hidden="true"></span>
+        <span class="holo__coin holo__coin--bg" aria-hidden="true"></span>
+        <span class="holo__coin holo__coin--bd" aria-hidden="true"></span>
+        <p class="holo__mention" aria-hidden="true">Projection · classification interne</p>
+      </div>
+
+      <div class="holo__fiche" aria-live="polite">
+        <h3 id="flotte-nom">—</h3>
+        <p class="holo__classe" id="flotte-classe"></p>
+        <p class="holo__texte" id="flotte-texte"></p>
+        <dl class="holo__donnees" id="flotte-fiche"></dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     ACTE V - L'ASCENSION
      ========================================================= -->
 <section class="acte acte--ascension" id="ascension">
   <div class="ascension__scene">
     <div class="contenu contenu--large">
       <div class="entete entete--centre revele">
-        <p class="acte__num">Acte IV</p>
-        <h2>L'ascension</h2>
+        <p class="acte__num">Acte V</p>
+        <h2 class="balaye">L'ascension</h2>
         <p class="intro">
           Six échelons. Les trois premiers s'obtiennent par la présence, les suivants
           sont conférés par le commandement. Rien ne s'achète, rien ne se demande.
@@ -263,13 +310,13 @@
 </section>
 
 <!-- =========================================================
-     ACTE V - LA VIGIE  (données en direct)
+     ACTE VI - LA VIGIE
      ========================================================= -->
 <section class="acte acte--donnees" id="vigie">
   <div class="contenu contenu--large">
     <div class="entete entete--centre revele">
-      <p class="acte__num">Acte V</p>
-      <h2>La Vigie</h2>
+      <p class="acte__num">Acte VI</p>
+      <h2 class="balaye">La Vigie</h2>
       <p class="intro">
         Ce que le serveur de l'Ordre dit de lui-même, relevé à l'instant.
         Rien n'est saisi à la main : tout vient des rôles portés sur le Discord.
@@ -314,17 +361,13 @@
 </section>
 
 <!-- =========================================================
-     ACTE VI - LES OPÉRATIONS
+     ACTE VII - LES OPÉRATIONS
      ========================================================= -->
 <section class="acte acte--donnees acte--operations" id="operations">
-  <div class="fond fond--sourd" data-vitesse="0.12">
-    <img src="assets/sc-vaisseaux.webp" alt="" width="480" height="821" loading="lazy" decoding="async">
-  </div>
-
   <div class="contenu contenu--large">
     <div class="entete revele">
-      <p class="acte__num">Acte VI</p>
-      <h2>Les opérations</h2>
+      <p class="acte__num">Acte VII</p>
+      <h2 class="balaye">Les opérations</h2>
       <p class="intro">
         Annoncées à l'avance, avec ordre de mission et inscription d'équipage.
         Le partage des gains est écrit avant le départ.
@@ -332,19 +375,18 @@
     </div>
 
     <p class="avis" id="avis-operations" hidden></p>
-
     <ol class="operations__liste" id="operations-liste" role="list"></ol>
   </div>
 </section>
 
 <!-- =========================================================
-     ACTE VII - LA GALERIE
+     ACTE VIII - LA GALERIE
      ========================================================= -->
 <section class="acte acte--galerie" id="galerie">
   <div class="contenu contenu--large">
     <div class="entete entete--centre revele">
-      <p class="acte__num">Acte VII</p>
-      <h2>La galerie</h2>
+      <p class="acte__num">Acte VIII</p>
+      <h2 class="balaye">La galerie</h2>
       <p class="intro">
         Captures d'opérations, de convois et d'expéditions. Le verse tel que
         l'Ordre le traverse.
@@ -357,18 +399,21 @@
 </section>
 
 <!-- =========================================================
-     ACTE VIII - LA REGLE
+     ACTE IX - LA RÈGLE
      ========================================================= -->
 <section class="acte acte--regle" id="regle">
   <div class="duo">
-    <div class="duo__image">
-      <img src="assets/sc-veilleur.webp" alt="Un membre de l'Ordre veille au bord d'une falaise, bannière déployée." width="500" height="441" loading="lazy" decoding="async">
-      <div class="duo__scrim" aria-hidden="true"></div>
+    <div class="duo__visuel">
+      <div class="attente attente--grand revele">
+        <span class="attente__cadre" aria-hidden="true"></span>
+        <span class="attente__mot">Emplacement libre</span>
+        <span class="attente__note">Une capture de l'Ordre viendra ici</span>
+      </div>
     </div>
 
     <div class="duo__texte">
-      <p class="acte__num revele">Acte VIII</p>
-      <h2 class="revele">La Règle</h2>
+      <p class="acte__num revele">Acte IX</p>
+      <h2 class="revele balaye">La Règle</h2>
 
       <div class="volet revele">
         <h3><span class="volet__puce" aria-hidden="true"></span>Ce que nous demandons</h3>
@@ -394,17 +439,12 @@
 </section>
 
 <!-- =========================================================
-     ACTE IX - LE PASSAGE
+     ACTE X - LE PASSAGE
      ========================================================= -->
-<section class="acte acte--image acte--passage" id="passage">
-  <div class="fond" data-vitesse="0.18">
-    <img src="assets/banniere-astre.webp" alt="" width="1672" height="941" loading="lazy" decoding="async">
-  </div>
-  <div class="scrim scrim--plein" aria-hidden="true"></div>
-
+<section class="acte acte--passage" id="passage">
   <div class="contenu contenu--centre">
-    <p class="acte__num revele">Acte IX</p>
-    <h2 class="revele">Entrer dans l'Ordre</h2>
+    <p class="acte__num revele">Acte X</p>
+    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
     <p class="chapeau revele">
       Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
       parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
@@ -447,9 +487,6 @@
 </div>
 
 <footer>
-  <div class="pied__sol" aria-hidden="true">
-    <img src="assets/sc-sol.webp" alt="" width="1672" height="341" loading="lazy" decoding="async">
-  </div>
   <div class="pied">
     <p class="devise-pied">Tout n'est que passage</p>
     <nav aria-label="Liens de l'Ordre">
@@ -459,13 +496,16 @@
     </nav>
     <p class="mention">
       Site non officiel. Star Citizen et Roberts Space Industries sont des marques
-      de Cloud Imperium Rights LLC.
+      de Cloud Imperium Rights LLC. Les appareils présentés en hologramme sont
+      des conceptions propres à l'Ordre.
     </p>
   </div>
 </footer>
 
 <script src="vendor/three.min.js" defer></script>
 <script src="scene.js" defer></script>
+<script src="approche.js" defer></script>
+<script src="flotte.js" defer></script>
 <script src="site.js" defer></script>
 <script src="vigie.js" defer></script>
 </body>
