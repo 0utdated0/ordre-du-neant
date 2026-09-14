@@ -23,6 +23,14 @@
   "main": "src/index.js",
   "compatibility_date": "2026-09-01",
 
+  // Domaines servis par ce Worker. « custom_domain » demande à
+  // Cloudflare de créer aussi l'enregistrement DNS et le certificat,
+  // sans toucher aux MX : la messagerie OVH continue de fonctionner.
+  "routes": [
+    { "pattern": "ordre-du-neant.fr", "custom_domain": true },
+    { "pattern": "www.ordre-du-neant.fr", "custom_domain": true }
+  ],
+
   "vars": {
     "GUILD_ID": "1546811036106227722"
   },
