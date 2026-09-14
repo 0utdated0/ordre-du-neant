@@ -192,11 +192,37 @@ async function lireIdentiteBot(jeton, guilde) {
 }
 
 async function lirePresence(guilde, nomsBot) {
-  const r = await fetch(API + '/guilds/' + guilde + '/widget.json');
-  if (!r.ok) {
-    return { disponible: false, raison: r.status === 403 ? 'widget-desactive' : 'indisponible' };
+  /* Le widget est une route publique, mais Discord attend quand même
+     un User-Agent : sans lui, la réponse peut être refusée. Et on
+     court-circuite le cache de zone, qui figerait un échec passager
+     pendant des heures sur le domaine. */
+  let r;
+  try {
+    r = await fetch(API + '/guilds/' + guilde + '/widget.json', {
+      headers: {
+        Accept: 'application/json',
+        'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)',
+      },
+      cf: { cacheTtl: 30, cacheEverything: false },
+    });
+  } catch (e) {
+    return { disponible: false, raison: 'reseau', detail: String((e && e.message) || e) };
   }
-  const w = await r.json();
+
+  if (!r.ok) {
+    return {
+      disponible: false,
+      raison: r.status === 403 ? 'widget-desactive' : 'refus',
+      statut: r.status,
+    };
+  }
+
+  let w;
+  try {
+    w = await r.json();
+  } catch (e) {
+    return { disponible: false, raison: 'reponse-illisible', detail: String((e && e.message) || e) };
+  }
 
   const salons = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
   const parId = new Map(salons.map((s) => [s.id, s]));
