@@ -173,7 +173,25 @@ async function lireOperations(jeton, guilde) {
    Le widget doit être activé dans les paramètres du serveur.
    S'il ne l'est pas, on le dit au lieu d'échouer.
    -------------------------------------------------------- */
-async function lirePresence(guilde) {
+async function lireIdentiteBot(jeton, guilde) {
+  /* Le widget ne distingue pas les bots des humains. La Vigie reste
+     en permanence dans un salon vocal pour la radio : sans ce filtre,
+     le site annoncerait éternellement « 1 en vocal » alors que
+     personne n'est là. On relève donc les noms sous lesquels le bot
+     peut apparaître, et on les écarte. */
+  const noms = new Set();
+  try {
+    const moi = await discord('/users/@me', jeton);
+    [moi.username, moi.global_name].forEach((n) => { if (n) noms.add(n); });
+    try {
+      const membre = await discord('/guilds/' + guilde + '/members/' + moi.id, jeton);
+      if (membre.nick) noms.add(membre.nick);
+    } catch (e) { /* le bot peut ne pas être listable, ce n'est pas bloquant */ }
+  } catch (e) { /* sans identité, on n'exclut rien plutôt que d'échouer */ }
+  return noms;
+}
+
+async function lirePresence(guilde, nomsBot) {
   const r = await fetch(API + '/guilds/' + guilde + '/widget.json');
   if (!r.ok) {
     return { disponible: false, raison: r.status === 403 ? 'widget-desactive' : 'indisponible' };
@@ -189,7 +207,11 @@ async function lirePresence(guilde) {
      les perdre, et sans révéler l'intitulé d'un salon fermé. */
   const reserve = { id: null, nom: 'Salon réservé', occupants: [] };
 
-  for (const m of w.members || []) {
+  const tous = w.members || [];
+  const humains = tous.filter((m) => !nomsBot.has(m.username));
+  const nbBots = tous.length - humains.length;
+
+  for (const m of humains) {
     if (!m.channel_id) continue;
     if (parId.has(m.channel_id)) {
       parId.get(m.channel_id).occupants.push(m.username);
@@ -201,10 +223,15 @@ async function lirePresence(guilde) {
   const occupes = salons.filter((s) => s.occupants.length);
   if (reserve.occupants.length) occupes.push(reserve);
 
+  /* presence_count compte les bots : on retire ceux qu'on a écartés. */
+  const enLigne = typeof w.presence_count === 'number'
+    ? Math.max(0, w.presence_count - nbBots)
+    : humains.length;
+
   return {
     disponible: true,
-    enLigne: typeof w.presence_count === 'number' ? w.presence_count : (w.members || []).length,
-    enVocal: (w.members || []).filter((m) => m.channel_id).length,
+    enLigne: enLigne,
+    enVocal: humains.filter((m) => m.channel_id).length,
     salons: occupes.slice(0, 6),
   };
 }
@@ -253,10 +280,12 @@ async function servirOrdre(request, env, ctx) {
   const garde = await cache.match(cle);
   if (garde) return garde;
 
+  const nomsBot = await lireIdentiteBot(jeton, guilde);
+
   const resultats = await Promise.allSettled([
     lireEffectif(jeton, guilde, avecNoms),
     lireOperations(jeton, guilde),
-    lirePresence(guilde),
+    lirePresence(guilde, nomsBot),
   ]);
 
   const [eff, ope, pre] = resultats;
