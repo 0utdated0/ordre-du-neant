@@ -17,7 +17,6 @@
   var doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var petit = window.innerWidth < 860;
 
-  var ARGENT = 0xeef0f4;
   var ROUGE = 0xe01020;
 
   /* ---------------------------------------------------------
@@ -95,235 +94,27 @@
     return l;
   }
 
-  function piece(geo, teinte, intensite, opaciteAretes) {
+  /* Peinture holographique : un volume additif sans lumière,
+     plus ses arêtes. C'est la fonction que les constructeurs
+     de vaisseaux.js appellent pour chaque pièce. */
+  function peindre(geo, teinte, intensite, opaciteAretes) {
     var g = new THREE.Group();
     g.add(new THREE.Mesh(geo, holo(teinte, intensite)));
     g.add(aretes(geo, teinte, opaciteAretes === undefined ? 0.5 : opaciteAretes));
     return g;
   }
 
-  function poser(g, x, y, z, rx, ry, rz) {
-    g.position.set(x || 0, y || 0, z || 0);
-    g.rotation.set(rx || 0, ry || 0, rz || 0);
-    return g;
-  }
-
   /* =========================================================
      LES MODÈLES
+     ---------------------------------------------------------
+     Décrits une seule fois dans vaisseaux.js, et peints ici
+     en hologramme. L'Approche les peint en coque pleine.
      ========================================================= */
 
-  /* --- Corvette d'escorte --------------------------------- */
-  function corvette() {
-    var n = new THREE.Group();
+  var CATALOGUE = (window.ODN && window.ODN.vaisseaux) || null;
+  if (!CATALOGUE) { return; }
 
-    var coque = new THREE.CylinderGeometry(0.42, 0.62, 5.2, 8);
-    n.add(poser(piece(coque, ARGENT, 0.9), 0, 0, 0, Math.PI / 2, 0, 0));
-
-    var proue = new THREE.ConeGeometry(0.42, 1.8, 8);
-    n.add(poser(piece(proue, ARGENT, 1.0), 0, 0, 3.4, -Math.PI / 2, 0, 0));
-
-    var passerelle = new THREE.SphereGeometry(0.46, 14, 10);
-    n.add(poser(piece(passerelle, ROUGE, 1.1), 0, 0.42, 1.55));
-
-    /* ailes en flèche */
-    for (var c = -1; c <= 1; c += 2) {
-      var aile = new THREE.BoxGeometry(3.1, 0.12, 1.5);
-      n.add(poser(piece(aile, ARGENT, 0.75), c * 1.8, -0.1, -0.5, 0, c * 0.34, c * 0.16));
-
-      var nacelle = new THREE.CylinderGeometry(0.28, 0.34, 2.3, 8);
-      n.add(poser(piece(nacelle, ARGENT, 0.85), c * 2.5, -0.1, -1.1, Math.PI / 2, 0, 0));
-
-      var tuyere = new THREE.CylinderGeometry(0.36, 0.2, 0.5, 8);
-      n.add(poser(piece(tuyere, ROUGE, 1.4), c * 2.5, -0.1, -2.4, Math.PI / 2, 0, 0));
-
-      var canard = new THREE.BoxGeometry(1.15, 0.09, 0.6);
-      n.add(poser(piece(canard, ARGENT, 0.7), c * 0.95, 0.12, 2.1, 0, -c * 0.5, 0));
-    }
-
-    var tuyereC = new THREE.CylinderGeometry(0.5, 0.26, 0.7, 8);
-    n.add(poser(piece(tuyereC, ROUGE, 1.5), 0, 0, -3.0, Math.PI / 2, 0, 0));
-
-    var derive = new THREE.BoxGeometry(0.1, 1.25, 1.5);
-    n.add(poser(piece(derive, ARGENT, 0.7), 0, 0.8, -1.7, 0.22, 0, 0));
-
-    return n;
-  }
-
-  /* --- Cargo lourd ---------------------------------------- */
-  function cargo() {
-    var n = new THREE.Group();
-
-    var epine = new THREE.BoxGeometry(0.8, 0.8, 7.4);
-    n.add(piece(epine, ARGENT, 0.75));
-
-    var pont = new THREE.BoxGeometry(1.5, 0.95, 1.6);
-    n.add(poser(piece(pont, ARGENT, 0.95), 0, 0.5, 3.3));
-    var verriere = new THREE.BoxGeometry(1.1, 0.4, 0.3);
-    n.add(poser(piece(verriere, ROUGE, 1.2), 0, 0.62, 4.1));
-
-    /* conteneurs : la répétition fait la lecture de « cargo » */
-    for (var i = 0; i < 4; i++) {
-      for (var c = -1; c <= 1; c += 2) {
-        var boite = new THREE.BoxGeometry(1.15, 1.0, 1.2);
-        n.add(poser(piece(boite, ARGENT, 0.6, 0.65),
-          c * 1.05, 0, 1.6 - i * 1.4));
-      }
-      var traverse = new THREE.BoxGeometry(2.6, 0.1, 0.1);
-      n.add(poser(piece(traverse, ARGENT, 0.5, 0.4), 0, 0.58, 1.6 - i * 1.4));
-    }
-
-    for (var m = -1; m <= 1; m += 2) {
-      var moteur = new THREE.CylinderGeometry(0.44, 0.5, 1.5, 10);
-      n.add(poser(piece(moteur, ARGENT, 0.85), m * 1.05, 0, -3.5, Math.PI / 2, 0, 0));
-      var feu = new THREE.CylinderGeometry(0.5, 0.28, 0.6, 10);
-      n.add(poser(piece(feu, ROUGE, 1.5), m * 1.05, 0, -4.4, Math.PI / 2, 0, 0));
-    }
-
-    var radiateur = new THREE.BoxGeometry(0.08, 1.9, 2.2);
-    n.add(poser(piece(radiateur, ARGENT, 0.55), 0, 1.3, -1.4, 0, 0, 0));
-
-    return n;
-  }
-
-  /* --- Foreuse ------------------------------------------- */
-  function foreuse() {
-    var n = new THREE.Group();
-
-    var ventre = new THREE.SphereGeometry(1.5, 16, 12);
-    var mv = poser(piece(ventre, ARGENT, 0.8), 0, 0, -0.4);
-    mv.scale.set(1, 0.85, 1.55);
-    n.add(mv);
-
-    var col = new THREE.CylinderGeometry(0.5, 0.75, 1.9, 10);
-    n.add(poser(piece(col, ARGENT, 0.85), 0, 0.1, 1.8, Math.PI / 2, 0, 0));
-
-    var tete = new THREE.ConeGeometry(0.85, 1.5, 12);
-    n.add(poser(piece(tete, ROUGE, 1.3), 0, 0.1, 3.1, -Math.PI / 2, 0, 0));
-
-    var couronne = new THREE.TorusGeometry(0.72, 0.09, 8, 20);
-    n.add(poser(piece(couronne, ROUGE, 1.5), 0, 0.1, 2.6));
-
-    /* bras articulés et soutes à minerai */
-    for (var c = -1; c <= 1; c += 2) {
-      var bras1 = new THREE.BoxGeometry(1.7, 0.16, 0.16);
-      n.add(poser(piece(bras1, ARGENT, 0.7), c * 1.6, 0.35, 1.5, 0, 0, c * 0.3));
-      var bras2 = new THREE.BoxGeometry(1.3, 0.14, 0.14);
-      n.add(poser(piece(bras2, ARGENT, 0.7), c * 2.4, 0.05, 2.1, 0, c * 0.55, c * -0.2));
-
-      var soute = new THREE.CylinderGeometry(0.52, 0.52, 2.2, 10);
-      n.add(poser(piece(soute, ARGENT, 0.65), c * 1.85, -0.35, -0.9, Math.PI / 2, 0, 0));
-
-      var propulseur = new THREE.CylinderGeometry(0.34, 0.2, 0.55, 8);
-      n.add(poser(piece(propulseur, ROUGE, 1.4), c * 1.0, -0.15, -2.6, Math.PI / 2, 0, 0));
-    }
-
-    var mat = new THREE.CylinderGeometry(0.06, 0.06, 1.6, 6);
-    n.add(poser(piece(mat, ARGENT, 0.6), 0, 1.15, -0.8));
-
-    return n;
-  }
-
-  /* --- Station ------------------------------------------- */
-  function station() {
-    var n = new THREE.Group();
-
-    var anneau = new THREE.TorusGeometry(3.1, 0.34, 10, 48);
-    n.add(poser(piece(anneau, ARGENT, 0.8), 0, 0, 0, Math.PI / 2, 0, 0));
-
-    var anneau2 = new THREE.TorusGeometry(2.1, 0.13, 8, 36);
-    n.add(poser(piece(anneau2, ARGENT, 0.6), 0, 0, 0, Math.PI / 2, 0, 0));
-
-    var fut = new THREE.CylinderGeometry(0.55, 0.55, 5.2, 12);
-    n.add(piece(fut, ARGENT, 0.85));
-
-    var moyeu = new THREE.SphereGeometry(0.95, 16, 12);
-    n.add(piece(moyeu, ROUGE, 1.0));
-
-    /* rayons et modules d'amarrage */
-    for (var i = 0; i < 6; i++) {
-      var a = (i / 6) * Math.PI * 2;
-      var rayon = new THREE.BoxGeometry(0.16, 0.16, 2.2);
-      var r = piece(rayon, ARGENT, 0.6, 0.45);
-      r.position.set(Math.cos(a) * 1.55, 0, Math.sin(a) * 1.55);
-      r.rotation.y = -a;
-      n.add(r);
-
-      if (i % 2 === 0) {
-        var module = new THREE.BoxGeometry(0.75, 0.75, 1.1);
-        var mo = piece(module, ARGENT, 0.7);
-        mo.position.set(Math.cos(a) * 3.1, 0, Math.sin(a) * 3.1);
-        mo.rotation.y = -a;
-        n.add(mo);
-
-        var feu2 = new THREE.SphereGeometry(0.11, 8, 6);
-        var fe = piece(feu2, ROUGE, 2.0, 0);
-        fe.position.set(Math.cos(a) * 3.55, 0, Math.sin(a) * 3.55);
-        n.add(fe);
-      }
-    }
-
-    for (var c = -1; c <= 1; c += 2) {
-      var coiffe = new THREE.ConeGeometry(0.55, 1.1, 12);
-      n.add(poser(piece(coiffe, ARGENT, 0.8), 0, c * 3.0, 0, c > 0 ? 0 : Math.PI, 0, 0));
-      var antenne = new THREE.CylinderGeometry(0.03, 0.03, 1.5, 6);
-      n.add(poser(piece(antenne, ARGENT, 0.7), 0, c * 4.1, 0));
-    }
-
-    return n;
-  }
-
-  /* ---------------------------------------------------------
-     Fiches
-     ---------------------------------------------------------
-     Désignations propres à l'Ordre : classification interne,
-     pas des modèles du commerce.
-     --------------------------------------------------------- */
-  var FLOTTE = [
-    {
-      cle: 'corvette', nom: 'Le Passeur', classe: 'Corvette d\'escorte',
-      division: 'Combat et Sécurité', construire: corvette,
-      echelle: 1, fiche: [
-        ['Rôle', 'Escorte, interception'],
-        ['Équipage', '2 à 4'],
-        ['Longueur', '38 m'],
-        ['Armement', 'Tourelles jumelées, contre-mesures']
-      ],
-      texte: "Rapide, peu armé pour sa taille, conçu pour tenir la distance autour d'un convoi plutôt que pour engager seul. Il escorte, il dissuade, il rentre."
-    },
-    {
-      cle: 'cargo', nom: 'Le Portefaix', classe: 'Cargo lourd',
-      division: 'Logistique et Industrie', construire: cargo,
-      echelle: 0.98, fiche: [
-        ['Rôle', 'Fret, ravitaillement'],
-        ['Équipage', '3 à 6'],
-        ['Longueur', '74 m'],
-        ['Soute', '8 conteneurs modulaires']
-      ],
-      texte: "L'épine dorsale des opérations de l'Ordre. Lent, vulnérable, indispensable. Rien ne se construit sans ce qu'il transporte."
-    },
-    {
-      cle: 'foreuse', nom: 'La Carrière', classe: 'Foreuse de prospection',
-      division: 'Extraction', construire: foreuse,
-      echelle: 1.05, fiche: [
-        ['Rôle', 'Minage, prospection'],
-        ['Équipage', '2 à 3'],
-        ['Longueur', '31 m'],
-        ['Soutes', 'Deux cuves à minerai']
-      ],
-      texte: "Tête de forage à couronne, deux bras de relevé, deux cuves. Elle passe des heures immobile contre un astéroïde, et c'est ce qui paie les autres."
-    },
-    {
-      cle: 'station', nom: 'Le Seuil', classe: 'Station d\'attache',
-      division: 'Commandement', construire: station,
-      echelle: 0.92, fiche: [
-        ['Rôle', 'Amarrage, réunion, dépôt'],
-        ['Équipage', 'Variable'],
-        ['Envergure', '210 m'],
-        ['Postes', 'Trois bras d\'amarrage']
-      ],
-      texte: "Le point de ralliement. Anneau d'habitation en rotation, fût central, trois bras d'amarrage. On y entre, on y repart : tout n'est que passage."
-    }
-  ];
+  var FLOTTE = CATALOGUE.FICHES;
 
   /* ---------------------------------------------------------
      Montage de la scène
@@ -352,7 +143,7 @@
     var t = new THREE.Mesh(
       new THREE.RingGeometry(r - 0.012, r, 96),
       new THREE.MeshBasicMaterial({
-        color: i === 0 ? ROUGE : ARGENT,
+        color: i === 0 ? ROUGE : CATALOGUE.ARGENT,
         transparent: true, opacity: i === 0 ? 0.5 : 0.22,
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
       })
@@ -407,7 +198,7 @@
     while (porteur.children.length) { porteur.remove(porteur.children[0]); }
     matieres.length = 0;
 
-    courant = f.construire();
+    courant = f.construire(peindre);
     courant.scale.setScalar(f.echelle);
     porteur.add(courant);
     transition = 0;

@@ -199,6 +199,134 @@
   station.add(halo);
 
   /* ---------------------------------------------------------
+     Le trafic
+     ---------------------------------------------------------
+     Un convoi escorté remonte le couloir vers la station, et
+     deux corvettes patrouillent autour d'elle. Ce sont les
+     mêmes silhouettes que la table d'hologrammes de l'acte IV,
+     peintes en coque pleine au lieu du fil de fer.
+
+     Ils avancent avec le temps, pas avec le défilement : un
+     vaisseau qui s'arrête quand on arrête de lire cesse d'être
+     un vaisseau.
+     --------------------------------------------------------- */
+
+  var CATALOGUE = (window.ODN && window.ODN.vaisseaux) || null;
+
+  /* halo de tuyère : un disque additif, pas une lumière */
+  var HALO = (function () {
+    var t = document.createElement('canvas');
+    t.width = t.height = 128;
+    var x = t.getContext('2d');
+    var g = x.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, 'rgba(255,240,240,1)');
+    g.addColorStop(0.18, 'rgba(255,90,90,0.9)');
+    g.addColorStop(0.5, 'rgba(224,16,32,0.35)');
+    g.addColorStop(1, 'rgba(224,16,32,0)');
+    x.fillStyle = g; x.beginPath(); x.arc(64, 64, 64, 0, 6.2832); x.fill();
+    return new THREE.CanvasTexture(t);
+  })();
+
+  /* traînée : un plan étiré derrière la tuyère */
+  var SILLAGE = (function () {
+    var t = document.createElement('canvas');
+    t.width = 128; t.height = 16;
+    var x = t.getContext('2d');
+    var g = x.createLinearGradient(0, 0, 128, 0);
+    g.addColorStop(0, 'rgba(224,16,32,0)');
+    g.addColorStop(0.6, 'rgba(224,20,36,0.35)');
+    g.addColorStop(0.92, 'rgba(255,80,80,0.85)');
+    g.addColorStop(1, 'rgba(255,170,170,0.95)');
+    x.fillStyle = g; x.fillRect(0, 0, 128, 16);
+    var v = x.createLinearGradient(0, 0, 0, 16);
+    v.addColorStop(0, 'rgba(0,0,0,1)');
+    v.addColorStop(0.5, 'rgba(0,0,0,0)');
+    v.addColorStop(1, 'rgba(0,0,0,1)');
+    x.globalCompositeOperation = 'destination-out';
+    x.fillStyle = v; x.fillRect(0, 0, 128, 16);
+    return new THREE.CanvasTexture(t);
+  })();
+
+  function peindreCoque(geo, teinte, opacite, opaciteAretes) {
+    var g = new THREE.Group();
+    g.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+      color: 0x0a0b0e, transparent: true, opacity: 0.96, fog: true
+    })));
+    g.add(new THREE.LineSegments(
+      new THREE.EdgesGeometry(geo, 20),
+      new THREE.LineBasicMaterial({
+        color: teinte, transparent: true,
+        opacity: Math.min(0.85, (opaciteAretes === undefined ? 0.6 : opaciteAretes) * 1.1),
+        blending: THREE.AdditiveBlending, depthWrite: false, fog: true
+      })
+    ));
+    return g;
+  }
+
+  var tuyeres = [];
+
+  function armer(appareil, echelle) {
+    appareil.scale.setScalar(echelle);
+    (appareil.userData.moteurs || []).forEach(function (m) {
+      var halo = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: HALO, transparent: true, opacity: 0.9,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      }));
+      halo.position.set(m[0], m[1], m[2]);
+      halo.scale.setScalar(m[3] * 4.6);
+      appareil.add(halo);
+
+      var sillage = new THREE.Mesh(
+        new THREE.PlaneGeometry(1, 1),
+        new THREE.MeshBasicMaterial({
+          map: SILLAGE, transparent: true, opacity: 0.55,
+          blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide
+        })
+      );
+      /* la traînée part de la tuyère vers l'arrière */
+      sillage.position.set(m[0], m[1], m[2] - m[3] * 6);
+      sillage.scale.set(m[3] * 12, m[3] * 1.5, 1);
+      sillage.rotation.y = Math.PI / 2;
+      appareil.add(sillage);
+
+      tuyeres.push({ halo: halo, sillage: sillage, base: m[3] });
+    });
+    return appareil;
+  }
+
+  var convoi = null, patrouille = [];
+
+  if (CATALOGUE) {
+    /* --- le convoi : un cargo, deux escortes en quinconce --- */
+    convoi = new THREE.Group();
+    convoi.position.set(-235, 46, 0);
+    scene.add(convoi);
+
+    var porteur = armer(CATALOGUE.cargo(peindreCoque), 8.4);
+    convoi.add(porteur);
+
+    var e1 = armer(CATALOGUE.corvette(peindreCoque), 5.4);
+    e1.position.set(-46, 9, -58);
+    e1.rotation.set(0.04, 0.16, -0.08);
+    convoi.add(e1);
+
+    var e2 = armer(CATALOGUE.corvette(peindreCoque), 5.4);
+    e2.position.set(52, -12, -76);
+    e2.rotation.set(-0.03, -0.2, 0.1);
+    convoi.add(e2);
+
+    /* --- la patrouille, autour de la station --- */
+    for (var v = 0; v < 2; v++) {
+      var pat = armer(CATALOGUE.corvette(peindreCoque), 4.6);
+      pat.userData.angle = v * Math.PI;
+      pat.userData.rayon = 205 + v * 46;
+      pat.userData.hauteur = v ? 34 : -28;
+      station.add(pat);
+      patrouille.push(pat);
+    }
+  }
+
+  /* ---------------------------------------------------------
      Mesure du défilement
      --------------------------------------------------------- */
   var avance = 0, cible = 0;
@@ -299,6 +427,35 @@
       var o = eclats.children[i];
       o.rotation.x += o.userData.v;
       o.rotation.y += o.userData.v * 0.7;
+    }
+
+    /* le convoi remonte le couloir et repart de l'arrière :
+       il y a toujours du trafic, où qu'on en soit du trajet */
+    if (convoi) {
+      convoi.position.z -= dt * 46;
+      if (convoi.position.z < -1320) { convoi.position.z = 420; }
+      convoi.position.y = 46 + Math.sin(t * 0.22) * 7;
+      convoi.rotation.z = Math.sin(t * 0.17) * 0.035;
+    }
+
+    for (var w = 0; w < patrouille.length; w++) {
+      var pa = patrouille[w];
+      pa.userData.angle += dt * (w ? 0.17 : -0.22);
+      var an = pa.userData.angle, ra = pa.userData.rayon;
+      pa.position.set(Math.cos(an) * ra, pa.userData.hauteur, Math.sin(an) * ra);
+      /* le nez suit la trajectoire, sinon elles glissent de côté */
+      pa.rotation.y = -an + (w ? Math.PI / 2 : -Math.PI / 2);
+      pa.rotation.z = (w ? -1 : 1) * 0.3;
+    }
+
+    /* battement des tuyères : une poussée n'est jamais parfaitement
+       régulière, et c'est ce frémissement qui la rend vivante */
+    for (var y = 0; y < tuyeres.length; y++) {
+      var ty = tuyeres[y];
+      var puls = 0.78 + 0.22 * Math.sin(t * 9 + y * 1.7) * Math.sin(t * 3.1 + y);
+      ty.halo.material.opacity = 0.75 * puls;
+      ty.halo.scale.setScalar(ty.base * 4.6 * (0.9 + puls * 0.15));
+      ty.sillage.material.opacity = 0.38 * puls;
     }
 
     marquerFragments();
