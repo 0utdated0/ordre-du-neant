@@ -172,6 +172,75 @@
     return n;
   }
 
+  /* --- Porte-Néant : le bâtiment de ligne ----------------- */
+  /* Trois fois la longueur du cargo. Ce qui fait lire « gros »,
+     ce n'est pas l'échelle, c'est le nombre de détails alignés
+     le long de la coque : on compare, donc on mesure. */
+  function porteNeant(peindre) {
+    var n = new THREE.Group();
+    var moteurs = [];
+
+    /* coque principale, en trois tronçons */
+    n.add(poser(peindre(new THREE.BoxGeometry(5.4, 2.7, 11), ARGENT, 0.8), 0, 0, -1));
+    n.add(poser(peindre(new THREE.BoxGeometry(4.2, 2.2, 5.5), ARGENT, 0.85), 0, 0, 6.6));
+    n.add(poser(peindre(new THREE.CylinderGeometry(1.5, 2.6, 4, 8), ARGENT, 0.95),
+      0, 0, 11, -Math.PI / 2, 0, 0));
+
+    /* étrave */
+    n.add(poser(peindre(new THREE.ConeGeometry(1.5, 3.4, 8), ARGENT, 1.0),
+      0, 0, 14.6, -Math.PI / 2, 0, 0));
+
+    /* château arrière et passerelle */
+    n.add(poser(peindre(new THREE.BoxGeometry(3, 1.6, 3.4), ARGENT, 0.85), 0, 2.1, -3.4));
+    n.add(poser(peindre(new THREE.BoxGeometry(2.2, 1, 2.2), ARGENT, 0.9), 0, 3.3, -2.9));
+    n.add(poser(peindre(new THREE.BoxGeometry(1.7, 0.42, 0.28), ROUGE, 1.4), 0, 3.45, -1.75));
+
+    /* hangars latéraux, ouverts et éclairés */
+    for (var c = -1; c <= 1; c += 2) {
+      n.add(poser(peindre(new THREE.BoxGeometry(0.5, 1.5, 4.4), ROUGE, 1.1), c * 2.75, -0.2, 2.2));
+      n.add(poser(peindre(new THREE.BoxGeometry(0.3, 2.1, 5.2), ARGENT, 0.7), c * 2.95, -0.2, 2.2));
+
+      /* pylônes et coques secondaires */
+      n.add(poser(peindre(new THREE.BoxGeometry(2.6, 0.5, 0.9), ARGENT, 0.65), c * 4, -0.9, -1.6));
+      n.add(poser(peindre(new THREE.CylinderGeometry(0.85, 1, 7, 8), ARGENT, 0.75),
+        c * 5.5, -1.1, -1.6, Math.PI / 2, 0, 0));
+      n.add(poser(peindre(new THREE.ConeGeometry(0.85, 2, 8), ARGENT, 0.85),
+        c * 5.5, -1.1, 2.4, -Math.PI / 2, 0, 0));
+
+      /* tourelles alignées : elles donnent l'échelle */
+      for (var k = 0; k < 5; k++) {
+        n.add(poser(peindre(new THREE.CylinderGeometry(0.3, 0.38, 0.4, 8), ARGENT, 0.8),
+          c * 1.9, 1.5, 7.2 - k * 2.5));
+      }
+
+      /* radiateurs */
+      n.add(poser(peindre(new THREE.BoxGeometry(0.1, 3.2, 3.6), ARGENT, 0.5),
+        c * 2, 2.1, -6.2, 0.2, 0, c * 0.25));
+
+      /* tuyères secondaires */
+      n.add(poser(peindre(new THREE.CylinderGeometry(0.62, 0.42, 1.2, 10), ROUGE, 1.5),
+        c * 5.5, -1.1, -5.6, Math.PI / 2, 0, 0));
+      moteurs.push([c * 5.5, -1.1, -6.3, 0.8]);
+    }
+
+    /* bloc propulsif principal, quatre tuyères */
+    n.add(poser(peindre(new THREE.BoxGeometry(5, 2.6, 2.6), ARGENT, 0.8), 0, 0, -7.4));
+    for (var a = -1; a <= 1; a += 2) {
+      for (var b = -1; b <= 1; b += 2) {
+        n.add(poser(peindre(new THREE.CylinderGeometry(1, 0.62, 1.6, 12), ROUGE, 1.6),
+          a * 1.5, b * 0.85, -9, Math.PI / 2, 0, 0));
+        moteurs.push([a * 1.5, b * 0.85, -9.9, 1.15]);
+      }
+    }
+
+    /* mâts */
+    n.add(poser(peindre(new THREE.CylinderGeometry(0.05, 0.05, 2.6, 6), ARGENT, 0.6), 0, 4.6, -2.9));
+
+    n.userData.moteurs = moteurs;
+    n.userData.longueur = 28;
+    return n;
+  }
+
   /* --- Fiches, pour la table d'hologrammes ---------------- */
   var FICHES = [
     {
@@ -228,6 +297,7 @@
     cargo: cargo,
     foreuse: foreuse,
     station: station,
+    porteNeant: porteNeant,
     FICHES: FICHES
   };
 })(window);

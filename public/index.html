@@ -41,7 +41,7 @@
 
 <body>
 
-<a class="saut" href="#approche">Aller au contenu</a>
+<a class="evitement" href="#approche">Aller au contenu</a>
 
 <canvas id="neant" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
@@ -58,12 +58,13 @@
   <a href="#approche" data-cible="approche"><span>II</span><em>Approche</em></a>
   <a href="#divisions" data-cible="divisions"><span>III</span><em>Divisions</em></a>
   <a href="#flotte" data-cible="flotte"><span>IV</span><em>Flotte</em></a>
-  <a href="#ascension" data-cible="ascension"><span>V</span><em>Ascension</em></a>
-  <a href="#vigie" data-cible="vigie"><span>VI</span><em>Vigie</em></a>
-  <a href="#operations" data-cible="operations"><span>VII</span><em>Opérations</em></a>
-  <a href="#galerie" data-cible="galerie"><span>VIII</span><em>Galerie</em></a>
-  <a href="#regle" data-cible="regle"><span>IX</span><em>Règle</em></a>
-  <a href="#plongee" data-cible="plongee"><span>X</span><em>Passage</em></a>
+  <a href="#saut" data-cible="saut"><span>V</span><em>Saut</em></a>
+  <a href="#ascension" data-cible="ascension"><span>VI</span><em>Ascension</em></a>
+  <a href="#vigie" data-cible="vigie"><span>VII</span><em>Vigie</em></a>
+  <a href="#operations" data-cible="operations"><span>VIII</span><em>Opérations</em></a>
+  <a href="#galerie" data-cible="galerie"><span>IX</span><em>Galerie</em></a>
+  <a href="#regle" data-cible="regle"><span>X</span><em>Règle</em></a>
+  <a href="#plongee" data-cible="plongee"><span>XI</span><em>Passage</em></a>
 </nav>
 
 <!-- =========================================================
@@ -235,14 +236,44 @@
 </section>
 
 <!-- =========================================================
-     ACTE V - L'ASCENSION  (montée pilotée)
+     ACTE V - LE SAUT  (séquence pilotée)
      ========================================================= -->
-<section class="ascension" id="ascension" aria-label="Acte V, l'Ascension">
+<section class="saut" id="saut" aria-label="Acte V, le Saut">
+  <div class="saut__collant">
+    <div class="saut__scene" id="saut-scene"></div>
+    <div class="saut__voile" aria-hidden="true"></div>
+
+    <p class="approche__num" aria-hidden="true">Acte V</p>
+
+    <div class="saut__tableau" aria-hidden="true">
+      <p class="saut__repere">Point de saut <strong>ODN-7</strong></p>
+      <div class="saut__mesure">
+        <span class="saut__lib">Moteur quantique</span>
+        <span class="saut__val" id="saut-charge">000 %</span>
+      </div>
+      <div class="saut__jauge" id="saut-jauge"><span></span></div>
+      <p class="saut__navire">Porte-Néant <strong>Le Silence</strong> · 340 m</p>
+    </div>
+
+    <div class="approche__textes">
+      <p class="fragment"><span>Un point de saut ne s'ouvre jamais deux fois de la même façon.</span></p>
+      <p class="fragment"><span>Mise en charge du moteur quantique.</span></p>
+      <p class="fragment"><span>La déchirure s'ouvre.</span></p>
+      <p class="fragment"><span>On s'engage, et l'espace se referme derrière.</span></p>
+      <p class="fragment"><span>Rien n'en revient identique.</span></p>
+    </div>
+  </div>
+</section>
+
+<!-- =========================================================
+     ACTE VI - L'ASCENSION  (montée pilotée)
+     ========================================================= -->
+<section class="ascension" id="ascension" aria-label="Acte VI, l'Ascension">
   <div class="ascension__collant">
     <div class="ascension__scene" id="ascension-scene"></div>
     <div class="ascension__voile" aria-hidden="true"></div>
 
-    <p class="ascension__num" aria-hidden="true">Acte V</p>
+    <p class="ascension__num" aria-hidden="true">Acte VI</p>
     <h2 class="ascension__titre balaye">L'ascension</h2>
 
     <ol class="echelle-verticale" aria-hidden="true">
@@ -301,12 +332,12 @@
 </section>
 
 <!-- =========================================================
-     ACTE VI - LA VIGIE
+     ACTE VII - LA VIGIE
      ========================================================= -->
 <section class="acte acte--donnees" id="vigie">
   <div class="contenu contenu--large">
     <div class="entete entete--centre revele">
-      <p class="acte__num">Acte VI</p>
+      <p class="acte__num">Acte VII</p>
       <h2 class="balaye">La Vigie</h2>
       <p class="intro">
         Ce que le serveur de l'Ordre dit de lui-même, relevé à l'instant.
@@ -352,12 +383,12 @@
 </section>
 
 <!-- =========================================================
-     ACTE VII - LES OPÉRATIONS
+     ACTE VIII - LES OPÉRATIONS
      ========================================================= -->
 <section class="acte acte--donnees acte--operations" id="operations">
   <div class="contenu contenu--large">
     <div class="entete revele">
-      <p class="acte__num">Acte VII</p>
+      <p class="acte__num">Acte VIII</p>
       <h2 class="balaye">Les opérations</h2>
       <p class="intro">
         Annoncées à l'avance, avec ordre de mission et inscription d'équipage.
@@ -371,12 +402,12 @@
 </section>
 
 <!-- =========================================================
-     ACTE VIII - LA GALERIE
+     ACTE IX - LA GALERIE
      ========================================================= -->
 <section class="acte acte--galerie" id="galerie">
   <div class="contenu contenu--large">
     <div class="entete entete--centre revele">
-      <p class="acte__num">Acte VIII</p>
+      <p class="acte__num">Acte IX</p>
       <h2 class="balaye">La galerie</h2>
       <p class="intro">
         Captures d'opérations, de convois et d'expéditions. Le verse tel que
@@ -390,7 +421,7 @@
 </section>
 
 <!-- =========================================================
-     ACTE IX - LA RÈGLE
+     ACTE X - LA RÈGLE
      ========================================================= -->
 <section class="acte acte--regle" id="regle">
   <div class="duo">
@@ -403,7 +434,7 @@
     </div>
 
     <div class="duo__texte">
-      <p class="acte__num revele">Acte IX</p>
+      <p class="acte__num revele">Acte X</p>
       <h2 class="revele balaye">La Règle</h2>
 
       <div class="volet revele">
@@ -430,15 +461,15 @@
 </section>
 
 <!-- =========================================================
-     ACTE X - LE PASSAGE  (plongée pilotée, puis l'appel)
+     ACTE XI - LE PASSAGE  (plongée pilotée, puis l'appel)
      ========================================================= -->
-<section class="plongee" id="plongee" aria-label="Acte X, le Passage">
+<section class="plongee" id="plongee" aria-label="Acte XI, le Passage">
   <div class="plongee__collant">
     <div class="plongee__scene" id="plongee-scene"></div>
     <div class="plongee__voile" aria-hidden="true"></div>
     <div class="plongee__noir" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte X</p>
+    <p class="approche__num" aria-hidden="true">Acte XI</p>
 
     <div class="approche__textes">
       <p class="fragment"><span>Rien ne dure.</span></p>
@@ -513,6 +544,7 @@
 <script src="scene.js" defer></script>
 <script src="approche.js" defer></script>
 <script src="flotte.js" defer></script>
+<script src="saut.js" defer></script>
 <script src="ascension.js" defer></script>
 <script src="plongee.js" defer></script>
 <script src="site.js" defer></script>
