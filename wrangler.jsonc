@@ -1,0 +1,27 @@
+{
+  // ============================================================
+  //  L'ORDRE DU NÉANT — configuration Cloudflare Workers
+  // ------------------------------------------------------------
+  //  Le dossier public/ est servi tel quel. Tout ce qui n'y
+  //  correspond à aucun fichier arrive au Worker, qui ne répond
+  //  qu'à /api/ordre et renvoie le reste aux fichiers.
+  //
+  //  Variables à déclarer dans les réglages du Worker :
+  //    DISCORD_TOKEN   jeton du bot, en variable chiffrée
+  //    GUILD_ID        identifiant du serveur
+  //    EFFECTIF_NOMS   "non" pour publier les compteurs seuls
+  // ============================================================
+
+  "name": "ordre-du-neant",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-01",
+
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS"
+  },
+
+  "observability": {
+    "enabled": true
+  }
+}

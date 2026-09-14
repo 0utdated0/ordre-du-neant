@@ -5,20 +5,25 @@ Fonts. Tout est servi depuis le domaine.
 
 ## Fichiers
 
-    index.html              la page, neuf actes
-    styles.css              charte noir / argent / rouge + @font-face
-    scene.js                scène WebGL persistante (Three.js)
-    site.js                 parallaxe, révélations, rail, cartes 3D
-    vigie.js                données en direct, galerie, visionneuse
-    functions/api/ordre.js  passerelle Discord (Cloudflare Pages)
-    exemple/ordre.json      jeu de données de repli, affiché comme tel
-    galerie/               captures + manifeste.json
-    assets/                 emblème, bannières et recadrages de scène
-    polices/                Michroma et Saira en woff2
-    vendor/three.min.js     Three.js r128 figé
-    _headers                en-têtes Cloudflare Pages
-    robots.txt, sitemap.xml
-    maj.sh                  script de mise à jour depuis une archive
+    wrangler.jsonc          configuration Cloudflare Workers
+    src/index.js            le Worker : sert /api/ordre, renvoie le reste
+    public/                 tout ce qui est servi tel quel
+      index.html            la page, neuf actes
+      styles.css            charte noir / argent / rouge + @font-face
+      scene.js              scène WebGL persistante (Three.js)
+      site.js               parallaxe, révélations, rail, cartes 3D
+      vigie.js              données en direct, galerie, visionneuse
+      exemple/ordre.json    jeu de données de repli, affiché comme tel
+      galerie/              captures + manifeste.json
+      assets/               emblème, bannières et recadrages de scène
+      polices/              Michroma et Saira en woff2
+      vendor/three.min.js   Three.js r128 figé
+      _headers              en-têtes servis avec les fichiers
+      robots.txt, sitemap.xml
+
+`maj.sh` date de l'époque où le site se mettait à jour par archive zip.
+Il est périmé et ne doit plus être lancé : la mise à jour se fait
+maintenant par `git push`, Cloudflare déploie tout seul.
 
 ## Les neuf actes
 
@@ -39,8 +44,9 @@ Fonts. Tout est servi depuis le domaine.
 Le bot est la source de vérité. Le site ne tient aucune base : il interroge
 Discord et affiche ce qu'il trouve.
 
-`functions/api/ordre.js` est une fonction Cloudflare Pages servie sur
-`/api/ordre`. Elle renvoie trois blocs :
+`src/index.js` est un Worker Cloudflare. Les fichiers de `public/` sont
+servis directement ; tout ce qui n'y correspond à rien arrive au Worker,
+qui ne répond qu'à `/api/ordre`. Cette adresse renvoie trois blocs :
 
 - **effectif** — membres et rôles du serveur, convertis en échelons,
   fonctions et divisions. Les rôles `Ordre Noir` et `Système` ne sortent
@@ -58,7 +64,7 @@ minutes quel que soit le nombre de visiteurs.
 Si `/api/ordre` ne répond pas, le site bascule sur `exemple/ordre.json` et
 l'affiche clairement comme un jeu d'exemple. Jamais de fausse donnée muette.
 
-### Variables à déclarer dans Cloudflare Pages
+### Variables à déclarer dans les réglages du Worker
 
 | Nom | Valeur | Type |
 |---|---|---|
@@ -72,15 +78,16 @@ l'affiche clairement comme un jeu d'exemple. Jamais de fausse donnée muette.
    interrupteur sur activé. Sans ça, l'effectif et les opérations
    fonctionnent, mais la présence en direct reste vide.
 2. **Créer le dépôt GitHub** et y pousser ce dossier.
-3. **Créer le projet Cloudflare Pages**, le relier au dépôt. Aucune
-   commande de compilation, dossier de sortie à la racine.
-4. **Déclarer les variables** ci-dessus dans les réglages du projet, puis
+3. **Créer le Worker**, le relier au dépôt. Build command vide, deploy
+   command `npx wrangler deploy`. Le reste est lu dans `wrangler.jsonc`.
+4. **Déclarer les variables** ci-dessus dans les réglages du Worker, puis
    relancer un déploiement pour qu'elles soient prises en compte.
-5. **Rattacher le domaine** `ordre-du-neant.fr` dans Custom domains.
+5. **Rattacher le domaine** `ordre-du-neant.fr`.
 
 ## La galerie
 
-Dépose les images dans `galerie/`, liste-les dans `galerie/manifeste.json` :
+Dépose les images dans `public/galerie/`, liste-les dans
+`public/galerie/manifeste.json` :
 
 ```json
 [
@@ -90,6 +97,13 @@ Dépose les images dans `galerie/`, liste-les dans `galerie/manifeste.json` :
 
 Tant que le manifeste est vide, la section affiche des emplacements libres
 au lieu d'un écran nu.
+
+## Mettre à jour le site
+
+    cd ~/Documents/ordre-du-neant-site
+    git add -A && git commit -m "Ce qui a changé" && git push
+
+Cloudflare déploie automatiquement à chaque push sur `main`.
 
 ## Principes tenus
 

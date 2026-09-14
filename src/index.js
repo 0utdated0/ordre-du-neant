@@ -1,7 +1,8 @@
 /* =========================================================
-   L'ORDRE DU NÉANT — passerelle Discord
+   L'ORDRE DU NÉANT — Worker Cloudflare
    ---------------------------------------------------------
-   Fonction Cloudflare Pages servie sur /api/ordre.
+   Sert /api/ordre, la passerelle Discord. Tout le reste part
+   vers les fichiers du dossier public/.
 
    Le jeton du bot ne quitte jamais le serveur : le navigateur
    n'appelle que cette adresse, qui renvoie des données déjà
@@ -182,25 +183,51 @@ async function lirePresence(guilde) {
   const salons = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
   const parId = new Map(salons.map((s) => [s.id, s]));
 
+  /* Les salons vocaux de l'Ordre sont réservés aux Adeptes : le widget
+     ne les nomme donc pas, il signale seulement qu'un membre s'y trouve.
+     On regroupe ces occupants sous une entrée sans nom plutôt que de
+     les perdre, et sans révéler l'intitulé d'un salon fermé. */
+  const reserve = { id: null, nom: 'Salon réservé', occupants: [] };
+
   for (const m of w.members || []) {
-    if (m.channel_id && parId.has(m.channel_id)) {
+    if (!m.channel_id) continue;
+    if (parId.has(m.channel_id)) {
       parId.get(m.channel_id).occupants.push(m.username);
+    } else {
+      reserve.occupants.push(m.username);
     }
   }
+
+  const occupes = salons.filter((s) => s.occupants.length);
+  if (reserve.occupants.length) occupes.push(reserve);
 
   return {
     disponible: true,
     enLigne: typeof w.presence_count === 'number' ? w.presence_count : (w.members || []).length,
     enVocal: (w.members || []).filter((m) => m.channel_id).length,
-    salons: salons.filter((s) => s.occupants.length).slice(0, 6),
+    salons: occupes.slice(0, 6),
   };
 }
 
 /* --------------------------------------------------------
    Point d'entrée
    -------------------------------------------------------- */
-export async function onRequestGet(context) {
-  const env = context.env || {};
+export default {
+  async fetch(request, env, ctx) {
+    const url = new URL(request.url);
+
+    if (url.pathname === '/api/ordre') {
+      return servirOrdre(request, env, ctx);
+    }
+
+    /* Les fichiers de public/ sont normalement servis avant même
+       d'atteindre le Worker. Ce renvoi couvre le reste, et produit
+       le 404 des assets pour une adresse inconnue. */
+    return env.ASSETS.fetch(request);
+  },
+};
+
+async function servirOrdre(request, env, ctx) {
   const jeton = env.DISCORD_TOKEN;
   const guilde = env.GUILD_ID;
   const avecNoms = String(env.EFFECTIF_NOMS || 'oui').toLowerCase() !== 'non';
@@ -208,14 +235,14 @@ export async function onRequestGet(context) {
   if (!jeton || !guilde) {
     return reponse({
       erreur: 'configuration',
-      message: "DISCORD_TOKEN ou GUILD_ID n'est pas déclaré dans Cloudflare Pages.",
+      message: "DISCORD_TOKEN ou GUILD_ID n'est pas déclaré dans les réglages du Worker.",
     }, 500, 0);
   }
 
   /* Le cache de périphérie évite de solliciter Discord à chaque
      visite : une réponse est réutilisée pendant cinq minutes. */
   const cache = caches.default;
-  const cle = new Request(new URL(context.request.url).origin + '/api/ordre', { method: 'GET' });
+  const cle = new Request(new URL(request.url).origin + '/api/ordre', { method: 'GET' });
   const garde = await cache.match(cle);
   if (garde) return garde;
 
@@ -229,13 +256,13 @@ export async function onRequestGet(context) {
 
   const corps = {
     maj: new Date().toISOString(),
-    effectif: eff.status === 'fulfilled' ? eff.value : { erreur: String(eff.reason && eff.reason.message || eff.reason) },
-    operations: ope.status === 'fulfilled' ? ope.value : { erreur: String(ope.reason && ope.reason.message || ope.reason) },
+    effectif: eff.status === 'fulfilled' ? eff.value : { erreur: String((eff.reason && eff.reason.message) || eff.reason) },
+    operations: ope.status === 'fulfilled' ? ope.value : { erreur: String((ope.reason && ope.reason.message) || ope.reason) },
     presence: pre.status === 'fulfilled' ? pre.value : { disponible: false, raison: 'indisponible' },
   };
 
   const sortie = reponse(corps, 200, CACHE_SECONDES);
-  context.waitUntil(cache.put(cle, sortie.clone()));
+  ctx.waitUntil(cache.put(cle, sortie.clone()));
   return sortie;
 }
 
