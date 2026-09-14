@@ -6,15 +6,26 @@
   //  correspond à aucun fichier arrive au Worker, qui ne répond
   //  qu'à /api/ordre et renvoie le reste aux fichiers.
   //
-  //  Variables à déclarer dans les réglages du Worker :
-  //    DISCORD_TOKEN   jeton du bot, en variable chiffrée
-  //    GUILD_ID        identifiant du serveur
-  //    EFFECTIF_NOMS   "non" pour publier les compteurs seuls
+  //  GUILD_ID est déclaré ici : ce n'est pas un secret, il figure
+  //  déjà dans l'adresse publique du widget. Il suit donc le dépôt
+  //  au lieu de dépendre d'une saisie dans le tableau de bord.
+  //
+  //  Le jeton du bot, lui, se déclare à la main dans le Worker,
+  //  section « Runtime variables and secrets », de type Secret.
+  //  Les secrets survivent aux déploiements, ils ne sont jamais
+  //  écrasés par ce fichier.
+  //
+  //  Réglage facultatif, à ajouter au même endroit :
+  //    EFFECTIF_NOMS = non   publie les compteurs sans les noms
   // ============================================================
 
   "name": "ordre-du-neant",
   "main": "src/index.js",
   "compatibility_date": "2026-09-01",
+
+  "vars": {
+    "GUILD_ID": "1546811036106227722"
+  },
 
   "assets": {
     "directory": "./public",
