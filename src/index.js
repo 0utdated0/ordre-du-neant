@@ -233,9 +233,16 @@ async function servirOrdre(request, env, ctx) {
   const avecNoms = String(env.EFFECTIF_NOMS || 'oui').toLowerCase() !== 'non';
 
   if (!jeton || !guilde) {
+    /* Nommer la variable absente plutôt que de dire « l'une des deux » :
+       sans ça, diagnostiquer demande d'ouvrir le tableau de bord. */
+    const manquantes = [];
+    if (!jeton) manquantes.push('DISCORD_TOKEN');
+    if (!guilde) manquantes.push('GUILD_ID');
     return reponse({
       erreur: 'configuration',
-      message: "DISCORD_TOKEN ou GUILD_ID n'est pas déclaré dans les réglages du Worker.",
+      manquantes: manquantes,
+      message: 'Absent des réglages du Worker, section Runtime variables and secrets : ' +
+        manquantes.join(' et ') + '.',
     }, 500, 0);
   }
 
