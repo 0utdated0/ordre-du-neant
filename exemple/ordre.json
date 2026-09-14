@@ -1,0 +1,66 @@
+{
+  "maj": "2026-09-14T18:40:00.000Z",
+  "exemple": true,
+  "presence": {
+    "disponible": true,
+    "enLigne": 14,
+    "enVocal": 5,
+    "salons": [
+      { "nom": "Passerelle", "occupants": ["GrilareX", "Hades", "Yod"] },
+      { "nom": "Soute — Convoi Hurston", "occupants": ["Minetor", "Kaelith"] }
+    ]
+  },
+  "effectif": {
+    "total": 31,
+    "recus": 22,
+    "parEchelon": { "Séraphin": 1, "Archange": 1, "Ange": 2, "Sentinelle": 4, "Paladin": 6, "Adepte": 8 },
+    "parDivision": {
+      "Div. Logistique": 9, "Div. Extraction": 7, "Div. Combat": 8, "Div. Sécurité": 5,
+      "Div. Exploration": 6, "Div. Médicale": 3, "Div. Ingénierie": 4, "Div. Industrie": 6
+    },
+    "parPassage": { "Initié": 5, "Postulant": 3, "Allié": 1 },
+    "membres": [
+      { "nom": "GrilareX", "echelon": "Séraphin", "rang": 5, "voie": "conféré", "fonctions": ["Ancien"], "divisions": ["Combat", "Exploration"], "depuis": "2026-06-02T10:00:00.000Z" },
+      { "nom": "Hades", "echelon": "Archange", "rang": 4, "voie": "conféré", "fonctions": ["Gardien"], "divisions": ["Sécurité", "Combat"], "depuis": "2026-06-11T18:20:00.000Z" },
+      { "nom": "Yod", "echelon": "Ange", "rang": 3, "voie": "présence", "fonctions": ["Missionnaire"], "divisions": ["Logistique"], "depuis": "2026-06-18T09:05:00.000Z" },
+      { "nom": "Minetor", "echelon": "Sentinelle", "rang": 2, "voie": "présence", "fonctions": [], "divisions": ["Logistique", "Industrie"], "depuis": "2026-06-24T21:40:00.000Z" },
+      { "nom": "Kaelith", "echelon": "Sentinelle", "rang": 2, "voie": "présence", "fonctions": [], "divisions": ["Extraction", "Industrie"], "depuis": "2026-07-03T14:12:00.000Z" },
+      { "nom": "Vorn", "echelon": "Paladin", "rang": 1, "voie": "présence", "fonctions": [], "divisions": ["Combat"], "depuis": "2026-07-09T19:55:00.000Z" },
+      { "nom": "Seren", "echelon": "Paladin", "rang": 1, "voie": "présence", "fonctions": [], "divisions": ["Médicale", "Exploration"], "depuis": "2026-07-15T12:30:00.000Z" },
+      { "nom": "Orkhan", "echelon": "Paladin", "rang": 1, "voie": "présence", "fonctions": [], "divisions": ["Ingénierie"], "depuis": "2026-07-22T08:44:00.000Z" },
+      { "nom": "Tessier", "echelon": "Adepte", "rang": 0, "voie": "présence", "fonctions": [], "divisions": ["Logistique"], "depuis": "2026-08-01T17:10:00.000Z" },
+      { "nom": "Aldren", "echelon": "Adepte", "rang": 0, "voie": "présence", "fonctions": [], "divisions": ["Exploration"], "depuis": "2026-08-09T20:25:00.000Z" },
+      { "nom": "Marek", "echelon": "Adepte", "rang": 0, "voie": "présence", "fonctions": [], "divisions": ["Extraction", "Industrie"], "depuis": "2026-08-20T11:02:00.000Z" },
+      { "nom": "Ishaan", "echelon": "Adepte", "rang": 0, "voie": "présence", "fonctions": [], "divisions": ["Sécurité"], "depuis": "2026-09-02T16:48:00.000Z" }
+    ]
+  },
+  "operations": [
+    {
+      "nom": "Convoi de ravitaillement — Hurston",
+      "resume": "Escorte de trois cargos jusqu'à Lorville. Inscription d'équipage ouverte, partage des gains au tonnage livré.",
+      "debut": "2026-09-16T19:00:00.000Z",
+      "fin": "2026-09-16T21:30:00.000Z",
+      "lieu": "Passerelle",
+      "inscrits": 9,
+      "encours": false
+    },
+    {
+      "nom": "Cycle de raffinage — ceinture d'Aaron",
+      "resume": "Prospection en groupe, deux Mole et un Prospector. Retour au raffinage d'ARC-L1.",
+      "debut": "2026-09-18T20:00:00.000Z",
+      "fin": "2026-09-18T22:00:00.000Z",
+      "lieu": "Soute",
+      "inscrits": 6,
+      "encours": false
+    },
+    {
+      "nom": "Instruction — manœuvres d'escadre",
+      "resume": "Formation, rupture, rassemblement. Ouvert aux Adeptes, obligatoire avant toute sortie ERT.",
+      "debut": "2026-09-21T19:30:00.000Z",
+      "fin": "2026-09-21T21:00:00.000Z",
+      "lieu": "Hangar d'instruction",
+      "inscrits": 4,
+      "encours": false
+    }
+  ]
+}

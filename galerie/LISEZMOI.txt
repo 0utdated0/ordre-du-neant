@@ -1,0 +1,17 @@
+GALERIE DE L'ORDRE
+
+Dépose ici tes captures, en .webp ou .jpg, puis liste-les dans
+manifeste.json. Rien d'autre à faire, la page se remplit toute seule.
+
+Exemple de manifeste.json :
+
+[
+  { "fichier": "convoi-hurston.webp", "legende": "Convoi de ravitaillement vers Lorville" },
+  { "fichier": "raffinage-aaron.webp", "legende": "Cycle de raffinage, ceinture d'Aaron" }
+]
+
+Conseils :
+- vise 1600 px de large, c'est largement suffisant
+- le .webp pèse deux à trois fois moins qu'un .png pour la même image
+- tant que le manifeste est vide, la section affiche un message
+  discret au lieu d'une grille vide

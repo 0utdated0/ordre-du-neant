@@ -1,0 +1,22 @@
+# En-têtes servis par Cloudflare Pages.
+
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Les visuels ne changent jamais : cache long.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Polices embarquées : cache long également.
+/polices/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Bibliothèque 3D figée à une version : cache long.
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Le jeu d'exemple ne doit pas masquer les vraies données.
+/exemple/*
+  Cache-Control: public, max-age=60

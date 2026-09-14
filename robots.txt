@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ordre-du-neant.fr/sitemap.xml
