@@ -63,7 +63,7 @@
   <a href="#operations" data-cible="operations"><span>VII</span><em>Opérations</em></a>
   <a href="#galerie" data-cible="galerie"><span>VIII</span><em>Galerie</em></a>
   <a href="#regle" data-cible="regle"><span>IX</span><em>Règle</em></a>
-  <a href="#passage" data-cible="passage"><span>X</span><em>Passage</em></a>
+  <a href="#plongee" data-cible="plongee"><span>X</span><em>Passage</em></a>
 </nav>
 
 <!-- =========================================================
@@ -235,77 +235,68 @@
 </section>
 
 <!-- =========================================================
-     ACTE V - L'ASCENSION
+     ACTE V - L'ASCENSION  (montée pilotée)
      ========================================================= -->
-<section class="acte acte--ascension" id="ascension">
-  <div class="ascension__scene">
-    <div class="contenu contenu--large">
-      <div class="entete entete--centre revele">
-        <p class="acte__num">Acte V</p>
-        <h2 class="balaye">L'ascension</h2>
-        <p class="intro">
-          Six échelons. Les trois premiers s'obtiennent par la présence, les suivants
-          sont conférés par le commandement. Rien ne s'achète, rien ne se demande.
-        </p>
-      </div>
+<section class="ascension" id="ascension" aria-label="Acte V, l'Ascension">
+  <div class="ascension__collant">
+    <div class="ascension__scene" id="ascension-scene"></div>
+    <div class="ascension__voile" aria-hidden="true"></div>
 
-      <ol class="echelle" role="list">
-        <li class="degre revele">
-          <span class="degre__ombre" aria-hidden="true">ADE</span>
-          <span class="degre__rang" aria-hidden="true">0</span>
-          <div class="degre__corps">
-            <h3>Adepte</h3>
-            <p>Dossier validé, entrée prononcée. Accès à l'ensemble des salons opérationnels.</p>
-          </div>
-          <span class="degre__voie" aria-hidden="true">présence</span>
-        </li>
-        <li class="degre revele">
-          <span class="degre__ombre" aria-hidden="true">PAL</span>
-          <span class="degre__rang" aria-hidden="true">1</span>
-          <div class="degre__corps">
-            <h3>Paladin</h3>
-            <p>Ouverture de fils de discussion. Franchi par l'activité.</p>
-          </div>
-          <span class="degre__voie" aria-hidden="true">présence</span>
-        </li>
-        <li class="degre revele">
-          <span class="degre__ombre" aria-hidden="true">SEN</span>
-          <span class="degre__rang" aria-hidden="true">2</span>
-          <div class="degre__corps">
-            <h3>Sentinelle</h3>
-            <p>Fils privés et table de sons en vocal. Franchi par l'activité.</p>
-          </div>
-          <span class="degre__voie" aria-hidden="true">présence</span>
-        </li>
-        <li class="degre revele">
-          <span class="degre__ombre" aria-hidden="true">ANG</span>
-          <span class="degre__rang" aria-hidden="true">3</span>
-          <div class="degre__corps">
-            <h3>Ange</h3>
-            <p>Droit d'inviter au nom de l'Ordre. Franchi par l'activité.</p>
-          </div>
-          <span class="degre__voie" aria-hidden="true">présence</span>
-        </li>
-        <li class="degre degre--confere revele">
-          <span class="degre__ombre" aria-hidden="true">ARC</span>
-          <span class="degre__rang" aria-hidden="true">4</span>
-          <div class="degre__corps">
-            <h3>Archange</h3>
-            <p>Organisation d'événements, pseudonyme libre.</p>
-          </div>
-          <span class="degre__voie" aria-hidden="true">conféré</span>
-        </li>
-        <li class="degre degre--confere revele">
-          <span class="degre__ombre" aria-hidden="true">SÉR</span>
-          <span class="degre__rang" aria-hidden="true">5</span>
-          <div class="degre__corps">
-            <h3>Séraphin</h3>
-            <p>Parole prioritaire, droits maximaux.</p>
-          </div>
-          <span class="degre__voie" aria-hidden="true">conféré</span>
-        </li>
-      </ol>
+    <p class="ascension__num" aria-hidden="true">Acte V</p>
+    <h2 class="ascension__titre balaye">L'ascension</h2>
+
+    <ol class="echelle-verticale" aria-hidden="true">
+        <li class="cran"><span>0</span><em>Adepte</em></li>
+        <li class="cran"><span>1</span><em>Paladin</em></li>
+        <li class="cran"><span>2</span><em>Sentinelle</em></li>
+        <li class="cran"><span>3</span><em>Ange</em></li>
+        <li class="cran cran--confere"><span>4</span><em>Archange</em></li>
+        <li class="cran cran--confere"><span>5</span><em>Séraphin</em></li>
+    </ol>
+
+    <div class="ascension__cartes">
+        <article class="echelon">
+          <span class="echelon__rang" aria-hidden="true">0</span>
+          <h3>Adepte</h3>
+          <p>Dossier validé, entrée prononcée. Accès à l'ensemble des salons opérationnels.</p>
+          <span class="echelon__voie">présence</span>
+        </article>
+        <article class="echelon">
+          <span class="echelon__rang" aria-hidden="true">1</span>
+          <h3>Paladin</h3>
+          <p>Ouverture de fils de discussion. Franchi par l'activité.</p>
+          <span class="echelon__voie">présence</span>
+        </article>
+        <article class="echelon">
+          <span class="echelon__rang" aria-hidden="true">2</span>
+          <h3>Sentinelle</h3>
+          <p>Fils privés et table de sons en vocal. Franchi par l'activité.</p>
+          <span class="echelon__voie">présence</span>
+        </article>
+        <article class="echelon">
+          <span class="echelon__rang" aria-hidden="true">3</span>
+          <h3>Ange</h3>
+          <p>Droit d'inviter au nom de l'Ordre. Franchi par l'activité.</p>
+          <span class="echelon__voie">présence</span>
+        </article>
+        <article class="echelon echelon--confere">
+          <span class="echelon__rang" aria-hidden="true">4</span>
+          <h3>Archange</h3>
+          <p>Organisation d'événements, pseudonyme libre.</p>
+          <span class="echelon__voie">conféré</span>
+        </article>
+        <article class="echelon echelon--confere">
+          <span class="echelon__rang" aria-hidden="true">5</span>
+          <h3>Séraphin</h3>
+          <p>Parole prioritaire, droits maximaux.</p>
+          <span class="echelon__voie">conféré</span>
+        </article>
     </div>
+
+    <p class="ascension__pied">
+      Six échelons. Les trois premiers s'obtiennent par la présence, les suivants
+      sont conférés par le commandement. Rien ne s'achète, rien ne se demande.
+    </p>
   </div>
 </section>
 
@@ -439,11 +430,26 @@
 </section>
 
 <!-- =========================================================
-     ACTE X - LE PASSAGE
+     ACTE X - LE PASSAGE  (plongée pilotée, puis l'appel)
      ========================================================= -->
+<section class="plongee" id="plongee" aria-label="Acte X, le Passage">
+  <div class="plongee__collant">
+    <div class="plongee__scene" id="plongee-scene"></div>
+    <div class="plongee__voile" aria-hidden="true"></div>
+    <div class="plongee__noir" aria-hidden="true"></div>
+
+    <p class="approche__num" aria-hidden="true">Acte X</p>
+
+    <div class="approche__textes">
+      <p class="fragment"><span>Rien ne dure.</span></p>
+      <p class="fragment"><span>Rien ne se garde.</span></p>
+      <p class="fragment"><span>Tout n'est que passage.</span></p>
+    </div>
+  </div>
+</section>
+
 <section class="acte acte--passage" id="passage">
   <div class="contenu contenu--centre">
-    <p class="acte__num revele">Acte X</p>
     <h2 class="revele balaye">Entrer dans l'Ordre</h2>
     <p class="chapeau revele">
       Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
@@ -506,6 +512,8 @@
 <script src="scene.js" defer></script>
 <script src="approche.js" defer></script>
 <script src="flotte.js" defer></script>
+<script src="ascension.js" defer></script>
+<script src="plongee.js" defer></script>
 <script src="site.js" defer></script>
 <script src="vigie.js" defer></script>
 </body>
