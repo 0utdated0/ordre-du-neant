@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>L'Ordre du Néant - site en construction</title>
+<meta name="description" content="Le site de L'Ordre du Néant est en construction. Le recrutement reste ouvert sur le Discord de l'organisation.">
+<meta name="robots" content="noindex, nofollow">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="L'Ordre du Néant">
+<meta property="og:title" content="L'Ordre du Néant">
+<meta property="og:description" content="Organisation Star Citizen francophone. Le site est en construction, le recrutement est ouvert.">
+<meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="/assets/embleme-512.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+
+<style>
+@font-face{
+  font-family:'Michroma';font-style:normal;font-weight:400;font-display:swap;
+  src:url('/polices/michroma-latin-400-normal.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Saira';font-style:normal;font-weight:200;font-display:swap;
+  src:url('/polices/saira-latin-200-normal.woff2') format('woff2');
+}
+@font-face{
+  font-family:'Saira';font-style:normal;font-weight:300;font-display:swap;
+  src:url('/polices/saira-latin-300-normal.woff2') format('woff2');
+}
+
+:root{
+  --noir:#000000;
+  --argent:#eef0f4;
+  --cendre:#868b95;
+  --rouge:#e01020;
+  --braise:#ff4d4d;
+  --titre:'Michroma','Saira',system-ui,sans-serif;
+  --texte:'Saira',system-ui,-apple-system,sans-serif;
+  --sortie:cubic-bezier(.16,1,.3,1);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+
+html{background:var(--noir);-webkit-text-size-adjust:100%}
+
+body{
+  margin:0;
+  min-height:100svh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  padding:clamp(2rem,6vh,4rem) clamp(1.25rem,5vw,4rem);
+  background:var(--noir);
+  color:var(--argent);
+  font-family:var(--texte);
+  font-weight:300;
+  line-height:1.65;
+  text-align:center;
+  overflow-x:hidden;
+}
+
+#etoiles{position:fixed;inset:0;width:100%;height:100%;z-index:0;display:block;pointer-events:none}
+
+.voile{
+  position:fixed;inset:0;z-index:1;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 45%, transparent 38%, rgba(0,0,0,.6) 86%, rgba(0,0,0,.9) 100%);
+}
+
+.bloc{
+  position:relative;z-index:2;
+  max-width:44rem;
+  animation:monte 1.4s var(--sortie) both;
+}
+@keyframes monte{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+
+.sceau{
+  display:block;
+  width:clamp(92px,12vw,148px);
+  height:auto;
+  margin:0 auto clamp(1.1rem,2.2vw,1.7rem);
+  filter:drop-shadow(0 0 54px rgba(224,16,32,.42)) drop-shadow(0 0 16px rgba(255,77,77,.28));
+  animation:respire 7s ease-in-out infinite;
+}
+@keyframes respire{
+  0%,100%{transform:translateY(0) scale(1)}
+  50%{transform:translateY(-10px) scale(1.015)}
+}
+
+h1{
+  margin:0 0 .85rem;
+  font-family:var(--titre);
+  font-weight:400;
+  line-height:1;
+  display:flex;flex-direction:column;align-items:center;gap:.45rem;
+}
+h1 .petit{
+  font-size:clamp(.6rem,.55rem + .3vw,.82rem);
+  letter-spacing:.54em;text-indent:.54em;
+  text-transform:uppercase;color:var(--cendre);
+}
+h1 .grand{
+  font-size:clamp(2rem,1.05rem + 4.6vw,4rem);
+  letter-spacing:.13em;text-indent:.13em;
+  color:#fff;
+  text-shadow:0 0 64px rgba(224,16,32,.38), 0 0 20px rgba(0,0,0,.9);
+}
+
+.devise{
+  position:relative;
+  margin:0 0 clamp(1.7rem,3.4vh,2.4rem);
+  padding-top:1rem;
+  font-size:clamp(.74rem,.7rem + .25vw,.9rem);
+  letter-spacing:.32em;text-indent:.32em;
+  text-transform:uppercase;
+  color:var(--argent);
+}
+.devise::before{
+  content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:clamp(80px,16vw,160px);height:1px;
+  background:linear-gradient(90deg,transparent,var(--rouge),transparent);
+  box-shadow:0 0 12px rgba(224,16,32,.8);
+}
+
+.etat{
+  display:inline-flex;align-items:center;gap:.7rem;
+  margin-bottom:1.3rem;
+  padding:.45rem 1rem;
+  border:1px solid rgba(224,16,32,.45);
+  background:rgba(224,16,32,.08);
+  font-family:var(--titre);
+  font-size:.54rem;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--braise);
+}
+.pouls{
+  width:7px;height:7px;flex:0 0 7px;border-radius:50%;
+  background:var(--braise);
+  animation:bat 2.2s ease-out infinite;
+}
+@keyframes bat{
+  0%{box-shadow:0 0 0 0 rgba(255,77,77,.6)}
+  70%{box-shadow:0 0 0 11px rgba(255,77,77,0)}
+  100%{box-shadow:0 0 0 0 rgba(255,77,77,0)}
+}
+
+h2{
+  margin:0 0 1rem;
+  font-family:var(--titre);
+  font-weight:400;
+  font-size:clamp(1.02rem,.88rem + .75vw,1.5rem);
+  line-height:1.3;
+  color:var(--argent);
+}
+
+p{margin:0 0 .85rem;color:var(--cendre);font-size:clamp(.95rem,.92rem + .18vw,1.05rem);max-width:40rem;margin-inline:auto}
+p strong{color:var(--argent);font-weight:400}
+
+.portes{
+  display:flex;flex-wrap:wrap;gap:.85rem;justify-content:center;
+  margin-top:clamp(1.5rem,3vh,2.1rem);
+}
+.porte{
+  position:relative;overflow:hidden;
+  display:inline-block;
+  padding:.95rem 1.9rem;
+  font-family:var(--titre);
+  font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;color:var(--argent);
+  border:1px solid rgba(238,240,244,.22);
+  background:rgba(6,6,8,.5);
+  transition:border-color .3s ease, transform .3s var(--sortie), box-shadow .3s ease;
+}
+.porte::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent,rgba(238,240,244,.14),transparent);
+  transform:translateX(-120%);
+  transition:transform .65s var(--sortie);
+}
+.porte:hover{border-color:rgba(238,240,244,.6);transform:translateY(-2px)}
+.porte:hover::before{transform:translateX(120%)}
+.porte--pleine{
+  color:#fff;border-color:var(--rouge);
+  background:linear-gradient(180deg, rgba(224,16,32,.9), rgba(160,8,20,.9));
+  box-shadow:0 0 28px rgba(224,16,32,.32), inset 0 1px 0 rgba(255,255,255,.18);
+}
+.porte--pleine:hover{border-color:var(--braise);box-shadow:0 0 48px rgba(224,16,32,.6), inset 0 1px 0 rgba(255,255,255,.28)}
+
+footer{
+  position:relative;z-index:2;
+  margin-top:clamp(1.8rem,4vh,2.8rem);
+  font-size:.78rem;
+  color:rgba(134,139,149,.6);
+}
+footer a{color:rgba(134,139,149,.85);text-decoration:none;border-bottom:1px solid transparent;padding-bottom:1px}
+footer a:hover{color:var(--argent);border-color:rgba(224,16,32,.7)}
+footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
+
+:focus-visible{outline:2px solid var(--braise);outline-offset:3px}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  #etoiles{display:none}
+}
+</style>
+</head>
+
+<body>
+
+<canvas id="etoiles" aria-hidden="true"></canvas>
+<div class="voile" aria-hidden="true"></div>
+
+<div class="bloc">
+  <img src="/assets/embleme.webp" alt="Emblème de l'Ordre du Néant" class="sceau" width="900" height="1251" fetchpriority="high">
+
+  <h1><span class="petit">L'Ordre du</span><span class="grand">Néant</span></h1>
+  <p class="devise">Tout n'est que passage</p>
+
+  <span class="etat"><span class="pouls" aria-hidden="true"></span>Site en construction</span>
+
+  <h2>Ce lieu n'est pas encore ouvert</h2>
+
+  <p>
+    Le site de l'Ordre est en cours de construction. Il n'y a rien à voir
+    ici pour l'instant, et nous préférons vous le dire franchement plutôt
+    que de vous montrer quelque chose d'inachevé.
+  </p>
+  <p>
+    <strong>Le recrutement, lui, est ouvert.</strong> L'Ordre du Néant est une
+    organisation Star Citizen francophone, structurée en huit divisions, qui
+    recrute lentement et sans exiger d'exclusivité. Tout se passe sur le Discord
+    en attendant.
+  </p>
+
+  <div class="portes">
+    <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
+    <a class="porte" href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">Voir la page RSI</a>
+  </div>
+</div>
+
+<footer>
+  <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
+  <p>Site non officiel. Star Citizen et Roberts Space Industries sont des marques de Cloud Imperium Rights LLC.</p>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+
+  var toile = document.getElementById('etoiles');
+  var ctx = toile.getContext('2d');
+  if (!ctx) { return; }
+
+  var etoiles = [], l = 0, h = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function dimensionner() {
+    l = window.innerWidth; h = window.innerHeight;
+    toile.width = l * dpr; toile.height = h * dpr;
+    toile.style.width = l + 'px'; toile.style.height = h + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    /* densité proportionnelle à la surface : ni vide sur grand écran,
+       ni surchargé sur un téléphone */
+    var nombre = Math.round(Math.min(260, (l * h) / 6800));
+    etoiles = [];
+    for (var i = 0; i < nombre; i++) {
+      etoiles.push({
+        x: Math.random() * l,
+        y: Math.random() * h,
+        r: Math.random() * 1.1 + 0.25,
+        a: Math.random() * 0.5 + 0.12,
+        v: Math.random() * 0.5 + 0.25,
+        p: Math.random() * 6.28,
+        rouge: Math.random() > 0.93
+      });
+    }
+  }
+
+  var minuteur;
+  window.addEventListener('resize', function () {
+    clearTimeout(minuteur);
+    minuteur = setTimeout(dimensionner, 150);
+  }, { passive: true });
+
+  var visible = true;
+  document.addEventListener('visibilitychange', function () { visible = !document.hidden; });
+
+  function boucle(t) {
+    requestAnimationFrame(boucle);
+    if (!visible) { return; }
+    ctx.clearRect(0, 0, l, h);
+    var s = t / 1000;
+    for (var i = 0; i < etoiles.length; i++) {
+      var e = etoiles[i];
+      var a = e.a * (0.55 + 0.45 * Math.sin(s * e.v + e.p));
+      ctx.beginPath();
+      ctx.arc(e.x, e.y, e.r, 0, 6.2832);
+      ctx.fillStyle = e.rouge
+        ? 'rgba(224,16,32,' + a.toFixed(3) + ')'
+        : 'rgba(238,240,244,' + a.toFixed(3) + ')';
+      ctx.fill();
+    }
+  }
+
+  dimensionner();
+  requestAnimationFrame(boucle);
+})();
+</script>
+
+</body>
+</html>

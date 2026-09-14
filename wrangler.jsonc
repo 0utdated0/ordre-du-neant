@@ -23,21 +23,22 @@
   "main": "src/index.js",
   "compatibility_date": "2026-09-01",
 
-  // Domaines servis par ce Worker. « custom_domain » demande à
-  // Cloudflare de créer aussi l'enregistrement DNS et le certificat,
-  // sans toucher aux MX : la messagerie OVH continue de fonctionner.
-  "routes": [
-    { "pattern": "ordre-du-neant.fr", "custom_domain": true },
-    { "pattern": "www.ordre-du-neant.fr", "custom_domain": true }
-  ],
-
   "vars": {
-    "GUILD_ID": "1546811036106227722"
+    "GUILD_ID": "1546811036106227722",
+
+    // « oui » masque tout le site derrière la page de chantier.
+    // Passer à « non » et pousser suffit à ouvrir le site.
+    "CHANTIER": "oui"
   },
 
   "assets": {
     "directory": "./public",
-    "binding": "ASSETS"
+    "binding": "ASSETS",
+
+    // Sans ceci, un fichier existant est servi sans passer par le
+    // Worker : la page de chantier ne masquerait alors que les
+    // adresses inconnues, et le site resterait visible.
+    "run_worker_first": true
   },
 
   "observability": {

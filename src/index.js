@@ -173,74 +173,12 @@ async function lireOperations(jeton, guilde) {
    Le widget doit être activé dans les paramètres du serveur.
    S'il ne l'est pas, on le dit au lieu d'échouer.
    -------------------------------------------------------- */
-async function lireIdentiteBot(jeton, guilde) {
-  /* Le widget ne distingue pas les bots des humains. La Vigie reste
-     en permanence dans un salon vocal pour la radio : sans ce filtre,
-     le site annoncerait éternellement « 1 en vocal » alors que
-     personne n'est là. On relève donc les noms sous lesquels le bot
-     peut apparaître, et on les écarte. */
-  const noms = new Set();
-  try {
-    const moi = await discord('/users/@me', jeton);
-    [moi.username, moi.global_name].forEach((n) => { if (n) noms.add(n); });
-    try {
-      const membre = await discord('/guilds/' + guilde + '/members/' + moi.id, jeton);
-      if (membre.nick) noms.add(membre.nick);
-    } catch (e) { /* le bot peut ne pas être listable, ce n'est pas bloquant */ }
-  } catch (e) { /* sans identité, on n'exclut rien plutôt que d'échouer */ }
-  return noms;
-}
-
-async function lirePresence(guilde, nomsBot, jeton, cache, origine) {
-  const clePresence = new Request(origine + '/interne/derniere-presence', { method: 'GET' });
-
-  let w = null;
-  let echec = null;
-
-  /* Deux tentatives, dans cet ordre.
-     Authentifiée d'abord : Discord compte alors par jeton de bot.
-     Sans jeton, il compte par adresse IP, et les Workers sortent par
-     des IP partagées avec d'autres clients Cloudflare : on hérite de
-     leur quota et on se fait refuser en 429 sans rien avoir demandé. */
-  for (const authentifie of [true, false]) {
-    try {
-      const entetes = {
-        Accept: 'application/json',
-        'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)',
-      };
-      if (authentifie) entetes.Authorization = 'Bot ' + jeton;
-
-      const r = await fetch(API + '/guilds/' + guilde + '/widget.json', {
-        headers: entetes,
-        cf: { cacheTtl: 30, cacheEverything: false },
-      });
-
-      if (r.status === 403) {
-        return { disponible: false, raison: 'widget-desactive' };
-      }
-      if (!r.ok) {
-        echec = { raison: 'refus', statut: r.status };
-        continue;
-      }
-      w = await r.json();
-      break;
-    } catch (e) {
-      echec = { raison: 'reseau', detail: String((e && e.message) || e) };
-    }
+async function lirePresence(guilde) {
+  const r = await fetch(API + '/guilds/' + guilde + '/widget.json');
+  if (!r.ok) {
+    return { disponible: false, raison: r.status === 403 ? 'widget-desactive' : 'indisponible' };
   }
-
-  /* Rien obtenu : plutôt qu'un bloc vide, on ressert le dernier relevé
-     connu en le signalant comme tel. Une présence d'il y a dix minutes
-     vaut mieux qu'un écran muet. */
-  if (!w) {
-    const vieux = await cache.match(clePresence);
-    if (vieux) {
-      const p = await vieux.json();
-      p.perime = true;
-      return p;
-    }
-    return Object.assign({ disponible: false }, echec || { raison: 'indisponible' });
-  }
+  const w = await r.json();
 
   const salons = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
   const parId = new Map(salons.map((s) => [s.id, s]));
@@ -251,11 +189,7 @@ async function lirePresence(guilde, nomsBot, jeton, cache, origine) {
      les perdre, et sans révéler l'intitulé d'un salon fermé. */
   const reserve = { id: null, nom: 'Salon réservé', occupants: [] };
 
-  const tous = w.members || [];
-  const humains = tous.filter((m) => !nomsBot.has(m.username));
-  const nbBots = tous.length - humains.length;
-
-  for (const m of humains) {
+  for (const m of w.members || []) {
     if (!m.channel_id) continue;
     if (parId.has(m.channel_id)) {
       parId.get(m.channel_id).occupants.push(m.username);
@@ -267,36 +201,88 @@ async function lirePresence(guilde, nomsBot, jeton, cache, origine) {
   const occupes = salons.filter((s) => s.occupants.length);
   if (reserve.occupants.length) occupes.push(reserve);
 
-  /* presence_count compte les bots : on retire ceux qu'on a écartés. */
-  const enLigne = typeof w.presence_count === 'number'
-    ? Math.max(0, w.presence_count - nbBots)
-    : humains.length;
-
-  const presence = {
+  return {
     disponible: true,
-    releve: new Date().toISOString(),
-    enLigne: enLigne,
-    enVocal: humains.filter((m) => m.channel_id).length,
+    enLigne: typeof w.presence_count === 'number' ? w.presence_count : (w.members || []).length,
+    enVocal: (w.members || []).filter((m) => m.channel_id).length,
     salons: occupes.slice(0, 6),
   };
-
-  /* Gardé une demi-heure, uniquement comme filet en cas de refus. */
-  await cache.put(clePresence, new Response(JSON.stringify(presence), {
-    headers: {
-      'Content-Type': 'application/json; charset=utf-8',
-      'Cache-Control': 'public, max-age=1800, s-maxage=1800',
-    },
-  }));
-
-  return presence;
 }
 
 /* --------------------------------------------------------
    Point d'entrée
    -------------------------------------------------------- */
+/* Ressources dont la page de chantier a besoin pour s'afficher.
+   Tout le reste est masqué tant que le chantier est levé. */
+const LAISSEZ_PASSER = [
+  '/assets/embleme.webp',
+  '/assets/embleme-512.png',
+  '/assets/banniere-monde.webp',
+];
+
+function enChantier(env) {
+  return String(env.CHANTIER || 'non').toLowerCase() === 'oui';
+}
+
+function passeChantier(request, env) {
+  const cle = env.CLE_CHANTIER;
+  if (!cle) return false;
+  const url = new URL(request.url);
+  if (url.searchParams.get('passe') === cle) return 'a-poser';
+  const biscuits = request.headers.get('Cookie') || '';
+  return biscuits.split(';').some((c) => c.trim() === 'passage=' + cle);
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    if (enChantier(env)) {
+      const laisser = passeChantier(request, env);
+
+      if (laisser === 'a-poser') {
+        /* Le sésame arrive par l'adresse : on le dépose en cookie et on
+           renvoie sur la page nue, pour qu'il ne traîne pas dans la barre
+           d'adresse ni dans l'historique partagé. */
+        return new Response(null, {
+          status: 302,
+          headers: {
+            Location: url.pathname,
+            'Set-Cookie': 'passage=' + env.CLE_CHANTIER +
+              '; Path=/; Max-Age=604800; HttpOnly; Secure; SameSite=Lax',
+          },
+        });
+      }
+
+      if (!laisser) {
+        const chemin = url.pathname;
+        const autorise = LAISSEZ_PASSER.indexOf(chemin) !== -1 ||
+          chemin.startsWith('/polices/');
+
+        /* Un robot qui demande robots.txt doit lire un refus, pas la
+           page de chantier servie en HTML. */
+        if (chemin === '/robots.txt') {
+          return new Response('User-agent: *\nDisallow: /\n', {
+            headers: {
+              'Content-Type': 'text/plain; charset=utf-8',
+              'Cache-Control': 'no-store',
+            },
+          });
+        }
+
+        if (!autorise) {
+          const page = await env.ASSETS.fetch(new URL('/chantier.html', url.origin));
+          return new Response(page.body, {
+            status: 200,
+            headers: {
+              'Content-Type': 'text/html; charset=utf-8',
+              'Cache-Control': 'no-store',
+              'X-Robots-Tag': 'noindex, nofollow',
+            },
+          });
+        }
+      }
+    }
 
     if (url.pathname === '/api/ordre') {
       return servirOrdre(request, env, ctx);
@@ -315,16 +301,9 @@ async function servirOrdre(request, env, ctx) {
   const avecNoms = String(env.EFFECTIF_NOMS || 'oui').toLowerCase() !== 'non';
 
   if (!jeton || !guilde) {
-    /* Nommer la variable absente plutôt que de dire « l'une des deux » :
-       sans ça, diagnostiquer demande d'ouvrir le tableau de bord. */
-    const manquantes = [];
-    if (!jeton) manquantes.push('DISCORD_TOKEN');
-    if (!guilde) manquantes.push('GUILD_ID');
     return reponse({
       erreur: 'configuration',
-      manquantes: manquantes,
-      message: 'Absent des réglages du Worker, section Runtime variables and secrets : ' +
-        manquantes.join(' et ') + '.',
+      message: "DISCORD_TOKEN ou GUILD_ID n'est pas déclaré dans les réglages du Worker.",
     }, 500, 0);
   }
 
@@ -335,12 +314,10 @@ async function servirOrdre(request, env, ctx) {
   const garde = await cache.match(cle);
   if (garde) return garde;
 
-  const nomsBot = await lireIdentiteBot(jeton, guilde);
-
   const resultats = await Promise.allSettled([
     lireEffectif(jeton, guilde, avecNoms),
     lireOperations(jeton, guilde),
-    lirePresence(guilde, nomsBot, jeton, cache, new URL(request.url).origin),
+    lirePresence(guilde),
   ]);
 
   const [eff, ope, pre] = resultats;

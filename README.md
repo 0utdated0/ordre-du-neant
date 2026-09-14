@@ -18,6 +18,7 @@ Fonts. Tout est servi depuis le domaine.
       assets/               emblème, bannières et recadrages de scène
       polices/              Michroma et Saira en woff2
       vendor/three.min.js   Three.js r128 figé
+      chantier.html         page affichée quand le site est fermé
       _headers              en-têtes servis avec les fichiers
       robots.txt, sitemap.xml
 
@@ -64,6 +65,21 @@ minutes quel que soit le nombre de visiteurs.
 Si `/api/ordre` ne répond pas, le site bascule sur `exemple/ordre.json` et
 l'affiche clairement comme un jeu d'exemple. Jamais de fausse donnée muette.
 
+## Le chantier
+
+Tant que `CHANTIER` vaut `oui` dans `wrangler.jsonc`, **toutes** les
+adresses renvoient `public/chantier.html`. Le site, ses images et
+`/api/ordre` sont inaccessibles. Seuls passent l'emblème, les polices
+et un `robots.txt` qui interdit l'indexation.
+
+Pour ouvrir le site : passer `CHANTIER` à `non` et pousser.
+
+Pour regarder le vrai site sans l'ouvrir à tout le monde : déclarer un
+secret `CLE_CHANTIER` dans le Worker, puis visiter
+`https://ordre-du-neant.fr/?passe=LA_CLE`. Un cookie est posé pour sept
+jours et la clé disparaît de la barre d'adresse. Sans ce secret, aucun
+contournement n'existe.
+
 ### Variables à déclarer dans les réglages du Worker
 
 | Nom | Valeur | Type |
@@ -71,6 +87,7 @@ l'affiche clairement comme un jeu d'exemple. Jamais de fausse donnée muette.
 | `DISCORD_TOKEN` | le jeton du bot | chiffrée |
 | `GUILD_ID` | l'identifiant du serveur | texte |
 | `EFFECTIF_NOMS` | `non` pour publier les compteurs sans la liste nominative | facultatif |
+| `CLE_CHANTIER` | mot de passe pour voir le site pendant le chantier | facultatif, chiffrée |
 
 ## Mise en service
 
