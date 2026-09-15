@@ -20,6 +20,15 @@ const ICI = __dirname;
 const RACINE = path.resolve(ICI, '..', '..');
 const SORTIE = path.join(RACINE, 'public');
 
+/* Empreinte d'un fichier de public/, ajoutée à son adresse. Une
+   page reconstruite pointe ainsi vers une adresse neuve dès qu'un
+   script ou la feuille de style change : aucun cache, ni celui du
+   navigateur ni celui de Cloudflare, ne peut servir l'ancien code
+   sous une page neuve. */
+const crypto = require('crypto');
+const empreinte = (fichier) => crypto.createHash('sha1')
+  .update(fs.readFileSync(path.join(SORTIE, fichier))).digest('hex').slice(0, 10);
+
 const lire = (p) => fs.readFileSync(path.join(ICI, p), 'utf8').replace(/\s+$/, '');
 const section = (nom) => lire(path.join('sections', nom + '.html'));
 const bloc = (nom) => lire(path.join('blocs', nom + '.html'));
@@ -158,8 +167,9 @@ for (const p of PAGES) {
     .replace('{{VISIONNEUSE}}', p.visionneuse ? bloc('visionneuse') : '')
     .replace('{{PIED}}', bloc('pied').replace('{{PLAN}}', menuDe(p)))
     .replace('{{SCRIPTS}}', p.scripts.map(function (s) {
-      return '<script src="/' + FICHIERS[s] + '" defer></script>';
-    }).join('\n'));
+      return '<script src="/' + FICHIERS[s] + '?v=' + empreinte(FICHIERS[s]) + '" defer></script>';
+    }).join('\n'))
+    .replace('href="/styles.css"', 'href="/styles.css?v=' + empreinte('styles.css') + '"');
 
   html = html.replace(/\n{3,}/g, '\n\n');
   fs.writeFileSync(path.join(SORTIE, p.fichier), html);

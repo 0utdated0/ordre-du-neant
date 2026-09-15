@@ -291,9 +291,29 @@ export default {
     /* Les fichiers de public/ sont normalement servis avant même
        d'atteindre le Worker. Ce renvoi couvre le reste, et produit
        le 404 des assets pour une adresse inconnue. */
-    return env.ASSETS.fetch(request);
+    const reponse = await env.ASSETS.fetch(request);
+
+    /* Pages, scripts et feuille de style : toujours revalidés. Sans
+       consigne explicite, un navigateur ou une règle de cache de la
+       zone pouvait resservir l'ancien code après un déploiement, et
+       rien ne changeait à l'écran. La revalidation coûte un 304 quand
+       rien n'a bougé. Les coques, polices, images et bibliothèques
+       gardent leur cache long (voir _headers). */
+    if (aRevalider(url.pathname)) {
+      const entetes = new Headers(reponse.headers);
+      entetes.set('Cache-Control', 'no-cache');
+      return new Response(reponse.body, {
+        status: reponse.status, statusText: reponse.statusText, headers: entetes,
+      });
+    }
+    return reponse;
   },
 };
+
+function aRevalider(chemin) {
+  if (/^\/(coques|polices|assets|vendor|galerie)\//.test(chemin)) return false;
+  return !/\.[a-z0-9]+$/i.test(chemin) || /\.(html|js|css|json|xml)$/i.test(chemin);
+}
 
 async function servirOrdre(request, env, ctx) {
   const jeton = env.DISCORD_TOKEN;
