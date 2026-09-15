@@ -58,6 +58,25 @@
   };
   var PETIT = window.innerWidth < 860;
 
+  /* Numéro d'édition des coques.
+
+     Une coque régénérée garde le même nom de fichier, et
+     /coques/* est servi avec un cache d'une semaine (voir
+     _headers). Sans marqueur dans l'adresse, un navigateur qui a
+     déjà vu le site continue de servir l'ancienne géométrie sous
+     un code à jour : on voit alors un maillage décimé peint par
+     le nuanceur neuf, ce qui ne ressemble à rien de connu et ne
+     se diagnostique pas depuis le serveur.
+
+     À incrémenter à chaque passage de outils/coques/draco.js. */
+  var EDITION = 3;
+
+  /* Ce qui a réellement été chargé, coque par coque. Deux tours
+     ont été perdus à se demander si le visiteur voyait bien les
+     fichiers déposés : maintenant il suffit de taper
+     ODN.coques dans la console. */
+  window.ODN.coques = {};
+
   /* ---------------------------------------------------------
      Version 2 : tout se lit sur place
      --------------------------------------------------------- */
@@ -161,7 +180,7 @@
   var fiches = null;
   window.ODN.points = function (nom) {
     if (!fiches) {
-      fiches = fetch('/coques/fiches.json').then(function (r) { return r.json(); })
+      fiches = fetch('/coques/fiches.json?e=' + EDITION).then(function (r) { return r.json(); })
         .then(function (liste) {
           var m = {};
           liste.forEach(function (f) { m[f.nom] = f; });
@@ -187,7 +206,8 @@
   window.ODN.coque = function (nom) {
     if (!cache[nom]) {
       var suffixe = (PETIT && VAISSEAUX[nom]) ? '-p' : '';
-      cache[nom] = fetch('/coques/' + nom + suffixe + '.odnm')
+      var fichier = '/coques/' + nom + suffixe + '.odnm';
+      cache[nom] = fetch(fichier + '?e=' + EDITION)
         .then(function (r) {
           if (!r.ok) { throw new Error('coque ' + nom + ' : ' + r.status); }
           return r.arrayBuffer();
@@ -196,7 +216,20 @@
           var vue = new DataView(tampon);
           if (vue.getUint32(0, false) !== 0x4f444e4d) { throw new Error('coque illisible'); }
           var version = vue.getUint16(4, true);
-          return version === 3 ? decoderV3(tampon) : decoderV2(tampon);
+          var octets = tampon.byteLength;
+          /* decoderV2 rend une géométrie, decoderV3 une promesse :
+             on aligne les deux avant d'enchaîner. */
+          var suite = Promise.resolve(
+            version === 3 ? decoderV3(tampon) : decoderV2(tampon));
+          return suite.then(function (geo) {
+            window.ODN.coques[nom] = {
+              fichier: fichier, version: version, octets: octets,
+              sommets: geo.attributes.position.count,
+              triangles: geo.index.count / 3,
+              aretes: geo.userData.aretes ? geo.userData.aretes.index.count / 2 : 0
+            };
+            return geo;
+          });
         });
     }
     return cache[nom];

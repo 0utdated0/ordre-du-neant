@@ -72,6 +72,14 @@ en deux images ce que le corps cache.
    à une variante `-p`.
 4. `npm i meshoptimizer draco3d` puis
    `node draco.js ../../public/coques/`.
+   Puis **incrémenter `EDITION` en tête de `public/coques.js`**.
+   Les fichiers gardent leur nom et sont servis avec une semaine
+   de cache : sans ce marqueur dans l'adresse, un navigateur qui a
+   déjà vu le site continue de servir l'ancienne géométrie sous un
+   code à jour. On voit alors un maillage décimé peint par le
+   nuanceur neuf, et rien ne le signale côté serveur.
+   `ODN.coques` dans la console dit ce qui a réellement été
+   chargé, fichier par fichier.
 5. Reporter la longueur et les tuyères de `fiches.json` dans la
    table `COQUES` de `public/vaisseaux.js`, puis ajouter la fiche
    dans `FICHES`.
