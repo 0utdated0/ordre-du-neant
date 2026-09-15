@@ -41,8 +41,10 @@
 
   var ROUGE = 0xe01020;
 
-  /* atan2(dx, dz) de la trajectoire du bâtiment */
-  var CAP = Math.atan2(0 - 212, -142 - 188);
+  /* Le bâtiment descend l'axe du point de saut, donc sa proue
+     regarde droit vers -Z. Une approche en biais donnait
+     l'impression qu'il rentrait de travers dans la déchirure. */
+  var CAP = Math.PI;
 
   function pastille(couleurs) {
     var t = document.createElement('canvas');
@@ -236,6 +238,102 @@
     arc.geo.attributes.position.needsUpdate = true;
   }
 
+  /* ---------------------------------------------------------
+     Lentille gravitationnelle
+     ---------------------------------------------------------
+     Trois coquilles très fines juste au-delà du bord, qui
+     tournent à des vitesses différentes. Ce n'est pas de la
+     vraie déviation de la lumière, mais c'est ce qui donne
+     l'impression que l'espace est tordu autour du trou.
+     --------------------------------------------------------- */
+  var coquilles = [];
+  [1.14, 1.33, 1.58].forEach(function (k, i) {
+    var c = new THREE.Mesh(
+      new THREE.TorusGeometry(RAYON * k, 0.7 + i * 0.35, 6, 128),
+      new THREE.MeshBasicMaterial({
+        color: i === 1 ? 0xffb8b8 : 0xe01020, transparent: true, opacity: 0,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      })
+    );
+    c.rotation.x = (i - 1) * 0.16;
+    c.rotation.y = (i - 1) * 0.1;
+    c.userData.vitesse = (i % 2 ? 1 : -1) * (0.22 + i * 0.1);
+    trou.add(c);
+    coquilles.push(c);
+  });
+
+  /* ---------------------------------------------------------
+     Gerbe de lumière
+     ---------------------------------------------------------
+     Une étoile à branches, toujours face à la caméra. C'est
+     l'effet qui fait dire « ça s'ouvre » plutôt que « ça
+     grandit ».
+     --------------------------------------------------------- */
+  var GERBE = (function () {
+    var t = document.createElement('canvas');
+    t.width = t.height = 512;
+    var x = t.getContext('2d');
+    x.translate(256, 256);
+    x.globalCompositeOperation = 'lighter';
+    for (var i = 0; i < 46; i++) {
+      var a = (i / 46) * Math.PI * 2;
+      var l = 60 + (i % 3 === 0 ? 190 : (i % 2 ? 90 : 130)) * (0.6 + Math.random() * 0.4);
+      var g = x.createLinearGradient(0, 0, Math.cos(a) * l, Math.sin(a) * l);
+      g.addColorStop(0, 'rgba(255,240,240,0.85)');
+      g.addColorStop(0.35, 'rgba(255,90,90,0.28)');
+      g.addColorStop(1, 'rgba(224,16,32,0)');
+      x.strokeStyle = g;
+      x.lineWidth = i % 3 === 0 ? 3.5 : 1.6;
+      x.beginPath();
+      x.moveTo(0, 0);
+      x.lineTo(Math.cos(a) * l, Math.sin(a) * l);
+      x.stroke();
+    }
+    var noyau = x.createRadialGradient(0, 0, 0, 0, 0, 70);
+    noyau.addColorStop(0, 'rgba(255,255,255,0.95)');
+    noyau.addColorStop(0.4, 'rgba(255,120,120,0.35)');
+    noyau.addColorStop(1, 'rgba(224,16,32,0)');
+    x.fillStyle = noyau;
+    x.beginPath(); x.arc(0, 0, 70, 0, 6.2832); x.fill();
+    return new THREE.CanvasTexture(t);
+  })();
+
+  var gerbe = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: GERBE, transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  }));
+  gerbe.scale.setScalar(RAYON * 6);
+  trou.add(gerbe);
+
+  /* ---------------------------------------------------------
+     Braises éjectées à l'ouverture
+     ---------------------------------------------------------
+     Leur distance ne dépend que du défilement : si on remonte,
+     elles rentrent. Une animation libre aurait cassé la
+     réversibilité de toute la séquence.
+     --------------------------------------------------------- */
+  var nbBraises = petit ? 300 : 900;
+  var brPos = new Float32Array(nbBraises * 3);
+  var brCol = new Float32Array(nbBraises * 3);
+  var brDir = [];
+  var cb = new THREE.Color();
+  for (var ib = 0; ib < nbBraises; ib++) {
+    var ab = Math.random() * 6.2832;
+    var etal = 0.55 + Math.random() * 0.9;
+    brDir.push([Math.cos(ab), Math.sin(ab), (Math.random() - 0.35) * 0.8, etal]);
+    cb.set(Math.random() > 0.4 ? 0xff5a4a : 0xffd8d8);
+    var lb = 0.4 + Math.random() * 0.6;
+    brCol[ib * 3] = cb.r * lb; brCol[ib * 3 + 1] = cb.g * lb; brCol[ib * 3 + 2] = cb.b * lb;
+  }
+  var brGeo = new THREE.BufferGeometry();
+  brGeo.setAttribute('position', new THREE.BufferAttribute(brPos, 3));
+  brGeo.setAttribute('color', new THREE.BufferAttribute(brCol, 3));
+  var braises = new THREE.Points(brGeo, new THREE.PointsMaterial({
+    size: 4.6, sizeAttenuation: true, vertexColors: true, map: BRAISE,
+    transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending
+  }));
+  trou.add(braises);
+
   /* =========================================================
      LE BÂTIMENT
      ========================================================= */
@@ -387,6 +485,34 @@
     halo.scale.setScalar(RAYON * (4 + ouverture * 2.4));
     trou.rotation.z += dt * 0.12;
 
+    /* coquilles de lentille : elles tournent chacune à son rythme */
+    for (var q = 0; q < coquilles.length; q++) {
+      var co = coquilles[q];
+      co.rotation.z += dt * co.userData.vitesse;
+      co.material.opacity = (0.06 * charge + 0.3 * ouverture) * (1 - fermeture);
+      co.scale.setScalar(1 + ouverture * 0.12 + Math.sin(t * 1.3 + q) * 0.01);
+    }
+
+    /* gerbe : elle culmine à l'instant où la déchirure cède,
+       puis se retire. C'est le pic de l'acte. */
+    var pic = 4 * ouverture * (1 - ouverture);
+    gerbe.material.opacity = Math.min(1, (0.12 * charge + pic * 0.9 + ouverture * 0.22)) * (1 - fermeture);
+    gerbe.scale.setScalar(RAYON * (4.4 + pic * 3.4 + ouverture * 1.6));
+    gerbe.material.rotation = t * 0.06;
+
+    /* braises éjectées */
+    var souffle = palier(avance, 0.42, 0.86);
+    var bp = brGeo.attributes.position.array;
+    for (var ib2 = 0; ib2 < nbBraises; ib2++) {
+      var d0 = brDir[ib2];
+      var dist = RAYON * (1.02 + souffle * 4.2 * d0[3]);
+      bp[ib2 * 3] = d0[0] * dist;
+      bp[ib2 * 3 + 1] = d0[1] * dist;
+      bp[ib2 * 3 + 2] = d0[2] * dist * 0.45;
+    }
+    brGeo.attributes.position.needsUpdate = true;
+    braises.material.opacity = Math.pow(1 - souffle, 1.6) * Math.min(1, souffle * 6) * 0.85;
+
     /* ondes de choc, réglées sur l'ouverture et non sur l'horloge */
     for (var w = 0; w < ondes.length; w++) {
       var depart = 0.36 + w * 0.07;
@@ -399,7 +525,11 @@
 
     /* spirale aspirée */
     var sp = spGeo.attributes.position.array;
-    spirale.material.opacity = Math.min(1, charge * 0.9 + ouverture * 0.4) * (1 - fermeture);
+    /* Elle s'efface avant que la caméra ne la traverse : vue de
+       trop près, un point de 3 px devient une tache de 200 px et
+       la fin de l'acte se couvrait de gros ronds flous. */
+    var retrait = 1 - palier(avance, 0.64, 0.86);
+    spirale.material.opacity = Math.min(1, charge * 0.9 + ouverture * 0.4) * (1 - fermeture) * retrait;
     for (var k2 = 0; k2 < nbSpire; k2++) {
       spA[k2] += dt * (2.4 + charge * 5) / (spR[k2] / RAYON);
       var r2 = spR[k2] * (1 - charge * 0.72);
@@ -423,17 +553,17 @@
 
     /* --- le bâtiment --- */
     if (navire) {
-      /* Il vient de la droite, là où le tableau de bord ne gêne
-         pas, et pique vers la déchirure. */
+      /* Aligné sur l'axe du trou, il ne fait qu'avancer. Le
+         volume vient de l'angle de la caméra, pas d'une
+         trajectoire de travers. */
       navire.position.set(
-        212 - entree * 212 + Math.sin(t * 0.3) * 2,
-        16 - entree * 16 + Math.cos(t * 0.24) * 1.5,
-        188 - entree * 330
+        Math.sin(t * 0.3) * 2.2,
+        Math.cos(t * 0.24) * 1.8,
+        300 - entree * 452
       );
-      /* Cap déduit de la trajectoire, qui est une droite : de
-         (212, 16, 188) vers (0, 0, -142). La proue des modèles
-         est en +Z, et les valeurs écrites à la main le faisaient
-         voler à reculons, tuyères en avant. */
+      /* La proue des modèles est en +Z : pour descendre vers -Z
+         il faut un lacet de PI. Les valeurs écrites à la main le
+         faisaient voler à reculons, tuyères en avant. */
       navire.rotation.set(
         0.05 - entree * 0.05 + Math.sin(t * 0.21) * 0.012,
         CAP,
@@ -466,22 +596,43 @@
        mesure qu'il s'y engage. Des coordonnées écrites en dur
        cadraient juste à un moment du trajet et rataient tous
        les autres. */
+    /* La caméra se tient en retrait du bâtiment, côté bâbord, et
+       glisse vers la déchirure à mesure qu'il s'y engage. Elle est
+       à gauche de l'axe pour que le sujet se présente à droite,
+       là où le tableau de bord ne le recouvre pas. */
     ancre.copy(navire ? navire.position : trou.position);
-    var vers = 0.5 + entree * 0.5;
-    visee.set(
-      ancre.x + (trou.position.x - ancre.x) * vers,
-      ancre.y + (trou.position.y - ancre.y) * vers,
-      ancre.z + (trou.position.z - ancre.z) * vers
-    );
+    ancre.lerp(trou.position, entree);
 
-    var app = palier(avance, 0, 0.62);
+    visee.copy(navire ? navire.position : trou.position);
+    visee.lerp(trou.position, 0.55 + entree * 0.45);
+
+    /* Puis elle se retire pour assister au scellement : rester
+       le nez dans la gorge ne donnait qu'un voile rouge uniforme,
+       alors que le plan de fin doit montrer la déchirure se
+       refermer sur le vide. */
+    /* Sur un écran étroit le champ horizontal est bien plus
+       serré : le même décalage bâbord sortait la déchirure du
+       cadre. On se place plus dans l'axe et plus en retrait. */
+    var ecart = petit ? 56 : 132;
+    var recul = petit ? 430 : 310;
     camera.position.set(
-      visee.x + 150 - app * 60 - entree * 30,
-      visee.y + 48 - app * 20 - entree * 14,
-      visee.z + 400 - app * 130 - entree * 120
+      ancre.x - ecart + entree * ecart * 0.6 - fermeture * 46,
+      ancre.y + 48 - entree * 30 + fermeture * 34,
+      ancre.z + recul - entree * recul * 0.51 + fermeture * 250
     );
     camera.lookAt(visee);
     camera.rotation.z += entree * 0.12 * Math.sin(t * 0.4);
+
+    /* Secousse : maximale au moment où la déchirure cède, nulle
+       avant et après. Elle passe par la rotation et non par la
+       position, pour ne pas décadrer le sujet. */
+    var choc = pic * 0.012;
+    camera.rotation.x += Math.sin(t * 41) * choc;
+    camera.rotation.y += Math.sin(t * 37 + 1.7) * choc;
+    camera.rotation.z += Math.sin(t * 53 + 0.4) * choc * 0.6;
+
+    /* l'éclat, lui, est peint par-dessus la page */
+    section.style.setProperty('--eclat', (pic * 0.5 * (1 - fermeture)).toFixed(3));
 
     marquer();
     moteur.render(scene, camera);

@@ -1885,3 +1885,18 @@ footer{background:linear-gradient(180deg, rgba(0,0,0,1), rgba(3,3,5,1))}
   .saut__tableau{position:relative;left:auto;top:auto;transform:none;margin:0 auto 2rem;width:min(22rem,90%)}
   .saut .approche__textes{position:relative;bottom:auto}
 }
+
+/* L'éclat de l'ouverture, peint par-dessus la scène.
+   Un halo rouge qui déborde du canevas : c'est ce qui fait que
+   la déchirure éclaire la page, et pas seulement son cadre. */
+.saut{--eclat:0}
+.saut__eclat{
+  position:absolute;inset:0;z-index:3;pointer-events:none;
+  background:radial-gradient(ellipse at 50% 46%,
+    rgba(255,220,220,.55) 0%,
+    rgba(224,16,32,.32) 26%,
+    rgba(224,16,32,.08) 52%,
+    transparent 74%);
+  opacity:var(--eclat,0);
+  mix-blend-mode:screen;
+}
