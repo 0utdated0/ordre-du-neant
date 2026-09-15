@@ -205,7 +205,12 @@ async function lirePresence(guilde, jeton, interne) {
   const humains = (interne && interne.humains) || [];
   const bots = (interne && interne.bots) || [];
   const moi = rmoi.status === 'fulfilled' ? rmoi.value.id : null;
-  const autresBots = bots.filter((id) => id !== moi).length;
+  /* Tous les bots sont retirés, le nôtre compris : GrilareX le voit
+     connecté sur le serveur, il est donc compté par Discord comme
+     n'importe quel autre compte en ligne. « En ligne » désigne les
+     joueurs. */
+  const autresBots = bots.length;
+  void moi;
 
   let enLigne = null;
   if (rc.status === 'fulfilled' && typeof rc.value.approximate_presence_count === 'number') {
