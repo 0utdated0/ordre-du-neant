@@ -1,1 +1,5 @@
-[]
+[
+  { "fichier": "orbite-station.webp", "legende": "En orbite, la station en vue" },
+  { "fichier": "hangar-depart.webp", "legende": "Au hangar, avant le départ" },
+  { "fichier": "passage-quantique.webp", "legende": "Passage quantique" }
+]
