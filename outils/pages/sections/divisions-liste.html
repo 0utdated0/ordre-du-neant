@@ -9,11 +9,22 @@
         ceux qu'on y croise le plus, aucun n'est exigé pour entrer.
       </p>
     </div>
+    <nav class="index-divisions revele" aria-label="Aller à une division">
+      <a href="#division-logistique"><span>LOG</span>Logistique</a>
+      <a href="#division-extraction"><span>EXT</span>Extraction</a>
+      <a href="#division-combat"><span>CBT</span>Combat</a>
+      <a href="#division-securite"><span>SEC</span>Sécurité</a>
+      <a href="#division-exploration"><span>EXP</span>Exploration</a>
+      <a href="#division-medical"><span>MED</span>Médical et sauvetage</a>
+      <a href="#division-ingenierie"><span>ING</span>Ingénierie</a>
+      <a href="#division-industrie"><span>IND</span>Industrie</a>
+    </nav>
     <div class="divisions">
-    <article class="division revele" id="division-logistique">
+    <article class="division revele" id="division-logistique" data-division="Div. Logistique">
       <header class="division__tete">
         <span class="division__num">01</span>
         <span class="division__code">LOG</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Logistique</h3>
         <p class="division__devise">Faire arriver.</p>
       </header>
@@ -31,10 +42,11 @@
         <div><dt>Travaille avec</dt><dd>Sécurité, Industrie</dd></div>
       </dl>
     </article>
-    <article class="division revele" id="division-extraction">
+    <article class="division revele" id="division-extraction" data-division="Div. Extraction">
       <header class="division__tete">
         <span class="division__num">02</span>
         <span class="division__code">EXT</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Extraction</h3>
         <p class="division__devise">Arracher la matière à la roche.</p>
       </header>
@@ -52,10 +64,11 @@
         <div><dt>Travaille avec</dt><dd>Exploration, Industrie, Sécurité</dd></div>
       </dl>
     </article>
-    <article class="division revele" id="division-combat">
+    <article class="division revele" id="division-combat" data-division="Div. Combat">
       <header class="division__tete">
         <span class="division__num">03</span>
         <span class="division__code">CBT</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Combat</h3>
         <p class="division__devise">Frapper quand il le faut.</p>
       </header>
@@ -73,10 +86,11 @@
         <div><dt>Travaille avec</dt><dd>Sécurité, Médical et sauvetage</dd></div>
       </dl>
     </article>
-    <article class="division revele" id="division-securite">
+    <article class="division revele" id="division-securite" data-division="Div. Sécurité">
       <header class="division__tete">
         <span class="division__num">04</span>
         <span class="division__code">SEC</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Sécurité</h3>
         <p class="division__devise">Dissuader avant d'avoir à combattre.</p>
       </header>
@@ -94,10 +108,11 @@
         <div><dt>Travaille avec</dt><dd>Logistique, Extraction, Combat</dd></div>
       </dl>
     </article>
-    <article class="division revele" id="division-exploration">
+    <article class="division revele" id="division-exploration" data-division="Div. Exploration">
       <header class="division__tete">
         <span class="division__num">05</span>
         <span class="division__code">EXP</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Exploration</h3>
         <p class="division__devise">Voir avant les autres.</p>
       </header>
@@ -115,10 +130,11 @@
         <div><dt>Travaille avec</dt><dd>Extraction, Ingénierie, Sécurité</dd></div>
       </dl>
     </article>
-    <article class="division revele" id="division-medical">
+    <article class="division revele" id="division-medical" data-division="Div. Médicale">
       <header class="division__tete">
         <span class="division__num">06</span>
         <span class="division__code">MED</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Médical et sauvetage</h3>
         <p class="division__devise">Ramener tout le monde.</p>
       </header>
@@ -136,10 +152,11 @@
         <div><dt>Travaille avec</dt><dd>Combat, Sécurité, Exploration</dd></div>
       </dl>
     </article>
-    <article class="division revele" id="division-ingenierie">
+    <article class="division revele" id="division-ingenierie" data-division="Div. Ingénierie">
       <header class="division__tete">
         <span class="division__num">07</span>
         <span class="division__code">ING</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Ingénierie</h3>
         <p class="division__devise">Garder les coques en vie.</p>
       </header>
@@ -157,10 +174,11 @@
         <div><dt>Travaille avec</dt><dd>Industrie, Exploration, Logistique</dd></div>
       </dl>
     </article>
-    <article class="division revele" id="division-industrie">
+    <article class="division revele" id="division-industrie" data-division="Div. Industrie">
       <header class="division__tete">
         <span class="division__num">08</span>
         <span class="division__code">IND</span>
+        <span class="division__effectif" hidden><strong>0</strong> membres</span>
         <h3>Industrie</h3>
         <p class="division__devise">Transformer le travail en ressources.</p>
       </header>

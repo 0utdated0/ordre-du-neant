@@ -184,13 +184,17 @@
      --------------------------------------------------------- */
   (function () {
     var OU = {
-      manifeste: '/ordre', divisions: '/ordre', ascension: '/ordre', regle: '/ordre',
+      manifeste: '/ordre', ascension: '/ordre',
+      divisions: '/divisions', regle: '/regle',
       flotte: '/flotte',
       vigie: '/vie', operations: '/vie', galerie: '/vie',
       passage: '/rejoindre'
     };
     var ancre = window.location.hash.slice(1);
     if (!ancre || document.getElementById(ancre) || !OU[ancre]) { return; }
+    /* Déjà sur la bonne page : l'ancre n'y existe plus, on reste. Sans
+       cette garde, /regle#regle se rechargeait indéfiniment. */
+    if (window.location.pathname.replace(/\.html$/, '') === OU[ancre]) { return; }
     window.location.replace(OU[ancre] + '#' + ancre);
   })();
 
@@ -233,4 +237,30 @@
       cible.scrollIntoView({ behavior: doux ? 'auto' : 'smooth', block: 'start' });
     });
   });
+
+  /* ---------------------------------------------------------
+     Divisions : l'effectif de chaque division, en direct
+     ---------------------------------------------------------
+     Le même relevé que la Vigie (/api/ordre, mis en cache cinq
+     minutes). Sans réponse, les compteurs restent masqués : une
+     fiche sans chiffre vaut mieux qu'un zéro faux. */
+  (function () {
+    var fiches = document.querySelectorAll('.division[data-division]');
+    if (!fiches.length || !window.fetch) { return; }
+    fetch('/api/ordre', { headers: { Accept: 'application/json' } })
+      .then(function (r) { if (!r.ok) { throw new Error(r.status); } return r.json(); })
+      .then(function (d) {
+        var par = d && d.effectif && d.effectif.parDivision;
+        if (!par) { return; }
+        fiches.forEach(function (f) {
+          var n = par[f.getAttribute('data-division')];
+          if (typeof n !== 'number') { return; }
+          var e = f.querySelector('.division__effectif');
+          e.querySelector('strong').textContent = n;
+          e.lastChild.textContent = n > 1 ? ' membres' : ' membre';
+          e.hidden = false;
+        });
+      })
+      .catch(function () {});
+  })();
 })();

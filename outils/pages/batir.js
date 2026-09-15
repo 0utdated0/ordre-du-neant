@@ -63,15 +63,20 @@ const PAGES = [
     menu: "L'Ordre",
     titre: "L'Ordre - divisions, hiérarchie et Règle | L'Ordre du Néant",
     description: "Huit divisions opérationnelles, six échelons d'ascension, et la Règle de l'Ordre : ce que nous demandons et ce que nous garantissons par écrit.",
-    sections: ['manifeste', 'divisions', 'ascension', 'regle', ':appel'],
-    rail: [['manifeste', 'I', 'Manifeste'], ['divisions', 'II', 'Divisions'],
-           ['ascension', 'III', 'Ascension'], ['regle', 'IV', 'Règle'],
-           ['appel', 'V', 'Entrer']],
+    sections: ['manifeste', 'ordre-portes', 'ascension', ':appel'],
+    rail: [['manifeste', 'I', 'Manifeste'], ['portes', 'II', 'Trois portes'],
+           ['ascension', 'III', 'Ascension'], ['appel', 'IV', 'Entrer']],
     scripts: ['trois', 'coques', 'scene', 'ascension', 'site']
   },
   {
     cle: 'codex', fichier: 'codex.html', url: '/codex',
     menu: 'Codex', etiquette: 'Chapitre',
+    appel: {
+      devise: 'Le Codex continue',
+      titre: 'Écrire la suite',
+      texte: "Le Codex s'arrête là où commence ce que nous n'avons pas encore vécu. Les prochains chapitres s'écriront avec ceux qui entrent maintenant.",
+      lien: '/rejoindre', libelle: 'Franchir le Seuil'
+    },
     titre: "Le Codex - récit, échelons et usages | L'Ordre du Néant",
     description: "Le récit de l'Ordre du Néant : le convoi perdu, le Seuil, le sens des six échelons, des fonctions et du nom des appareils, et les usages de l'Ordre.",
     sections: ['codex-prologue', 'codex-neant', 'codex-convoi', 'codex-seuil',
@@ -87,6 +92,12 @@ const PAGES = [
   {
     cle: 'regle', fichier: 'regle.html', url: '/regle',
     menu: 'La Règle',
+    appel: {
+      devise: 'Lue et comprise',
+      titre: 'Elle vous convient ?',
+      texte: "Si ces vingt-neuf articles vous ressemblent, le Seuil est ouvert. Sinon, rien ne vous retient : tout n'est que passage.",
+      lien: '/rejoindre', libelle: 'Le parcours d\'entrée'
+    },
     titre: "La Règle de l'Ordre - vingt-neuf articles | L'Ordre du Néant",
     description: "La Règle de l'Ordre du Néant en vingt-neuf articles : principes, admission, présence et échelons, opérations et partage des gains, conduite, commandement.",
     sections: ['regle-preambule', 'regle-principes', 'regle-admission', 'regle-presence',
@@ -100,6 +111,12 @@ const PAGES = [
   {
     cle: 'divisions', fichier: 'divisions.html', url: '/divisions',
     menu: 'Divisions', horsMenu: true,
+    appel: {
+      devise: 'Un métier, un équipage',
+      titre: 'Choisir sa division',
+      texte: "On en choisit une ou plusieurs en entrant, on en change quand on veut. Le premier mois, un référent vole avec vous.",
+      lien: '/rejoindre', libelle: 'Comment entrer'
+    },
     titre: "Divisions et instruction | L'Ordre du Néant",
     description: "Les huit divisions de l'Ordre du Néant en détail : missions, activités, appareils typiques, et l'instruction des nouveaux membres pendant leur premier mois.",
     sections: ['divisions-ouverture', 'divisions-liste', 'instruction', ':appel'],
@@ -152,6 +169,16 @@ const FICHIERS = {
    entrées il ne tient plus sur un écran de portable. Une page
    « horsMenu » reste dans le plan du site en pied de page, et on
    y arrive par les renvois des pages voisines. */
+/* L'appel du bas de page. Il était identique partout : huit pages qui
+   finissaient par le même bloc, mot pour mot. Chaque page peut
+   maintenant le tourner vers ce qu'elle vient de raconter. */
+const APPEL = {
+  devise: "Tout n'est que passage",
+  titre: "Entrer dans l'Ordre",
+  texte: "Nous sommes une organisation jeune, encore réduite. Si vous préférez compter parmi les premiers plutôt que d'être le quatre-centième nom d'une liste, le moment est maintenant.",
+  lien: '/rejoindre', libelle: 'Comment entrer'
+};
+
 function menuDe(courante, plan) {
   return PAGES.filter(function (p) { return plan || !p.horsMenu; }).map(function (p) {
     const actif = p.cle === courante.cle;
@@ -180,6 +207,13 @@ function corpsDe(p) {
   const morceaux = p.sections.map(function (nom) {
     const cle = nom[0] === ':' ? nom.slice(1) : nom;
     let html = nom[0] === ':' ? bloc(cle) : section(cle);
+    if (cle === 'appel') {
+      const a = Object.assign({}, APPEL, p.appel || {});
+      html = html.replace('{{APPEL_DEVISE}}', a.devise).replace('{{APPEL_TITRE}}', a.titre)
+        .replace('{{APPEL_TEXTE}}', a.texte).replace('{{APPEL_LIEN}}', a.lien)
+        .replace('{{APPEL_LIBELLE}}', a.libelle);
+    }
+    html = html.replace(/\{\{NUMERO\}\}/g, numeros[cle] || '');
     if (numeros[cle]) {
       html = html.replace(/\{\{ACTE\}\}/g, (p.etiquette || 'Acte') + ' ' + numeros[cle]);
     } else {

@@ -28,7 +28,7 @@
 <link rel="apple-touch-icon" href="/assets/embleme-512.png">
 <link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=cce331df17">
+<link rel="stylesheet" href="/styles.css?v=b356acf73d">
 
 </head>
 
@@ -66,10 +66,9 @@
 </div>
 <nav class="rail" id="rail" aria-label="Sections">
   <a href="#manifeste" data-cible="manifeste"><span>I</span><em>Manifeste</em></a>
-  <a href="#divisions" data-cible="divisions"><span>II</span><em>Divisions</em></a>
+  <a href="#portes" data-cible="portes"><span>II</span><em>Trois portes</em></a>
   <a href="#ascension" data-cible="ascension"><span>III</span><em>Ascension</em></a>
-  <a href="#regle" data-cible="regle"><span>IV</span><em>Règle</em></a>
-  <a href="#appel" data-cible="appel"><span>V</span><em>Entrer</em></a>
+  <a href="#appel" data-cible="appel"><span>IV</span><em>Entrer</em></a>
 </nav>
 <main id="contenu">
 <section class="acte acte--manifeste" id="manifeste">
@@ -107,76 +106,47 @@
       </p>
       <p class="manifeste__fin">Tout n'est que passage. Autant le faire ensemble.</p>
     </div>
-    <nav class="renvois renvois--centre revele" aria-label="Pour aller plus loin">
-      <a class="lien-clair" href="/codex">Lire le Codex</a>
-      <a class="lien-clair" href="/regle">Lire la Règle</a>
-      <a class="lien-clair" href="/divisions">Les divisions en détail</a>
-    </nav>
   </div>
 </section>
 
-<section class="acte acte--divisions" id="divisions">
+<section class="acte acte--texte acte--portes" id="portes">
   <div class="contenu contenu--large">
-    <div class="entete revele">
-      <p class="acte__num">Acte II</p>
-      <h2 class="balaye">Huit divisions</h2>
+    <div class="entete entete--centre revele">
+      <h2 class="balaye">Trois portes</h2>
       <p class="intro">
-        Chaque division a ses salons, ses référents et ses opérations. Vous en choisissez
-        librement, la plupart des membres en suivent deux ou trois.
+        Ce que l'Ordre se raconte, ce qu'il exige, et ce qu'on y fait. Chaque sujet a sa page,
+        et chaque page va au bout de son sujet.
       </p>
     </div>
-
-    <ul class="grille" role="list" id="grille">
-      <li class="carte revele" data-code="LOG">
-        <span class="carte__index">01</span>
-        <h3>Logistique</h3>
-        <p>Convois, fret, chaînes d'approvisionnement, escorte de cargo.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="EXT">
-        <span class="carte__index">02</span>
-        <h3>Extraction</h3>
-        <p>Minage de surface et d'astéroïdes, prospection, cycles de raffinage.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="CBT">
-        <span class="carte__index">03</span>
-        <h3>Combat</h3>
-        <p>Contrats de primes, escadres ERT, défense des intérêts de l'Ordre.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="SEC">
-        <span class="carte__index">04</span>
-        <h3>Sécurité</h3>
-        <p>Escorte de convois, protection de sites, patrouilles et dissuasion.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="EXP">
-        <span class="carte__index">05</span>
-        <h3>Exploration</h3>
-        <p>Reconnaissance, relevés, expéditions longues hors des routes connues.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="MED">
-        <span class="carte__index">06</span>
-        <h3>Médical et sauvetage</h3>
-        <p>Médecine de terrain, récupération d'équipages, appui aux opérations.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="ING">
-        <span class="carte__index">07</span>
-        <h3>Ingénierie</h3>
-        <p>Postes multi-équipage, récupération d'épaves, réparation en vol.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="IND">
-        <span class="carte__index">08</span>
-        <h3>Industrie</h3>
-        <p>Négoce, production, marché interne entre membres.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-    </ul>
-    <p class="renvoi-centre revele"><a class="lien-clair" href="/divisions">Chaque division en détail, et l'instruction</a></p>
+    <div class="trois-portes">
+      <a class="grande-porte revele" href="/codex">
+        <svg class="grande-porte__signe" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <path d="M14 10h26l10 10v34H14z"/><path d="M40 10v10h10"/><path d="M22 30h20M22 38h20M22 46h12"/>
+        </svg>
+        <span class="grande-porte__chiffre">8<small>chapitres</small></span>
+        <span class="grande-porte__titre">Le Codex</span>
+        <span class="grande-porte__texte">Le convoi perdu, le Seuil, le sens des échelons et du nom des appareils.</span>
+        <span class="grande-porte__lien">Lire</span>
+      </a>
+      <a class="grande-porte revele" href="/regle">
+        <svg class="grande-porte__signe" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <circle cx="32" cy="32" r="21"/><circle cx="32" cy="32" r="14" stroke-dasharray="2 4"/><path d="M32 5v8M32 51v8M5 32h8M51 32h8"/>
+        </svg>
+        <span class="grande-porte__chiffre">29<small>articles</small></span>
+        <span class="grande-porte__titre">La Règle</span>
+        <span class="grande-porte__texte">Ce qui ne se négocie pas : admission, présence, opérations, conduite, commandement.</span>
+        <span class="grande-porte__lien">Consulter</span>
+      </a>
+      <a class="grande-porte revele" href="/divisions">
+        <svg class="grande-porte__signe" viewBox="0 0 64 64" aria-hidden="true" focusable="false">
+          <rect x="10" y="10" width="19" height="19"/><rect x="35" y="10" width="19" height="19"/><rect x="10" y="35" width="19" height="19"/><rect x="35" y="35" width="19" height="19"/>
+        </svg>
+        <span class="grande-porte__chiffre">8<small>divisions</small></span>
+        <span class="grande-porte__titre">Les divisions</span>
+        <span class="grande-porte__texte">Huit métiers, leurs activités, leurs appareils, et l'instruction du premier mois.</span>
+        <span class="grande-porte__lien">Explorer</span>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -243,106 +213,12 @@
   </div>
 </section>
 
-<section class="acte acte--regle" id="regle">
-  <div class="duo">
-    <div class="duo__visuel">
-      <!-- Le sceau de la Règle. Il remplace l'emplacement libre : un
-           cadre vide annonçant « une capture viendra ici » se lisait
-           comme un site pas fini. Rien d'illustré, tout est dessiné :
-           vingt-neuf graduations, une par article, qui s'allument
-           l'une après l'autre comme une lecture. -->
-      <figure class="sceau-regle revele" aria-hidden="true">
-        <svg class="sceau-regle__svg" viewBox="0 0 400 400" focusable="false">
-          <defs>
-            <path id="sceau-regle-cercle" d="M200 200 m-146 0 a146 146 0 1 1 292 0 a146 146 0 1 1 -292 0"/>
-            <radialGradient id="sceau-regle-lueur">
-              <stop offset="0" stop-color="#e01020" stop-opacity=".22"/>
-              <stop offset=".55" stop-color="#e01020" stop-opacity=".05"/>
-              <stop offset="1" stop-color="#e01020" stop-opacity="0"/>
-            </radialGradient>
-          </defs>
-          <circle cx="200" cy="200" r="200" fill="url(#sceau-regle-lueur)"/>
-          <circle class="sceau-regle__trait" cx="200" cy="200" r="192"/>
-          <circle class="sceau-regle__trait sceau-regle__trait--fin" cx="200" cy="200" r="160"/>
-          <path class="sceau-regle__fines" d="M209.5 24.3L209.8 19.3M219.0 25.0L219.6 20.1M228.5 26.3L229.3 21.4M247.1 30.4L248.4 25.6M256.2 33.2L257.8 28.5M265.1 36.5L267.0 31.9M282.4 44.5L284.8 40.1M290.7 49.2L293.3 44.9M298.8 54.3L301.6 50.2M313.9 65.9L317.2 62.0M321.0 72.2L324.5 68.6M327.8 79.0L331.4 75.5M340.1 93.5L344.1 90.5M345.7 101.2L349.8 98.4M350.8 109.3L355.1 106.7M359.7 126.1L364.3 124.0M363.5 134.9L368.1 133.0M366.8 143.8L371.5 142.2M371.9 162.2L376.8 161.1M373.7 171.5L378.6 170.7M375.0 181.0L379.9 180.4M376.0 200.0L381.0 200.0M375.7 209.5L380.7 209.8M375.0 219.0L379.9 219.6M371.9 237.8L376.8 238.9M369.6 247.1L374.4 248.4M366.8 256.2L371.5 257.8M359.7 273.9L364.3 276.0M355.5 282.4L359.9 284.8M350.8 290.7L355.1 293.3M340.1 306.5L344.1 309.5M334.1 313.9L338.0 317.2M327.8 321.0L331.4 324.5M313.9 334.1L317.2 338.0M306.5 340.1L309.5 344.1M298.8 345.7L301.6 349.8M282.4 355.5L284.8 359.9M273.9 359.7L276.0 364.3M265.1 363.5L267.0 368.1M247.1 369.6L248.4 374.4M237.8 371.9L238.9 376.8M228.5 373.7L229.3 378.6M209.5 375.7L209.8 380.7M200.0 376.0L200.0 381.0M190.5 375.7L190.2 380.7M171.5 373.7L170.7 378.6M162.2 371.9L161.1 376.8M152.9 369.6L151.6 374.4M134.9 363.5L133.0 368.1M126.1 359.7L124.0 364.3M117.6 355.5L115.2 359.9M101.2 345.7L98.4 349.8M93.5 340.1L90.5 344.1M86.1 334.1L82.8 338.0M72.2 321.0L68.6 324.5M65.9 313.9L62.0 317.2M59.9 306.5L55.9 309.5M49.2 290.7L44.9 293.3M44.5 282.4L40.1 284.8M40.3 273.9L35.7 276.0M33.2 256.2L28.5 257.8M30.4 247.1L25.6 248.4M28.1 237.8L23.2 238.9M25.0 219.0L20.1 219.6M24.3 209.5L19.3 209.8M24.0 200.0L19.0 200.0M25.0 181.0L20.1 180.4M26.3 171.5L21.4 170.7M28.1 162.2L23.2 161.1M33.2 143.8L28.5 142.2M36.5 134.9L31.9 133.0M40.3 126.1L35.7 124.0M49.2 109.3L44.9 106.7M54.3 101.2L50.2 98.4M59.9 93.5L55.9 90.5M72.2 79.0L68.6 75.5M79.0 72.2L75.5 68.6M86.1 65.9L82.8 62.0M101.2 54.3L98.4 50.2M109.3 49.2L106.7 44.9M117.6 44.5L115.2 40.1M134.9 36.5L133.0 31.9M143.8 33.2L142.2 28.5M152.9 30.4L151.6 25.6M171.5 26.3L170.7 21.4M181.0 25.0L180.4 20.1M190.5 24.3L190.2 19.3"/>
-          <g class="sceau-regle__articles">
-          <line class="sceau-regle__article" style="--i:0" x1="200.0" y1="32.0" x2="200.0" y2="14.0"/>
-          <line class="sceau-regle__article" style="--i:1" x1="236.1" y1="35.9" x2="240.0" y2="18.3"/>
-          <line class="sceau-regle__article" style="--i:2" x1="270.5" y1="47.5" x2="278.1" y2="31.2"/>
-          <line class="sceau-regle__article" style="--i:3" x1="301.7" y1="66.3" x2="312.6" y2="51.9"/>
-          <line class="sceau-regle__article" style="--i:4" x1="328.0" y1="91.2" x2="341.8" y2="79.6"/>
-          <line class="sceau-regle__article" style="--i:5" x1="348.4" y1="121.3" x2="364.3" y2="112.9"/>
-          <line class="sceau-regle__article" style="--i:6" x1="361.9" y1="155.1" x2="379.2" y2="150.2"/>
-          <line class="sceau-regle__article" style="--i:7" x1="367.8" y1="190.9" x2="385.7" y2="189.9"/>
-          <line class="sceau-regle__article" style="--i:8" x1="365.8" y1="227.2" x2="383.5" y2="230.1"/>
-          <line class="sceau-regle__article" style="--i:9" x1="356.1" y1="262.2" x2="372.8" y2="268.8"/>
-          <line class="sceau-regle__article" style="--i:10" x1="339.1" y1="294.3" x2="354.0" y2="304.4"/>
-          <line class="sceau-regle__article" style="--i:11" x1="315.5" y1="322.0" x2="327.9" y2="335.0"/>
-          <line class="sceau-regle__article" style="--i:12" x1="286.6" y1="344.0" x2="295.9" y2="359.4"/>
-          <line class="sceau-regle__article" style="--i:13" x1="253.6" y1="359.2" x2="259.4" y2="376.3"/>
-          <line class="sceau-regle__article" style="--i:14" x1="218.2" y1="367.0" x2="220.1" y2="384.9"/>
-          <line class="sceau-regle__article" style="--i:15" x1="181.8" y1="367.0" x2="179.9" y2="384.9"/>
-          <line class="sceau-regle__article" style="--i:16" x1="146.4" y1="359.2" x2="140.6" y2="376.3"/>
-          <line class="sceau-regle__article" style="--i:17" x1="113.4" y1="344.0" x2="104.1" y2="359.4"/>
-          <line class="sceau-regle__article" style="--i:18" x1="84.5" y1="322.0" x2="72.1" y2="335.0"/>
-          <line class="sceau-regle__article" style="--i:19" x1="60.9" y1="294.3" x2="46.0" y2="304.4"/>
-          <line class="sceau-regle__article" style="--i:20" x1="43.9" y1="262.2" x2="27.2" y2="268.8"/>
-          <line class="sceau-regle__article" style="--i:21" x1="34.2" y1="227.2" x2="16.5" y2="230.1"/>
-          <line class="sceau-regle__article" style="--i:22" x1="32.2" y1="190.9" x2="14.3" y2="189.9"/>
-          <line class="sceau-regle__article" style="--i:23" x1="38.1" y1="155.1" x2="20.8" y2="150.2"/>
-          <line class="sceau-regle__article" style="--i:24" x1="51.6" y1="121.3" x2="35.7" y2="112.9"/>
-          <line class="sceau-regle__article" style="--i:25" x1="72.0" y1="91.2" x2="58.2" y2="79.6"/>
-          <line class="sceau-regle__article" style="--i:26" x1="98.3" y1="66.3" x2="87.4" y2="51.9"/>
-          <line class="sceau-regle__article" style="--i:27" x1="129.5" y1="47.5" x2="121.9" y2="31.2"/>
-          <line class="sceau-regle__article" style="--i:28" x1="163.9" y1="35.9" x2="160.0" y2="18.3"/>
-          </g>
-          <g class="sceau-regle__anneau">
-            <text class="sceau-regle__devise"><textPath href="#sceau-regle-cercle" textLength="900" lengthAdjust="spacing">Vingt-neuf articles · aucune surprise · tout n'est que passage ·</textPath></text>
-          </g>
-          <path class="sceau-regle__balai" d="M200 200 L200 8 A192 192 0 0 1 266 20 Z"/>
-        </svg>
-        <img class="sceau-regle__embleme" src="assets/embleme.webp" alt="" width="900" height="1251" loading="lazy" decoding="async">
-        <figcaption class="sceau-regle__legende">La Règle <span>·</span> 29 articles</figcaption>
-      </figure>
-    </div>
-
-    <div class="duo__texte">
-      <p class="acte__num revele">Acte IV</p>
-      <h2 class="revele balaye">La Règle</h2>
-
-      <div class="volet revele">
-        <h3><span class="volet__puce" aria-hidden="true"></span>Ce que nous demandons</h3>
-        <ul class="liste" role="list">
-          <li>Dix-huit ans révolus.</li>
-          <li>Parler français. Les opérations se mènent en français.</li>
-          <li>Se montrer de temps en temps. Un membre qui n'apparaît jamais n'est pas un membre.</li>
-          <li>Lire la Règle avant d'entrer. Vingt-neuf articles, aucune surprise.</li>
-        </ul>
-      </div>
-
-      <div class="volet revele">
-        <h3><span class="volet__puce volet__puce--clair" aria-hidden="true"></span>Ce que vous trouverez</h3>
-        <ul class="liste" role="list">
-          <li>Des opérations annoncées à l'avance, avec ordre de mission et inscription d'équipage.</li>
-          <li>Un partage des gains écrit avant le départ, pas négocié après.</li>
-          <li>Des salons vocaux et textuels personnels pour vos propres équipages.</li>
-          <li>Un commandement qui répond.</li>
-        </ul>
-      </div>
-
-      <p class="revele"><a class="lien-clair" href="/regle">Lire les vingt-neuf articles</a></p>
-    </div>
-  </div>
-</section>
-
 <section class="acte acte--appel" id="appel">
   <div class="contenu contenu--centre">
     <p class="appel__devise revele">Tout n'est que passage</p>
     <h2 class="revele balaye">Entrer dans l'Ordre</h2>
     <p class="chapeau revele">
-      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
-      parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
-      le moment est maintenant.
+      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter parmi les premiers plutôt que d'être le quatre-centième nom d'une liste, le moment est maintenant.
     </p>
     <div class="portes portes--bas revele">
       <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
@@ -385,6 +261,6 @@
 <script src="/coques.js?v=01d2bb3174" defer></script>
 <script src="/scene.js?v=5839ff321f" defer></script>
 <script src="/ascension.js?v=94f109fa28" defer></script>
-<script src="/site.js?v=5c91f5aaed" defer></script>
+<script src="/site.js?v=2a1912f05c" defer></script>
 </body>
 </html>
