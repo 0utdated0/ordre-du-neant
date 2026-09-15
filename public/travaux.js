@@ -27,12 +27,65 @@
   /* Peinture des coques : corps sombre, arêtes additives. La même
      que l'Approche, pour que les vaisseaux se ressemblent d'un
      acte à l'autre. */
+  /* La matière du corps.
+
+     C'était un noir plat. Sur les maillages décimés d'avant,
+     chaque panneau était un grand triangle et le fil de fer
+     couvrait toute la surface : le corps ne servait qu'à masquer
+     l'arrière. Sur la géométrie réelle, les grandes tôles sont
+     lisses et n'ont d'arêtes vives que sur leur pourtour. Le noir
+     plat avalait tout le reste, et le vaisseau se lisait comme
+     une découpe de papier noir : des aplats sans volume, avec du
+     détail par plaques. Mesuré en peignant la même coque en
+     arêtes seules, où tout est là.
+
+     Il lui faut donc une lumière. On garde un MeshBasicMaterial
+     et on greffe le calcul dans son nuanceur, plutôt qu'un
+     ShaderMaterial : les actes font disparaître les vaisseaux en
+     relevant les matières transparentes et en baissant leur
+     opacité, et un nuanceur écrit à la main sortirait de ce
+     mécanisme.
+
+     La normale vient de la dérivée écran. Les coques n'en portent
+     plus (voir coques.js) et, sur une coque à panneaux, une
+     normale plate est de toute façon ce qu'on veut. */
+  function matiereCoque(teinte) {
+    var m = new THREE.MeshBasicMaterial({
+      color: 0x0a0b0e, transparent: true, opacity: 0.96, fog: true
+    });
+    m.extensions = { derivatives: true };
+    m.onBeforeCompile = function (nuanceur) {
+      nuanceur.uniforms.teinteCoque = { value: new THREE.Color(teinte) };
+      nuanceur.vertexShader = nuanceur.vertexShader
+        .replace('#include <common>',
+                 '#include <common>\nvarying vec3 vVue;')
+        .replace('#include <fog_vertex>',
+                 '#include <fog_vertex>\n\tvVue = mvPosition.xyz;');
+      nuanceur.fragmentShader = nuanceur.fragmentShader
+        .replace('#include <common>',
+                 '#include <common>\nvarying vec3 vVue;\nuniform vec3 teinteCoque;')
+        /* r128 n'a pas de bloc « output_fragment » dans le
+           nuanceur du MeshBasicMaterial : il écrit la ligne en
+           clair. C'est donc elle qu'on remplace. */
+        .replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );', [
+          '  vec3 nCoque = normalize(cross(dFdx(vVue), dFdy(vVue)));',
+          '  vec3 oeil = normalize(-vVue);',
+          /* le bord : une tôle vue en biais accroche la lumière */
+          '  float rasant = pow(1.0 - abs(dot(nCoque, oeil)), 2.6);',
+          /* et un jour venu d'en haut à droite, très faible, juste
+             de quoi séparer deux faces qui se touchent */
+          '  float jour = max(dot(nCoque, normalize(vec3(0.35, 0.70, 0.55))), 0.0);',
+          '  outgoingLight += teinteCoque * (rasant * 0.55 + pow(jour, 1.6) * 0.10);',
+          '  gl_FragColor = vec4( outgoingLight, diffuseColor.a );'
+        ].join('\n'));
+    };
+    return m;
+  }
+
   function peintre(teinte, opaciteAretes) {
     return function (geo) {
       var g = new THREE.Group();
-      g.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-        color: 0x0a0b0e, transparent: true, opacity: 0.96, fog: true
-      })));
+      g.add(new THREE.Mesh(geo, matiereCoque(teinte || ARGENT)));
       g.add(new THREE.LineSegments(
         window.ODN.aretesDe(geo, 20),
         new THREE.LineBasicMaterial({
@@ -430,7 +483,8 @@
 
   window.ODN.travaux = {
     ARGENT: ARGENT, ROUGE: ROUGE, BRAISE: BRAISE,
-    peintre: peintre, coque: coque, tuyeres: tuyeres, halo: halo, enMonde: enMonde,
+    peintre: peintre, matiereCoque: matiereCoque,
+    coque: coque, tuyeres: tuyeres, halo: halo, enMonde: enMonde,
     explosion: explosion,
     pousser: pousser,
     etoiles: etoiles, poussiere: poussiere, faisceau: faisceau, tendre: tendre

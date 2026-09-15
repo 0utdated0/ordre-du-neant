@@ -133,11 +133,17 @@
       })
     );
   }
-  function sombre(geo) {
+  /* La matière de coque est celle des actes de travail : un noir
+     qui accroche la lumière au bord. Voir travaux.js pour le
+     pourquoi. */
+  function corps(geo, teinte) {
+    var T = window.ODN && window.ODN.travaux;
+    if (T && T.matiereCoque) { return new THREE.Mesh(geo, T.matiereCoque(teinte || 0xeef0f4)); }
     return new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
       color: 0x090a0d, transparent: true, opacity: 0.94, fog: true
     }));
   }
+  function sombre(geo) { return corps(geo, 0xeef0f4); }
   function bloc(geo, couleur, opacite) {
     var g = new THREE.Group();
     g.add(sombre(geo));
@@ -256,9 +262,7 @@
 
   function peindreCoque(geo, teinte, opacite, opaciteAretes) {
     var g = new THREE.Group();
-    g.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-      color: 0x0a0b0e, transparent: true, opacity: 0.96, fog: true
-    })));
+    g.add(corps(geo, teinte));
     g.add(new THREE.LineSegments(
       window.ODN.aretesDe(geo, 20),
       new THREE.LineBasicMaterial({

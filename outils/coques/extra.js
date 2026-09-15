@@ -149,18 +149,47 @@ function aretesRapides(pos, idx, budget){
     n++;
   }
 
-  /* Seuil d'angle par histogramme : on descend depuis 180 jusqu'a
-     tenir environ trois fois le budget, puis on garde les plus
-     longues. Ce sont elles qui dessinent la structure ; le grenu
-     court ne fait que blanchir l'image. */
+  /* Selection.
+
+     Premiere version : seuil d'angle par histogramme, puis on
+     gardait les aretes les plus LONGUES. Sur un maillage decime
+     ca marchait, parce que chaque panneau etait un grand triangle
+     et que ses bords etaient longs. Sur le maillage reel c'est
+     l'inverse : une ligne de panneau y est decoupee en vingt
+     segments courts, donc elle perd systematiquement contre les
+     grandes aretes des parties grossieres. Resultat, les zones
+     detaillees passaient a la trappe et les grandes toles
+     restaient nues : le vaisseau se lisait comme une decoupe de
+     papier noir.
+
+     Ici on ne classe plus par longueur. On descend le seuil
+     d'angle jusqu'a remplir le budget, et dans le dernier cran
+     on prend un echantillon a pas regulier. L'ordre des faces
+     apres decodage suit le parcours du maillage, donc un pas
+     regulier repartit le reste sur toute la coque au lieu de le
+     concentrer quelque part.  */
   var bac=new Uint32Array(181);
   for(var i3=0;i3<n;i3++) bac[Math.min(180, ang[i3]|0)]++;
-  var vise=Math.min(n, budget*3), cum=0, seuil=180;
-  for(var s=180;s>=8;s--){ cum+=bac[s]; if(cum>=vise){ seuil=s; break; } seuil=s; }
+  var cum=0, seuil=180;
+  for(var s=180;s>=8;s--){
+    if(cum+bac[s] > budget){ seuil=s; break; }
+    cum+=bac[s]; seuil=s;
+  }
+  var reste=Math.max(0, budget-cum);
+  var dansLeCran=bac[seuil];
+  var pas = (reste>0 && dansLeCran>reste) ? dansLeCran/reste : 1;
 
-  var garde=[];
-  for(var i4=0;i4<n;i4++) if(ang[i4]>=seuil) garde.push(i4);
-  garde.sort(function(u,v){ return lon[v]-lon[u]; });
+  var garde=[], vus=0;
+  for(var i4=0;i4<n;i4++){
+    var a4=Math.min(180, ang[i4]|0);
+    if(a4>seuil){ garde.push(i4); }
+    else if(a4===seuil && reste>0){
+      if(Math.floor(vus/pas) > Math.floor((vus-1)/pas) || vus===0){
+        if(garde.length<budget) garde.push(i4);
+      }
+      vus++;
+    }
+  }
   if(garde.length>budget) garde.length=budget;
 
   var out=new Uint32Array(garde.length*2);

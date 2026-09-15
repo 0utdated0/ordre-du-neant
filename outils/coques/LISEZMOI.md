@@ -31,6 +31,14 @@ pas le poids, c'était le format.
 Les stations, elles, sortent de Blender aux polygones comptés.
 Elles n'ont rien à gagner à un décodeur et restent en v2.
 
+## Regarder une coque
+
+`apercu.html` affiche une coque seule, en grand. Le copier dans
+`public/` le temps d'un coup d'oeil, puis ouvrir
+`/apercu.html?c=orion&m=fil`. Le paramètre `m` vaut `fil`,
+`plein`, `aretes` ou `ombre` : comparer `aretes` et `plein` dit
+en deux images ce que le corps cache.
+
 ## Ce que fait `draco.js`
 
 1. `lire.js` décode le `.ctm` (lecteur OpenCTM de three.js r100,
@@ -72,13 +80,37 @@ Elles n'ont rien à gagner à un décodeur et restent en v2.
 
 ## Réglages qui ont demandé plusieurs essais
 
-- **Budget d'arêtes.** Sur un maillage décimé, chaque grand
-  triangle portait ses trois bords et le fil de fer couvrait
-  toute la coque. Sur le maillage réel, les arêtes vives se
-  concentrent là où il y a du détail et laissent les panneaux
-  lisses vides. Il en faut le triple pour retrouver la même
-  lecture, ce qui coûte 200 Ko par coque sur un budget de cinq
-  mégaoctets.
+- **Ne jamais classer les arêtes par longueur.** C'était le
+  premier tri : au-delà du budget, garder les plus longues. Sur
+  un maillage décimé ça marchait, chaque panneau étant un grand
+  triangle aux bords longs. Sur le maillage réel c'est l'inverse :
+  une ligne de panneau y est découpée en vingt segments courts,
+  donc elle perd systématiquement contre les grandes arêtes des
+  parties grossières. Les zones détaillées passaient à la trappe.
+  On descend maintenant le seuil d'angle jusqu'à remplir le
+  budget, et dans le dernier cran on prend un échantillon à pas
+  régulier : l'ordre des faces après décodage suit le parcours du
+  maillage, donc un pas régulier répartit le reste sur toute la
+  coque.
+- **Le corps ne peut plus être un noir plat.** C'est le vrai
+  piège de cette conversion, et il a coûté une passe entière.
+  Avant, le corps ne servait qu'à masquer l'arrière : le fil de
+  fer couvrait toute la surface. Sur la géométrie réelle, les
+  grandes tôles sont lisses et n'ont d'arêtes vives que sur leur
+  pourtour, si bien que le noir plat avalait tout le reste : les
+  vaisseaux se lisaient comme des découpes de papier noir, avec
+  du détail par plaques. Peindre la même coque en arêtes seules
+  le montre d'un coup, tout y est. Le corps a donc maintenant une
+  lumière rasante, greffée dans le nuanceur du
+  `MeshBasicMaterial` par `onBeforeCompile` (voir `matiereCoque`
+  dans `travaux.js`) plutôt qu'un `ShaderMaterial`, parce que les
+  actes font disparaître les vaisseaux en baissant l'opacité des
+  matières transparentes. Et plus de budget d'arêtes n'y change
+  rien : essayé à quatre fois le budget, le résultat est le même.
+- **Le budget d'arêtes ne sert plus qu'aux lignes de panneau.**
+  Les bords francs seuls (82 000 à 168 000 selon la coque)
+  dépassent déjà le budget : aucun pli intérieur n'est tracé, et
+  ce n'est pas grave, c'est le corps qui porte les plis.
 - **Pas de normales.** Toutes les coques sont peintes avec un
   `MeshBasicMaterial`, qui ne les regarde jamais ; les calculer
   coûtait deux cents millisecondes et sept mégaoctets par coque.

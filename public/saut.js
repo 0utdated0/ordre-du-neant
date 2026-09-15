@@ -386,9 +386,14 @@
 
   function peindreCoque(geo, teinteC, opacite, opaciteAretes) {
     var g = new THREE.Group();
-    g.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-      color: 0x0a0b0e, transparent: true, opacity: 0.97
-    })));
+    /* Même matière de coque que partout ailleurs : un noir qui
+       accroche la lumière au bord. Voir travaux.js. */
+    var T = window.ODN && window.ODN.travaux;
+    g.add(T && T.matiereCoque
+      ? new THREE.Mesh(geo, T.matiereCoque(teinteC))
+      : new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
+          color: 0x0a0b0e, transparent: true, opacity: 0.97
+        })));
     g.add(new THREE.LineSegments(
       window.ODN.aretesDe(geo, 20),
       new THREE.LineBasicMaterial({

@@ -1,0 +1,76 @@
+<!doctype html>
+<!-- Aperçu d'une coque, en grand et toute seule.
+
+     Copier ce fichier dans public/ le temps d'un coup d'oeil, puis
+     ouvrir /apercu.html?c=orion&m=fil
+
+       c  nom de la coque
+       m  fil (corps + arêtes) | plein | aretes | ombre
+       v  trois-quarts | cote | dessus
+
+     C'est ce qui a montré que le corps noir plat avalait tout :
+     en « aretes » le vaisseau est entièrement dessiné, en « plein »
+     il n'est plus qu'une silhouette. --><html lang="fr"><head><meta charset="utf-8"><title>aperçu d'une coque</title>
+<style>html,body{margin:0;background:#000;overflow:hidden}canvas{display:block}</style></head>
+<body>
+<script src="/vendor/three.min.js"></script>
+<script src="/coques.js"></script>
+<script>
+var q=new URLSearchParams(location.search);
+var nom=q.get('c')||'javelin';
+var mode=q.get('m')||'fil';          /* fil | plein | aretes */
+var vue=q.get('v')||'trois-quarts';
+var R=new THREE.WebGLRenderer({antialias:true});
+R.setSize(1400,900); R.setClearColor(0x000000,1);
+document.body.appendChild(R.domElement);
+var sc=new THREE.Scene();
+var cam=new THREE.PerspectiveCamera(38,1400/900,0.1,20000);
+window.__pret=false;
+ODN.coque(nom).then(function(geo){
+  geo.computeBoundingBox();
+  var b=geo.boundingBox, c=b.getCenter(new THREE.Vector3()), t=b.getSize(new THREE.Vector3());
+  var g=new THREE.Group();
+  if(mode!=='aretes'){
+    var mat;
+    if(mode==='ombre'||mode==='ombreseul'){
+      mat=new THREE.ShaderMaterial({
+        uniforms:{teinte:{value:new THREE.Color(0xeef0f4)},
+                  fres:{value:parseFloat(q.get('f')||'0.55')},
+                  jour:{value:parseFloat(q.get('j')||'0.10')}},
+        extensions:{derivatives:true},
+        vertexShader:'varying vec3 vP; void main(){ vec4 mv=modelViewMatrix*vec4(position,1.0); vP=mv.xyz; gl_Position=projectionMatrix*mv; }',
+        fragmentShader:[
+         'uniform vec3 teinte; uniform float fres; uniform float jour; varying vec3 vP;',
+         'void main(){',
+         ' vec3 n=normalize(cross(dFdx(vP),dFdy(vP)));',
+         ' vec3 v=normalize(-vP);',
+         ' float f=pow(1.0-abs(dot(n,v)),2.6);',
+         ' float j=max(dot(n,normalize(vec3(0.35,0.70,0.55))),0.0);',
+         ' vec3 c=vec3(0.028,0.030,0.038)+teinte*(f*fres+pow(j,1.6)*jour);',
+         ' gl_FragColor=vec4(c,1.0); }'
+        ].join('\n')
+      });
+    } else {
+      mat=new THREE.MeshBasicMaterial({color:0x0a0b0e, transparent:true, opacity:0.96});
+    }
+    g.add(new THREE.Mesh(geo, mat));
+  }
+  if(mode!=='plein'&&mode!=='ombreseul'){
+    g.add(new THREE.LineSegments(ODN.aretesDe(geo,20), new THREE.LineBasicMaterial({
+      color:0xeef0f4, transparent:true, opacity:0.45,
+      blending:THREE.AdditiveBlending, depthWrite:false})));
+  }
+  g.position.sub(c);
+  sc.add(g);
+  var d=Math.max(t.x,t.y,t.z);
+  if(vue==='cote') cam.position.set(d*1.25,0,0);
+  else if(vue==='dessus') cam.position.set(0,d*1.25,0);
+  else cam.position.set(d*0.75,d*0.42,d*0.9);
+  cam.lookAt(0,0,0);
+  R.render(sc,cam);
+  window.__pret=true;
+  window.__infos={som:geo.attributes.position.count, tri:geo.index.count/3,
+                  aretes:geo.userData.aretes?geo.userData.aretes.index.count/2:0,
+                  boite:[+t.x.toFixed(1),+t.y.toFixed(1),+t.z.toFixed(1)]};
+}).catch(function(e){ window.__pret='erreur '+e.message; });
+</script></body></html>
