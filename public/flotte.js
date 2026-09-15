@@ -1,12 +1,13 @@
 /* =========================================================
    L'ORDRE DU NÉANT — table d'hologrammes
    ---------------------------------------------------------
-   Vaisseaux et station projetés en hologramme, construits
-   en volumes primitifs directement dans le code.
+   Vaisseaux et station projetés en hologramme. Les coques
+   viennent de vaisseaux.js et arrivent par le réseau : la
+   peinture doit donc survivre à un changement d'onglet en
+   cours de chargement.
 
-   Les silhouettes sont propres à l'Ordre. Ce ne sont pas
-   des vaisseaux existants du jeu : ces modèles appartiennent
-   à leur éditeur et n'ont pas à être recopiés ici.
+   Site non officiel. Ces modèles appartiennent à Cloud
+   Imperium Rights LLC.
    ========================================================= */
 (function () {
   'use strict';
@@ -75,18 +76,25 @@
     });
   }
 
+  /* Les coques arrivent par le réseau : une peinture peut se
+     terminer après que le visiteur a changé d'onglet. Chaque
+     montage a donc ses propres listes, et l'animation ne lit que
+     celles du modèle affiché. Une peinture en retard remplit des
+     listes que plus personne ne regarde. */
   var matieres = [];
-  function holo(teinte, intensite) {
+  var traits = [];
+
+  function holo(teinte, intensite, liste) {
     var m = matiereHolo(teinte, intensite);
     m.userData.base = intensite;
-    matieres.push(m);
+    liste.push(m);
     return m;
   }
 
   /* arêtes : c'est elles qui donnent la lecture technique */
   function aretes(geo, teinte, opacite) {
     var l = new THREE.LineSegments(
-      new THREE.EdgesGeometry(geo, 22),
+      window.ODN.aretesDe(geo, 22),
       new THREE.LineBasicMaterial({
         color: teinte, transparent: true, opacity: opacite,
         blending: THREE.AdditiveBlending, depthWrite: false
@@ -98,16 +106,16 @@
   /* Peinture holographique : un volume additif sans lumière,
      plus ses arêtes. C'est la fonction que les constructeurs
      de vaisseaux.js appellent pour chaque pièce. */
-  var traits = [];
-
-  function peindre(geo, teinte, intensite, opaciteAretes) {
-    var g = new THREE.Group();
-    g.add(new THREE.Mesh(geo, holo(teinte, intensite)));
-    var l = aretes(geo, teinte, opaciteAretes === undefined ? 0.5 : opaciteAretes);
-    l.material.userData.base = l.material.opacity;
-    traits.push(l.material);
-    g.add(l);
-    return g;
+  function peintre(mesMatieres, mesTraits) {
+    return function (geo, teinte, intensite, opaciteAretes) {
+      var g = new THREE.Group();
+      g.add(new THREE.Mesh(geo, holo(teinte, intensite, mesMatieres)));
+      var l = aretes(geo, teinte, opaciteAretes === undefined ? 0.5 : opaciteAretes);
+      l.material.userData.base = l.material.opacity;
+      mesTraits.push(l.material);
+      g.add(l);
+      return g;
+    };
   }
 
   /* =========================================================
@@ -202,10 +210,12 @@
     var f = FLOTTE[i];
 
     while (porteur.children.length) { porteur.remove(porteur.children[0]); }
-    matieres.length = 0;
-    traits.length = 0;
+    var mesMatieres = [];
+    var mesTraits = [];
+    matieres = mesMatieres;
+    traits = mesTraits;
 
-    courant = f.construire(peindre);
+    courant = f.construire(peintre(mesMatieres, mesTraits));
     courant.scale.setScalar(f.echelle);
     porteur.add(courant);
     transition = 0;

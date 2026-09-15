@@ -17,6 +17,11 @@
 /vendor/*
   Cache-Control: public, max-age=31536000, immutable
 
+# Coques 3D : 1,2 Mo au total, jamais modifiées sur place.
+# Une coque qui change reçoit un nouveau nom de fichier.
+/coques/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # Le jeu d'exemple ne doit pas masquer les vraies données.
 /exemple/*
   Cache-Control: public, max-age=60

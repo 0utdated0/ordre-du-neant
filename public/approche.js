@@ -124,7 +124,7 @@
 
   function ligne(geo, couleur, opacite) {
     return new THREE.LineSegments(
-      new THREE.EdgesGeometry(geo, 20),
+      window.ODN.aretesDe(geo, 20),
       new THREE.LineBasicMaterial({
         color: couleur, transparent: true, opacity: opacite,
         blending: THREE.AdditiveBlending, depthWrite: false, fog: true
@@ -253,7 +253,7 @@
       color: 0x0a0b0e, transparent: true, opacity: 0.96, fog: true
     })));
     g.add(new THREE.LineSegments(
-      new THREE.EdgesGeometry(geo, 20),
+      window.ODN.aretesDe(geo, 20),
       new THREE.LineBasicMaterial({
         color: teinte, transparent: true,
         opacity: Math.min(0.85, (opaciteAretes === undefined ? 0.6 : opaciteAretes) * 1.1),
@@ -300,6 +300,14 @@
        part, on ne veut pas que deux règles se disputent la même
        opacité */
     var fiche = { groupe: appareil, mats: recolter(appareil), tuyeres: [] };
+    /* La coque réelle arrive par le réseau : le relevé fait à
+       l'instant ne voit qu'un groupe vide. On le refait quand la
+       géométrie est là, sinon l'appareil ne s'estompe jamais. */
+    if (appareil.userData.quandPret) {
+      appareil.userData.quandPret.then(function (coque) {
+        if (coque) { fiche.mats = fiche.mats.concat(recolter(coque)); }
+      }, function () {});
+    }
     (appareil.userData.moteurs || []).forEach(function (m) {
       var halo = new THREE.Sprite(new THREE.SpriteMaterial({
         map: HALO, transparent: true, opacity: 0.9,

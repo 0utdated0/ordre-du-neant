@@ -345,7 +345,7 @@
       color: 0x0a0b0e, transparent: true, opacity: 0.97
     })));
     g.add(new THREE.LineSegments(
-      new THREE.EdgesGeometry(geo, 20),
+      window.ODN.aretesDe(geo, 20),
       new THREE.LineBasicMaterial({
         color: teinteC, transparent: true,
         opacity: Math.min(0.9, (opaciteAretes === undefined ? 0.6 : opaciteAretes) * 1.15),
@@ -382,6 +382,14 @@
     navire.scale.setScalar(4.2);
     scene.add(navire);
     coques = recolter(navire);
+    /* La coque réelle arrive par le réseau. Le relevé fait ici ne
+       voit qu'un groupe vide : sans ce rattrapage, le bâtiment ne
+       s'effacerait jamais en franchissant le seuil. */
+    if (navire.userData.quandPret) {
+      navire.userData.quandPret.then(function (c) {
+        if (c) { coques = coques.concat(recolter(c)); }
+      }, function () {});
+    }
 
     (navire.userData.moteurs || []).forEach(function (m) {
       var h = new THREE.Sprite(new THREE.SpriteMaterial({

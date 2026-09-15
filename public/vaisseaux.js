@@ -6,9 +6,12 @@
    les fait voler en coque pleine : même géométrie, deux
    peintures.
 
-   Les conceptions sont propres à l'Ordre. Ce ne sont pas des
-   vaisseaux existants du jeu : ces modèles appartiennent à
-   leur éditeur et n'ont pas à être recopiés ici.
+   Deux couches. En haut, les silhouettes dessinées à la main :
+   elles servent de repli et pour la station, qui n'a pas
+   d'équivalent. En bas, les coques réelles, chargées par le
+   réseau. Ce site n'est pas officiel : Star Citizen, les noms
+   de vaisseaux et ces modèles appartiennent à Cloud Imperium
+   Rights LLC.
 
    Chaque constructeur reçoit une fonction « peindre » et
    renvoie un groupe dont userData.moteurs liste les tuyères,
@@ -241,49 +244,244 @@
     return n;
   }
 
+
+  /* =========================================================
+     LES COQUES RÉELLES
+     ---------------------------------------------------------
+     Les silhouettes ci-dessus restent la solution de repli : si
+     une coque ne se charge pas, l'acte tourne quand même.
+
+     Les coques ci-dessous sont les maillages du holoviewer de
+     Roberts Space Industries, décimés et remis à l'échelle. Ce
+     site n'est pas officiel et n'est affilié à personne. Star
+     Citizen, les noms de vaisseaux et ces modèles appartiennent
+     à Cloud Imperium Rights LLC.
+
+     Chaque entrée ne porte que ce dont les actes ont besoin tout
+     de suite : la longueur réelle en mètres et la position des
+     tuyères, relevée sur le maillage. La géométrie, elle, arrive
+     par le réseau.
+     ========================================================= */
+  var COQUES = {
+    javelin: { longueur: 345, moteurs: [
+      [-31.862, 13.165, -164.471, 7.734],
+      [-33.623, -12.056, -164.523, 7.537],
+      [-20.553, -21.355, -164.143, 6.886],
+      [-20.455, 20.798, -164.354, 7.042],
+      [20.842, 21.455, -164.219, 6.385],
+      [28.288, -15.096, -164.312, 7.389]
+    ] },
+    idris: { longueur: 239, moteurs: [
+      [-0.478, -2.026, -112.295, 4.291],
+      [0.625, -3.052, -109.765, 2.868],
+      [9.151, 4.308, -111.249, 3.679],
+      [-8.035, 6.043, -111.35, 2.868],
+      [-12.264, 2.952, -109.662, 2.868],
+      [8.595, 0.582, -111.808, 2.868]
+    ] },
+    polaris: { longueur: 155, moteurs: [
+      [25.428, 11.879, -72.321, 5.411],
+      [-24.274, 11.47, -72.611, 5.451],
+      [-23.903, -11.092, -72.508, 5.59],
+      [25.262, -10.65, -72.702, 5.916],
+      [25.988, 0.923, -70.132, 4.91]
+    ] },
+    reclaimer: { longueur: 155, moteurs: [
+      [0.111, 17.799, -76.184, 2.904],
+      [-0.05, -1.626, -71.108, 2.879],
+      [0.689, 9.269, -75.913, 3.384],
+      [-6.921, -0.589, -71.019, 2.303],
+      [6.766, -0.793, -71.13, 2.574],
+      [-8.121, 7.558, -71.818, 1.911]
+    ] },
+    caterpillar: { longueur: 111, moteurs: [
+      [7.537, 2.123, -52.414, 2.178],
+      [-0.965, 2.194, -52.29, 2.175],
+      [-2.832, 3.992, -51.945, 2.175],
+      [5.907, 4.244, -52.364, 2.122],
+      [7.959, 4.994, -52.544, 2.016],
+      [-0.727, 5.123, -52.92, 1.966]
+    ] },
+    hammerhead: { longueur: 110, moteurs: [
+      [-29.121, -3.146, -48.961, 2.674],
+      [-22.571, -3.113, -48.962, 2.674],
+      [29.13, -3.221, -48.962, 2.674],
+      [22.564, -3.155, -48.964, 2.674],
+      [2.447, -1.095, -52.426, 4.234],
+      [-5.534, -2.638, -52.193, 4.4]
+    ] },
+    gladius: { longueur: 20, moteurs: [
+      [-2.014, -0.241, -9.506, 0.478],
+      [-1.198, 0.074, -9.6, 0.381],
+      [2.083, -0.173, -9.667, 0.31],
+      [1.164, 0.098, -9.728, 0.336],
+      [-1.085, -0.294, -9.22, 0.264],
+      [2.77, -0.513, -9.683, 0.264]
+    ] }
+  };
+
+  /* Construit une coque réelle. Le groupe est rendu tout de suite,
+     avec ses tuyères et sa longueur : les actes peuvent poser
+     leurs halos et calculer leurs cadrages sans attendre. La
+     géométrie s'y ajoute quand elle arrive, et userData.quandPret
+     permet à l'appelant de faire ce qu'il doit refaire ensuite. */
+  function coqueReelle(nomCoque, peindre, longueurVoulue, teinte, intensite, opaciteAretes) {
+    var d = COQUES[nomCoque];
+    var n = new THREE.Group();
+    var k = longueurVoulue / d.longueur;
+
+    n.userData.longueur = longueurVoulue;
+    n.userData.coque = nomCoque;
+    n.userData.moteurs = d.moteurs.map(function (m) {
+      return [m[0] * k, m[1] * k, m[2] * k, m[3] * k];
+    });
+
+    var charger = (global.ODN && global.ODN.coque)
+      ? global.ODN.coque(nomCoque)
+      : Promise.reject(new Error('chargeur de coques absent'));
+
+    n.userData.quandPret = charger.then(function (geo) {
+      /* Les silhouettes dessinées à la main avaient deux cents
+         arêtes, ces coques en ont dix mille. À la même opacité,
+         le fil de fer s'empile en tache blanche : il faut peindre
+         beaucoup plus discrètement. */
+      var g = peindre(geo, teinte === undefined ? ARGENT : teinte,
+                      intensite === undefined ? 0.55 : intensite,
+                      opaciteAretes === undefined ? 0.26 : opaciteAretes);
+      g.scale.setScalar(k);
+      n.add(g);
+      /* On rend le groupe peint, pas le porteur : l'appelant veut
+         relever les matières de la coque seule, sans ramasser les
+         halos qu'il a posés entre-temps. */
+      return g;
+    });
+    /* Une promesse rejetée sans preneur remonte dans la console du
+       visiteur. L'acte, lui, se contente d'un groupe vide. */
+    n.userData.quandPret.catch(function () { return null; });
+
+    return n;
+  }
+
+  function fabrique(nomCoque, longueur, reglages) {
+    var r = reglages || {};
+    return function (peindre, teinte, intensite, opaciteAretes) {
+      return coqueReelle(nomCoque, peindre, longueur, teinte,
+        intensite === undefined ? r.intensite : intensite,
+        opaciteAretes === undefined ? r.aretes : opaciteAretes);
+    };
+  }
+
+  /* Sur la table d'hologrammes, chaque appareil doit remplir le
+     socle : à l'échelle réelle, la Sentinelle serait un point à
+     côté du Silence. On garde l'ordre des tailles sans en garder
+     le rapport, et la fiche donne la longueur exacte. */
+  /* L'hologramme peint un volume additif double face. Sur les
+     silhouettes primitives d'origine, une vingtaine de pièces
+     s'additionnaient ; ici ce sont onze mille triangles, et à la
+     même force la projection vire au blanc plein. */
+  function pourLaTable(nomCoque) {
+    var L = COQUES[nomCoque].longueur;
+    return fabrique(nomCoque, 9.2 * Math.pow(L / 345, 0.22),
+      { intensite: 0.028, aretes: 0.075 });
+  }
+
+  /* Les noms d'appel restent ceux des actes : ils décrivent un
+     rôle dans le récit, pas un modèle. */
+  var corvetteReelle   = fabrique('polaris',     7.6);
+  var cargoReel        = fabrique('caterpillar', 9.6);
+  var foreuseReelle    = fabrique('reclaimer',   6.4);
+  var porteNeantReel   = fabrique('javelin',    28.0);
+  var canonniereReelle = fabrique('hammerhead',  7.2);
+  var chasseurReel     = fabrique('gladius',     2.4);
+  var fregateReelle    = fabrique('idris',      18.0);
+
   /* --- Fiches, pour la table d'hologrammes ---------------- */
   var FICHES = [
     {
-      cle: 'corvette', nom: 'Le Passeur', classe: "Corvette d'escorte",
-      division: 'Combat et Sécurité', construire: corvette, echelle: 1,
+      cle: 'porteNeant', nom: 'Le Silence', classe: 'Porte-Néant',
+      division: 'Commandement', construire: pourLaTable('javelin'), echelle: 1,
       fiche: [
-        ['Rôle', 'Escorte, interception'],
-        ['Équipage', '2 à 4'],
-        ['Longueur', '38 m'],
-        ['Armement', 'Tourelles jumelées, contre-mesures']
+        ['Modèle', 'Aegis Javelin'],
+        ['Rôle', 'Bâtiment de ligne, franchissement'],
+        ['Équipage', '80 et plus'],
+        ['Longueur', '345 m']
       ],
-      texte: "Rapide, peu armé pour sa taille, conçu pour tenir la distance autour d'un convoi plutôt que pour engager seul. Il escorte, il dissuade, il rentre."
+      texte: "Le bâtiment amiral. On ne le sort pas pour une escorte : on le sort quand il faut franchir un point de saut et que personne ne doit revenir en arrière."
     },
     {
-      cle: 'cargo', nom: 'Le Portefaix', classe: 'Cargo lourd',
-      division: 'Logistique et Industrie', construire: cargo, echelle: 0.98,
+      cle: 'fregate', nom: "L'Écueil", classe: 'Frégate',
+      division: 'Combat et Sécurité', construire: pourLaTable('idris'), echelle: 1,
       fiche: [
+        ['Modèle', 'Aegis Idris-P'],
+        ['Rôle', 'Patrouille lourde, appui'],
+        ['Équipage', '10 à 16'],
+        ['Longueur', '239 m']
+      ],
+      texte: "Le poing de l'Ordre. Un pont de commandement, un hangar, assez d'artillerie pour tenir un secteur seule le temps que le reste arrive."
+    },
+    {
+      cle: 'corvette', nom: 'Le Passeur', classe: "Corvette d'escorte",
+      division: 'Combat et Sécurité', construire: pourLaTable('polaris'), echelle: 1,
+      fiche: [
+        ['Modèle', 'RSI Polaris'],
+        ['Rôle', 'Escorte, interception'],
+        ['Équipage', '6 à 10'],
+        ['Longueur', '155 m']
+      ],
+      texte: "Rapide pour sa masse, conçu pour tenir la distance autour d'un convoi plutôt que pour engager seul. Il escorte, il dissuade, il rentre."
+    },
+    {
+      cle: 'canonniere', nom: 'Le Rempart', classe: 'Canonnière',
+      division: 'Combat et Sécurité', construire: pourLaTable('hammerhead'), echelle: 1,
+      fiche: [
+        ['Modèle', 'Aegis Hammerhead'],
+        ['Rôle', 'Défense de convoi, saturation'],
+        ['Équipage', '6 à 8'],
+        ['Longueur', '110 m']
+      ],
+      texte: "Six tourelles habitées et rien d'autre. Elle ne poursuit personne : elle se place entre le convoi et ce qui arrive, et elle attend."
+    },
+    {
+      cle: 'cargo', nom: 'Le Portefaix', classe: 'Cargo modulaire',
+      division: 'Logistique et Industrie', construire: pourLaTable('caterpillar'), echelle: 1,
+      fiche: [
+        ['Modèle', 'Drake Caterpillar'],
         ['Rôle', 'Fret, ravitaillement'],
         ['Équipage', '3 à 6'],
-        ['Longueur', '74 m'],
-        ['Soute', '8 conteneurs modulaires']
+        ['Longueur', '111 m']
       ],
       texte: "L'épine dorsale des opérations de l'Ordre. Lent, vulnérable, indispensable. Rien ne se construit sans ce qu'il transporte."
     },
     {
-      cle: 'foreuse', nom: 'La Carrière', classe: 'Foreuse de prospection',
-      division: 'Extraction', construire: foreuse, echelle: 1.05,
+      cle: 'foreuse', nom: 'La Carrière', classe: 'Plateforme de récupération',
+      division: 'Extraction', construire: pourLaTable('reclaimer'), echelle: 1,
       fiche: [
-        ['Rôle', 'Minage, prospection'],
-        ['Équipage', '2 à 3'],
-        ['Longueur', '31 m'],
-        ['Soutes', 'Deux cuves à minerai']
+        ['Modèle', 'Aegis Reclaimer'],
+        ['Rôle', 'Récupération, découpe'],
+        ['Équipage', '4 à 6'],
+        ['Longueur', '155 m']
       ],
-      texte: "Tête de forage à couronne, deux bras de relevé, deux cuves. Elle passe des heures immobile contre un astéroïde, et c'est ce qui paie les autres."
+      texte: "Bras de découpe, salle de traitement, deux soutes. Elle passe des heures accrochée à une épave, et c'est ce qui paie les autres."
+    },
+    {
+      cle: 'chasseur', nom: 'La Sentinelle', classe: 'Chasseur léger',
+      division: 'Combat et Sécurité', construire: pourLaTable('gladius'), echelle: 1,
+      fiche: [
+        ['Modèle', 'Aegis Gladius'],
+        ['Rôle', 'Interception, reconnaissance'],
+        ['Équipage', '1'],
+        ['Longueur', '20 m']
+      ],
+      texte: "Un pilote, deux canons, rien à perdre. C'est le premier appareil qu'un Adepte pilote pour l'Ordre, et souvent celui qu'il regrette."
     },
     {
       cle: 'station', nom: 'Le Seuil', classe: "Station d'attache",
       division: 'Commandement', construire: station, echelle: 0.92,
       fiche: [
+        ['Modèle', "Conception propre à l'Ordre"],
         ['Rôle', 'Amarrage, réunion, dépôt'],
         ['Équipage', 'Variable'],
-        ['Envergure', '210 m'],
-        ['Postes', "Trois bras d'amarrage"]
+        ['Envergure', '210 m']
       ],
       texte: "Le point de ralliement. Anneau d'habitation en rotation, fût central, trois bras d'amarrage. On y entre, on y repart : tout n'est que passage."
     }
@@ -293,11 +491,23 @@
   global.ODN.vaisseaux = {
     ARGENT: ARGENT,
     ROUGE: ROUGE,
-    corvette: corvette,
-    cargo: cargo,
-    foreuse: foreuse,
+    /* coques réelles, celles que les actes utilisent */
+    corvette: corvetteReelle,
+    cargo: cargoReel,
+    foreuse: foreuseReelle,
+    porteNeant: porteNeantReel,
+    canonniere: canonniereReelle,
+    chasseur: chasseurReel,
+    fregate: fregateReelle,
     station: station,
-    porteNeant: porteNeant,
+    /* silhouettes de repli, dessinées à la main */
+    repli: {
+      corvette: corvette,
+      cargo: cargo,
+      foreuse: foreuse,
+      porteNeant: porteNeant,
+      station: station
+    },
     FICHES: FICHES
   };
 })(window);
