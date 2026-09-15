@@ -33,11 +33,16 @@ const PAGES = [
     menu: 'Histoire',
     titre: "L'Ordre du Néant - organisation Star Citizen francophone",
     description: "Organisation Star Citizen francophone structurée : huit divisions, opérations planifiées, partage des gains écrit. Recrutement ouvert aux pilotes majeurs parlant français.",
-    sections: ['seuil', 'approche', 'saut', 'plongee', ':appel'],
+    sections: ['seuil', 'approche', 'convoi', 'extraction', 'recuperation',
+               'ligne', 'saut', 'plongee', ':appel'],
     rail: [['seuil', 'I', 'Seuil'], ['approche', 'II', 'Approche'],
-           ['saut', 'III', 'Saut'], ['plongee', 'IV', 'Passage'],
-           ['appel', 'V', 'Entrer']],
-    scripts: ['trois', 'coques', 'vaisseaux', 'scene', 'approche', 'saut', 'plongee', 'site']
+           ['convoi', 'III', 'Convoi'], ['extraction', 'IV', 'Extraction'],
+           ['recuperation', 'V', 'Récupération'], ['ligne', 'VI', 'Ligne de feu'],
+           ['saut', 'VII', 'Saut'], ['plongee', 'VIII', 'Passage'],
+           ['appel', 'IX', 'Entrer']],
+    scripts: ['trois', 'coques', 'vaisseaux', 'acte3d', 'travaux', 'scene',
+              'approche', 'convoi', 'extraction', 'recuperation', 'ligne',
+              'saut', 'plongee', 'site']
   },
   {
     cle: 'ordre', fichier: 'ordre.html', url: '/ordre',
@@ -84,7 +89,9 @@ const PAGES = [
 const FICHIERS = {
   trois: 'vendor/three.min.js', coques: 'coques.js', vaisseaux: 'vaisseaux.js',
   scene: 'scene.js', approche: 'approche.js', flotte: 'flotte.js', saut: 'saut.js',
-  ascension: 'ascension.js', plongee: 'plongee.js', site: 'site.js', vigie: 'vigie.js'
+  ascension: 'ascension.js', plongee: 'plongee.js', site: 'site.js', vigie: 'vigie.js',
+  acte3d: 'acte3d.js', travaux: 'travaux.js', convoi: 'convoi.js',
+  extraction: 'extraction.js', recuperation: 'recuperation.js', ligne: 'ligne.js'
 };
 
 function menuDe(courante) {

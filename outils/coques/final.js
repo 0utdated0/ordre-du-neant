@@ -14,6 +14,7 @@ const FLOTTE = {
   'javelin':     {nom:'javelin',     longueur:345, cible:14000, aretes:9000},
   'idris-p':     {nom:'idris',       longueur:239, cible:12000, aretes:8000},
   'perseus':     {nom:'perseus',     longueur:180, cible:13000, aretes:9000},
+  'ironclad':    {nom:'ironclad',    longueur:135, cible:12000, aretes:9000},
   'polaris':     {nom:'polaris',     longueur:155, cible:12000, aretes:8000},
   'orion':       {nom:'orion',       longueur:170, cible:13000, aretes:9000},
   'reclaimer':   {nom:'reclaimer',   longueur:155, cible:12000, aretes:8000},
