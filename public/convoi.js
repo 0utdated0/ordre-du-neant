@@ -14,6 +14,11 @@
   var T = window.ODN && window.ODN.travaux;
   if (!T || !window.ODN.acte) { return; }
 
+  /* Vitesse apparente du convoi dans son propre repère, pour le
+     cap des Sentinelles : plus que leur louvoiement, pour qu'elles
+     ne fassent jamais demi-tour. */
+  var MARCHE = 24;
+
   window.ODN.acte({
     id: 'convoi',
     champ: 52,
@@ -92,10 +97,21 @@
           var y = b.y + Math.sin(t * 0.31 + ph * 1.7) * 8;
           var z = b.z + Math.cos(t * 0.37 + ph) * 22;
           var dx = Math.cos(t * 0.42 + ph) * 0.42 * 18;
-          var dz = -Math.sin(t * 0.37 + ph) * 0.37 * 22;
+          var dy = Math.cos(t * 0.31 + ph * 1.7) * 0.31 * 8;
+          /* Le cap suivait le seul louvoiement, dans le repère du
+             convoi. Or le convoi avance : quand le louvoiement
+             repartait vers l'arrière, la Sentinelle faisait
+             demi-tour, et au point mort elle volait de travers,
+             traînées perpendiculaires à la route. Mesuré : jusqu'à
+             162 degrés entre la traînée et le déplacement. On
+             ajoute la marche du convoi, qui l'emporte toujours. */
+          var dz = -Math.sin(t * 0.37 + ph) * 0.37 * 22 + MARCHE;
           g.position.set(x, y, z);
-          g.rotation.y = Math.atan2(dx, dz);
-          g.rotation.z = -Math.sin(t * 0.42 + ph) * 0.5;
+          /* lacet, puis tangage autour de l'aile, puis roulis */
+          g.rotation.order = 'YXZ';
+          g.rotation.set(-Math.atan2(dy, Math.sqrt(dx * dx + dz * dz)),
+                         Math.atan2(dx, dz),
+                         -Math.sin(t * 0.42 + ph) * 0.35);
         });
       }
 

@@ -137,7 +137,7 @@
         petit: petit, doux: doux,
         palier: palier, lisser: lisser, rond: rond, pastille: pastille,
         fragments: Array.prototype.slice.call(section.querySelectorAll('.fragment')),
-        avance: 0
+        avance: 0, def: def
       };
 
       if (def.brouillard) {

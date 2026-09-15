@@ -15,6 +15,14 @@
 
   var SOL = 0;
 
+  /* Trajectoire d'appontage (voir jouer). Le point de contrôle est
+     aux trois quarts du trajet vu de dessus, et haut : départ en
+     pente douce, arrivée à la verticale. */
+  var DEPART = new THREE.Vector3(-64, 168, -108);
+  var ARRIVEE = new THREE.Vector3(0, 9, -2);
+  var CONTROLE = new THREE.Vector3(-16, 128, -28.5);
+  var CAP = Math.atan2(ARRIVEE.x - DEPART.x, ARRIVEE.z - DEPART.z);
+
   window.ODN.acte({
     id: 'appontage',
     champ: 48,
@@ -131,7 +139,7 @@
     jouer: function (c, avance, dt, t) {
       var P = c.palier;
       var approche = P(avance, 0.0, 0.34);
-      var descente = P(avance, 0.26, 0.74);
+      var descente = P(avance, 0.02, 0.74);
       var pose = P(avance, 0.66, 0.9);
       var repos = P(avance, 0.86, 1.0);
 
@@ -142,27 +150,52 @@
         /* Il arrive de l'arrière-gauche et descend vers le cercle.
            Sa proue est en +Z : son cap doit suivre son déplacement,
            sinon il aborde le pont en marche arrière. */
-        var depart = new THREE.Vector3(-64, 168, -108);
-        var arrivee = new THREE.Vector3(0, 9, -2);
-        var av = descente;
-        c.navire.position.lerpVectors(depart, arrivee, av);
+        /* La trajectoire était une droite à cinquante degrés sous
+           l'horizon, coque à plat : le cargo tombait presque à la
+           verticale en crachant ses traînées vers l'arrière, en
+           travers de sa route. C'est maintenant une courbe : il
+           arrive en vol, presque à plat, et finit à la verticale
+           au-dessus du cercle. Le cap horizontal ne change pas en
+           route (le point de contrôle est sur la même droite vue
+           de dessus), et la poussée principale suit l'alignement
+           entre la proue et la route : elle s'éteint quand le
+           cargo descend, les rétrofusées prennent le relais. */
+        var s = descente;
+        var courbe = function (u, cible) {
+          var a = (1 - u) * (1 - u), b = 2 * (1 - u) * u, d = u * u;
+          return cible.set(
+            a * DEPART.x + b * CONTROLE.x + d * ARRIVEE.x,
+            a * DEPART.y + b * CONTROLE.y + d * ARRIVEE.y,
+            a * DEPART.z + b * CONTROLE.z + d * ARRIVEE.z);
+        };
+        courbe(s, c.navire.position);
         c.navire.position.y -= pose * 1.5;
-        var dep = arrivee.clone().sub(depart);
-        var cap = Math.atan2(dep.x, dep.z) * (1 - av);
+        var route = courbe(Math.min(1, s + 0.01), new THREE.Vector3())
+          .sub(courbe(Math.max(0, s - 0.01), new THREE.Vector3()));
+        var plat = Math.sqrt(route.x * route.x + route.z * route.z);
+        var pente = Math.atan2(-route.y, plat);
+        /* nez vers le bas, un peu, tant qu'il vole ; à plat pour se
+           poser */
+        var tangage = Math.min(pente * 0.4, 0.3) * (1 - pose);
         c.navire.rotation.set(
-          0.14 * (1 - av) + 0.02 * Math.sin(t * 0.7) * (1 - pose),
-          cap,
-          -0.09 * (1 - av) + 0.015 * Math.sin(t * 0.5) * (1 - pose)
+          tangage + 0.02 * Math.sin(t * 0.7) * (1 - pose),
+          CAP * (1 - pose),
+          -0.09 * (1 - s) + 0.015 * Math.sin(t * 0.5) * (1 - pose)
         );
-        /* Les moteurs principaux se coupent quand les rétrofusées
-           prennent le relais : on ne se pose pas en poussant. */
-        T.pousser(c.navire, Math.max(0, 0.85 - descente * 0.75) * (1 - repos), t);
+        c.navire.updateMatrixWorld(true);
+        var proue = new THREE.Vector3(0, 0, 1).transformDirection(c.navire.matrixWorld);
+        var alignement = route.lengthSq() > 1e-6 ? Math.max(0, proue.dot(route.normalize())) : 1;
+        c.alignement = alignement;
+        T.pousser(c.navire, Math.max(0, 0.85 - s * 0.35) * Math.pow(alignement, 3) * (1 - repos), t);
 
         var freins = P(avance, 0.34, 0.6) * (1 - repos);
         c.retro.forEach(function (s, i) {
           var puls = 0.78 + 0.22 * Math.sin(t * 17 + i * 1.3);
-          s.material.opacity = freins * puls;
-          s.scale.setScalar(10 + freins * 16 * puls);
+          /* Des lueurs de vingt-six unités sous une coque de
+             soixante-deux : on voyait quatre boules rouges, pas des
+             rétrofusées. Plus petites, et plus vives au cœur. */
+          s.material.opacity = freins * puls * 0.9;
+          s.scale.setScalar(5 + freins * 7 * puls);
         });
 
         /* la poussière ne se lève que près du pont */
@@ -199,8 +232,15 @@
         88 - m1 * 40 - m2 * 26 + m3 * 6,
         136 - m1 * 24 - m2 * 30 - m3 * 18
       );
-      c.camera.lookAt(new THREE.Vector3(
-        (1 - descente) * -18, 52 - descente * 44 - pose * 4, -4));
+      /* La visée tirait vers le pont dès le début : le cargo, qui
+         arrive de haut, restait hors du cadre pendant toute la
+         première moitié de l'acte (mesuré : bord haut de l'image
+         franchi à 45 % seulement). Elle suit maintenant le cargo,
+         puis revient sur le pont quand il se pose. */
+      var visee = new THREE.Vector3(
+        (1 - descente) * -18, 52 - descente * 44 - pose * 4, -4);
+      if (c.navire) { visee.lerp(c.navire.position, 0.5 * (1 - pose)); }
+      c.camera.lookAt(visee);
       c.camera.rotation.z += Math.sin(t * 0.27) * 0.014;
       void approche;
     }

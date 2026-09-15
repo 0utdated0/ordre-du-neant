@@ -193,6 +193,8 @@
     return TRAINEE;
   }
 
+  var OEIL = new THREE.Vector3();
+
   function reacteurs(porteur) {
     var out = [];
     porteur.userData.moteurs.forEach(function (m) {
@@ -224,13 +226,31 @@
       /* +PI/2 et non -PI/2 : avec -PI/2 le plan part vers +Z, donc
          vers l'avant. Les traînées sortaient par la proue. */
       q1.rotation.x = Math.PI / 2;
-      var q2 = q1.clone();
-      q2.material = q1.material.clone();
-      q2.rotation.z = Math.PI / 2;
-      g.add(q1); g.add(q2);
+
+      /* Il y avait deux plans croisés, et le second était faux :
+         tourné de PI/2 autour de Z dans l'ordre d'Euler par défaut,
+         sa rotation s'appliquait AVANT le basculement, si bien que
+         sa longueur partait selon X. Chaque tuyère crachait une
+         traînée vers l'arrière et une autre en travers de la route.
+         Même juste, une croix se lit comme une croix dès qu'on la
+         voit de dos.
+
+         Il n'y a donc plus qu'un plan, qui tourne autour de l'axe de
+         la traînée pour faire face à la caméra, juste avant d'être
+         peint. Vu de profil c'est un panache, vu de dos une lueur
+         courte, jamais un trait perpendiculaire. */
+      var axe = new THREE.Object3D();
+      axe.add(q1);
+      g.add(axe);
+      q1.onBeforeRender = function (moteur, scene, camera) {
+        OEIL.setFromMatrixPosition(camera.matrixWorld);
+        g.worldToLocal(OEIL);
+        axe.rotation.z = Math.atan2(OEIL.x, -OEIL.y);
+        axe.updateMatrixWorld(true);
+      };
 
       porteur.add(g);
-      out.push({ groupe: g, coeur: coeur, lueur: lueur, voiles: [q1, q2], rayon: m.r });
+      out.push({ groupe: g, coeur: coeur, lueur: lueur, voiles: [q1], rayon: m.r });
     });
     return out;
   }
@@ -252,7 +272,7 @@
       e.lueur.material.opacity = Math.min(0.40, f * 0.30);
       e.lueur.scale.setScalar(e.rayon * (1.8 + f * 1.2));
       for (var v = 0; v < e.voiles.length; v++) {
-        e.voiles[v].material.opacity = Math.min(0.9, f * 0.85);
+        e.voiles[v].material.opacity = Math.min(0.95, f * 1.05);
         /* Le panache s'ouvre à la tuyère et s'allonge avec la
            poussée ; sa largeur, elle, bouge peu. */
         e.voiles[v].scale.set(e.rayon * (2.6 + f * 0.6), e.rayon * (5 + f * 26), 1);

@@ -239,9 +239,18 @@
             b.y + Math.sin(w2) * 20,
             b.z + Math.cos(w1) * 58
           );
-          g.rotation.y = Math.atan2(Math.cos(w1) * 0.5 * 46, -Math.sin(w1) * 0.5 * 58);
+          var vx = Math.cos(w1) * 0.5 * 46, vz = -Math.sin(w1) * 0.5 * 58;
+          var vy = Math.cos(w2) * 0.36 * 20;
+          g.rotation.y = Math.atan2(vx, vz);
           g.rotation.z = -Math.sin(w1) * 0.8;
-          g.rotation.x = Math.sin(w2) * 0.12;
+          /* Le tangage suit la montée et la descente. Il était
+             déphasé d'un quart de tour : la traînée pointait vers
+             le haut quand le chasseur montait. */
+          g.rotation.x = -Math.atan2(vy, Math.sqrt(vx * vx + vz * vz));
+          /* Dans l'ordre par défaut (XYZ), le tangage tournait autour
+             de l'axe X du monde, après le lacet : un chasseur qui
+             file selon X roulait au lieu de cabrer. */
+          g.rotation.order = 'YXZ';
         });
       }
 
