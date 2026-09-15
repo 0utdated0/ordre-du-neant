@@ -265,8 +265,41 @@
 
   var tuyeres = [];
 
+  /* Relève les matières d'un appareil pour pouvoir le faire
+     apparaître et disparaître en fondu. Sans ça, un vaisseau qui
+     sort du couloir se volatilise d'une image à l'autre. */
+  function recolter(groupe) {
+    var liste = [];
+    groupe.traverse(function (n) {
+      if (!n.material) { return; }
+      var mats = Array.isArray(n.material) ? n.material : [n.material];
+      mats.forEach(function (m) {
+        if (m.transparent) { liste.push({ m: m, base: m.opacity }); }
+      });
+    });
+    return liste;
+  }
+
+  function voiler(fiche, facteur) {
+    for (var i = 0; i < fiche.mats.length; i++) {
+      fiche.mats[i].m.opacity = fiche.mats[i].base * facteur;
+    }
+    fiche.groupe.visible = facteur > 0.005;
+  }
+
+  /* interpolation douce, qui accepte a > b */
+  function douceur(x, a, b) {
+    var t = (x - a) / (b - a);
+    t = t < 0 ? 0 : (t > 1 ? 1 : t);
+    return t * t * (3 - 2 * t);
+  }
+
   function armer(appareil, echelle) {
     appareil.scale.setScalar(echelle);
+    /* relevé avant d'ajouter les halos : ceux-ci sont pilotés à
+       part, on ne veut pas que deux règles se disputent la même
+       opacité */
+    var fiche = { groupe: appareil, mats: recolter(appareil), tuyeres: [] };
     (appareil.userData.moteurs || []).forEach(function (m) {
       var halo = new THREE.Sprite(new THREE.SpriteMaterial({
         map: HALO, transparent: true, opacity: 0.9,
@@ -289,17 +322,24 @@
       sillage.rotation.y = Math.PI / 2;
       appareil.add(sillage);
 
-      tuyeres.push({ halo: halo, sillage: sillage, base: m[3] });
+      var ty = { halo: halo, sillage: sillage, base: m[3], fiche: fiche };
+      fiche.tuyeres.push(ty);
+      tuyeres.push(ty);
     });
+    appareil.userData.fiche = fiche;
     return appareil;
   }
 
-  var convoi = null, patrouille = [];
+  var convoi = null, patrouille = [], voileConvoi = 1;
 
   if (CATALOGUE) {
     /* --- le convoi : un cargo, deux escortes en quinconce --- */
     convoi = new THREE.Group();
     convoi.position.set(-235, 46, 0);
+    /* La proue des modèles est en +Z. Le convoi descend le couloir
+       vers -Z : sans ce demi-tour, il le remontait en marche arrière,
+       tuyères devant. */
+    convoi.rotation.y = Math.PI;
     scene.add(convoi);
 
     var porteur = armer(CATALOGUE.cargo(peindreCoque), 8.4);
@@ -321,6 +361,7 @@
       pat.userData.angle = v * Math.PI;
       pat.userData.rayon = 205 + v * 46;
       pat.userData.hauteur = v ? 34 : -28;
+      pat.userData.sens = v ? 0.17 : -0.22;
       station.add(pat);
       patrouille.push(pat);
     }
@@ -433,19 +474,31 @@
        il y a toujours du trafic, où qu'on en soit du trajet */
     if (convoi) {
       convoi.position.z -= dt * 46;
-      if (convoi.position.z < -1320) { convoi.position.z = 420; }
+      if (convoi.position.z < -1360) { convoi.position.z = 460; }
       convoi.position.y = 46 + Math.sin(t * 0.22) * 7;
       convoi.rotation.z = Math.sin(t * 0.17) * 0.035;
+
+      /* Il naît au loin et s'éteint au loin. Une réapparition
+         franche, même hors du regard, se voit du coin de l'œil. */
+      var z = convoi.position.z;
+      voileConvoi = Math.min(douceur(z, 460, 300), douceur(z, -1360, -1120));
+      for (var c3 = 0; c3 < convoi.children.length; c3++) {
+        var f3 = convoi.children[c3].userData.fiche;
+        if (f3) { voiler(f3, voileConvoi); }
+      }
     }
 
     for (var w = 0; w < patrouille.length; w++) {
       var pa = patrouille[w];
-      pa.userData.angle += dt * (w ? 0.17 : -0.22);
+      var sens = pa.userData.sens;
+      pa.userData.angle += dt * sens;
       var an = pa.userData.angle, ra = pa.userData.rayon;
       pa.position.set(Math.cos(an) * ra, pa.userData.hauteur, Math.sin(an) * ra);
-      /* le nez suit la trajectoire, sinon elles glissent de côté */
-      pa.rotation.y = -an + (w ? Math.PI / 2 : -Math.PI / 2);
-      pa.rotation.z = (w ? -1 : 1) * 0.3;
+      /* Cap tangent à l'orbite, déduit du sens de rotation. Les
+         valeurs écrites à la main étaient fausses d'un quart de
+         tour : elles patrouillaient en crabe. */
+      pa.rotation.y = -an + (sens > 0 ? 0 : Math.PI);
+      pa.rotation.z = (sens > 0 ? -1 : 1) * 0.3;
     }
 
     /* battement des tuyères : une poussée n'est jamais parfaitement
@@ -453,9 +506,10 @@
     for (var y = 0; y < tuyeres.length; y++) {
       var ty = tuyeres[y];
       var puls = 0.78 + 0.22 * Math.sin(t * 9 + y * 1.7) * Math.sin(t * 3.1 + y);
-      ty.halo.material.opacity = 0.75 * puls;
+      var vo = ty.fiche && ty.fiche.groupe.parent === convoi ? voileConvoi : 1;
+      ty.halo.material.opacity = 0.75 * puls * vo;
       ty.halo.scale.setScalar(ty.base * 4.6 * (0.9 + puls * 0.15));
-      ty.sillage.material.opacity = 0.38 * puls;
+      ty.sillage.material.opacity = 0.38 * puls * vo;
     }
 
     marquerFragments();

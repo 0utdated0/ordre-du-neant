@@ -41,6 +41,9 @@
 
   var ROUGE = 0xe01020;
 
+  /* atan2(dx, dz) de la trajectoire du bâtiment */
+  var CAP = Math.atan2(0 - 212, -142 - 188);
+
   function pastille(couleurs) {
     var t = document.createElement('canvas');
     t.width = t.height = 128;
@@ -254,11 +257,27 @@
     return g;
   }
 
+  /* Relevé des matières, pour une disparition en fondu plutôt
+     qu'un escamotage d'une image à l'autre. */
+  function recolter(groupe) {
+    var liste = [];
+    groupe.traverse(function (n) {
+      if (!n.material) { return; }
+      var mats = Array.isArray(n.material) ? n.material : [n.material];
+      mats.forEach(function (m) {
+        if (m.transparent) { liste.push({ m: m, base: m.opacity }); }
+      });
+    });
+    return liste;
+  }
+
+  var coques = [];
   var navire = null;
   if (CATALOGUE && CATALOGUE.porteNeant) {
     navire = CATALOGUE.porteNeant(peindreCoque);
     navire.scale.setScalar(4.2);
     scene.add(navire);
+    coques = recolter(navire);
 
     (navire.userData.moteurs || []).forEach(function (m) {
       var h = new THREE.Sprite(new THREE.SpriteMaterial({
@@ -411,20 +430,32 @@
         16 - entree * 16 + Math.cos(t * 0.24) * 1.5,
         188 - entree * 330
       );
+      /* Cap déduit de la trajectoire, qui est une droite : de
+         (212, 16, 188) vers (0, 0, -142). La proue des modèles
+         est en +Z, et les valeurs écrites à la main le faisaient
+         voler à reculons, tuyères en avant. */
       navire.rotation.set(
         0.05 - entree * 0.05 + Math.sin(t * 0.21) * 0.012,
-        -0.46 + entree * 0.46,
+        CAP,
         0.08 - entree * 0.08 + Math.sin(t * 0.17) * 0.012
       );
       /* il s'étire en franchissant le seuil */
       navire.scale.set(4.2, 4.2, 4.2 * (1 + entree * entree * 2.6));
-      navire.visible = fermeture < 0.55;
+
+      /* Il ne s'éteint pas : il est avalé. Le fondu commence quand
+         la proue franchit l'anneau et s'achève quand la poupe a
+         disparu dans la gorge. */
+      var voile = 1 - palier(entree, 0.74, 0.99);
+      for (var v2 = 0; v2 < coques.length; v2++) {
+        coques[v2].m.opacity = coques[v2].base * voile;
+      }
+      navire.visible = voile > 0.005;
 
       var pousse = 0.5 + charge * 0.6 + entree * 1.8;
       for (var y = 0; y < tuyeres.length; y++) {
         var ty = tuyeres[y];
         var puls = 0.82 + 0.18 * Math.sin(t * 8 + y * 1.3);
-        ty.halo.material.opacity = Math.min(1, 0.55 * pousse * puls);
+        ty.halo.material.opacity = Math.min(1, 0.55 * pousse * puls) * voile;
         ty.halo.scale.setScalar(ty.base * 5.5 * (0.8 + pousse * 0.5));
       }
     }

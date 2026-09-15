@@ -78,6 +78,7 @@
   var matieres = [];
   function holo(teinte, intensite) {
     var m = matiereHolo(teinte, intensite);
+    m.userData.base = intensite;
     matieres.push(m);
     return m;
   }
@@ -97,10 +98,15 @@
   /* Peinture holographique : un volume additif sans lumière,
      plus ses arêtes. C'est la fonction que les constructeurs
      de vaisseaux.js appellent pour chaque pièce. */
+  var traits = [];
+
   function peindre(geo, teinte, intensite, opaciteAretes) {
     var g = new THREE.Group();
     g.add(new THREE.Mesh(geo, holo(teinte, intensite)));
-    g.add(aretes(geo, teinte, opaciteAretes === undefined ? 0.5 : opaciteAretes));
+    var l = aretes(geo, teinte, opaciteAretes === undefined ? 0.5 : opaciteAretes);
+    l.material.userData.base = l.material.opacity;
+    traits.push(l.material);
+    g.add(l);
     return g;
   }
 
@@ -197,6 +203,7 @@
 
     while (porteur.children.length) { porteur.remove(porteur.children[0]); }
     matieres.length = 0;
+    traits.length = 0;
 
     courant = f.construire(peindre);
     courant.scale.setScalar(f.echelle);
@@ -336,9 +343,16 @@
     }
 
     var monte = ((t * 0.7) % 2.6) - 0.7;
+    /* La projection se lève au lieu d'apparaître d'un bloc quand on
+       change d'appareil. */
+    var leve = transition;
     for (var i = 0; i < matieres.length; i++) {
       matieres[i].uniforms.temps.value = t;
       matieres[i].uniforms.balayage.value = monte;
+      matieres[i].uniforms.force.value = matieres[i].userData.base * leve;
+    }
+    for (var j = 0; j < traits.length; j++) {
+      traits[j].opacity = traits[j].userData.base * leve;
     }
     cone.material.uniforms.temps.value = t;
     grille.rotation.y += dt * 0.04;
