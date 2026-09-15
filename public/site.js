@@ -80,7 +80,15 @@
     var milieu = window.scrollY + window.innerHeight * 0.42;
     var courant = 0;
     for (var i = 0; i < actes.length; i++) {
-      if (actes[i] && hautAbsolu(actes[i]) <= milieu) { courant = i; }
+      if (!actes[i]) { continue; }
+      /* Un acte collant qui chevauche le précédent d'un écran (voir
+         styles.css) est collé dès que son haut touche le haut de la
+         vue, au creux du fondu : c'est là qu'il devient l'acte
+         courant. Au seuil habituel, le rail passait au suivant
+         alors que le précédent jouait encore ses derniers 18 %. */
+      var chevauche = parseFloat(getComputedStyle(actes[i]).marginTop) < 0;
+      var seuil = chevauche ? window.scrollY + 1 : milieu;
+      if (hautAbsolu(actes[i]) <= seuil) { courant = i; }
     }
     for (var j = 0; j < liens.length; j++) {
       liens[j].classList.toggle('actif', j === courant);

@@ -204,6 +204,19 @@
     }, { passive: true });
     window.addEventListener('resize', mesurer, { passive: true });
 
+
+    /* Le fondu suit le défilement lui-même, pas la boucle : la
+       boucle s'arrête quand l'acte sort de la vue, et un bloc qui y
+       revient gardait l'opacité de sa dernière image le temps que
+       l'observateur se réveille. Relevé en mesure : 0,25 sur un
+       bloc encore en train de glisser. */
+    function suivreFondu() {
+      if (doux) { return; }
+      mesurer();
+      fondre(hote.parentElement, cible);
+    }
+    window.addEventListener('scroll', suivreFondu, { passive: true });
+    window.addEventListener('resize', suivreFondu, { passive: true });
     function dimensionner() {
       var l = hote.clientWidth, h = hote.clientHeight;
       if (!l || !h) { return; }
@@ -265,12 +278,13 @@
       anGeo.attributes.position.needsUpdate = true;
 
       marquer();
-      if (doux || fondre(moteur.domElement, avance)) { moteur.render(scene, camera); }
+      if (doux || fondre(hote.parentElement, cible)) { moteur.render(scene, camera); }
     }
 
     dimensionner();
     mesurer();
     avance = cible;
+    suivreFondu();
     marquer();
 
     if (doux) {

@@ -349,6 +349,21 @@ body:not(.page-accueil) main{padding-top:clamp(4.2rem,7vh,5.4rem)}
   .travail__lignes dd{font-size:.68rem}
 }
 
+/* Les actes collants se chevauchent d'un écran. Au moment où un
+   acte se décolle, son bloc est éteint (voir le fondu dans
+   acte3d.js) ; le suivant est déjà collé, éteint lui aussi, et
+   s'allume sur place. Sans ce chevauchement, le bloc sortant et
+   le bloc entrant glissaient à la verticale sur toute une hauteur
+   d'écran : on voyait la page défiler au lieu d'un fondu. La
+   course de chaque acte est inchangée, seule cette glissade
+   disparaît. */
+@media (prefers-reduced-motion:no-preference){
+  .approche + .travail,
+  .travail + .travail,
+  .travail + .saut,
+  .saut + .plongee{margin-top:-100vh;margin-top:-100svh}
+}
+
 @media (prefers-reduced-motion:reduce){
   .travail{height:auto;min-height:100vh}
   .travail__collant{position:relative;height:100vh}
