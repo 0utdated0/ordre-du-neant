@@ -116,6 +116,16 @@ a{color:inherit}
 }
 .evitement:focus{left:1rem;top:1rem}
 
+/* Sélection de texte aux couleurs de l'Ordre, plutôt que le bleu
+   du système. */
+::selection{background:rgba(224,16,32,.55);color:#fff}
+
+/* Barre de défilement de la page : fine, sombre, pouce rouge. */
+html{scrollbar-width:thin;scrollbar-color:rgba(224,16,32,.55) #030305}
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:#030305}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#e01020,#7a0a14);border:2px solid #030305}
+
 :focus-visible{
   outline:2px solid var(--braise);
   outline-offset:3px;
@@ -156,6 +166,22 @@ a{color:inherit}
 /* =========================================================
    BARRE HAUTE
    ========================================================= */
+
+/* Un fil rouge sous la barre, qui avance avec la lecture de la
+   page. Uniquement là où le navigateur sait lier une animation au
+   défilement ; ailleurs, rien ne s'affiche. */
+@supports (animation-timeline:scroll()){
+  .barre::after{
+    content:'';position:absolute;left:0;right:0;bottom:-1px;height:1px;
+    background:linear-gradient(90deg,transparent,var(--rouge) 18%,var(--braise));
+    box-shadow:0 0 8px rgba(224,16,32,.7);
+    transform-origin:0 50%;transform:scaleX(0);
+    animation:fil-lecture linear both;
+    animation-timeline:scroll(root block);
+    pointer-events:none;
+  }
+  @keyframes fil-lecture{to{transform:scaleX(1)}}
+}
 
 .barre{
   position:fixed;top:0;left:0;right:0;z-index:70;
@@ -375,7 +401,11 @@ body:not(.page-accueil) main{padding-top:clamp(4.2rem,7vh,5.4rem)}
 .acte--appel{
   min-height:auto;
   padding-block:clamp(4rem,9vh,7rem);
-  background:radial-gradient(ellipse at 50% 120%, rgba(224,16,32,.14), transparent 62%);
+  /* La lueur était une ellipse centrée sous le bas de la section :
+     coupée net par le bord inférieur, et, sur téléphone, étirée
+     en une colonne aux bords visibles. Elle est maintenant tout
+     entière dans la section et s'éteint avant ses bords. */
+  background:radial-gradient(ellipse 62% 46% at 50% 62%, rgba(224,16,32,.13), rgba(224,16,32,.04) 55%, transparent 100%);
 }
 .appel__devise{
   margin:0 0 .9rem;
@@ -692,7 +722,11 @@ h3{
 .grille{
   list-style:none;margin:0;padding:0;
   display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,255px),1fr));
+  /* Huit divisions en colonnes libres : trois par rangée à 1100 px,
+     donc une case vide en fin de grille, peinte du gris des
+     séparateurs. On choisit des nombres de colonnes qui divisent
+     huit. */
+  grid-template-columns:1fr;
   gap:1px;
   background:rgba(238,240,244,.08);
   border:1px solid rgba(238,240,244,.08);
@@ -850,6 +884,11 @@ h3{
 }
 .duo__visuel{
   position:relative;
+  /* Sur téléphone la colonne passe au-dessus du texte, et son fond
+     s'arrêtait sur deux bords horizontaux nets. Il s'éteint en haut
+     et en bas. */
+  -webkit-mask-image:linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image:linear-gradient(180deg, transparent, #000 12%, #000 88%, transparent);
   display:grid;
   padding:clamp(1.5rem,3vw,2.5rem);
   background:
@@ -948,12 +987,19 @@ h3{
    PIED
    ========================================================= */
 
-footer{position:relative;z-index:10;overflow:hidden;background:var(--noir)}
-.pied__sol{position:absolute;inset:0;z-index:1}
+/* Le pied commençait par un noir plein : la lueur rouge de
+   l'appel, juste au-dessus, s'arrêtait sur une ligne horizontale
+   nette. Il s'ouvre maintenant sur un dégradé, et l'image du sol
+   monte en fondu au lieu de commencer par un bord. */
+footer{position:relative;z-index:10;overflow:hidden;
+  background:linear-gradient(180deg, transparent, var(--noir) 9rem)}
+.pied__sol{position:absolute;inset:0;z-index:1;
+  -webkit-mask-image:linear-gradient(180deg, transparent, #000 14rem);
+  mask-image:linear-gradient(180deg, transparent, #000 14rem)}
 .pied__sol img{width:100%;height:100%;object-fit:cover;opacity:.3}
 .pied__sol::after{
   content:'';position:absolute;inset:0;
-  background:linear-gradient(180deg, var(--noir), rgba(0,0,0,.72) 40%, rgba(0,0,0,.94));
+  background:linear-gradient(180deg, transparent, rgba(0,0,0,.72) 40%, rgba(0,0,0,.94));
 }
 .pied{
   position:relative;z-index:3;
@@ -989,6 +1035,8 @@ footer{position:relative;z-index:10;overflow:hidden;background:var(--noir)}
   transition:opacity .9s var(--sortie), transform .9s var(--sortie);
 }
 .revele.vu{opacity:1;transform:none}
+@media (min-width:600px){.grille{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (min-width:1060px){.grille{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .grille .revele{transform:translateY(30px) scale(.985)}
 .grille .revele.vu{transform:none}
 
@@ -1285,6 +1333,29 @@ footer{position:relative;z-index:10;overflow:hidden;background:var(--noir)}
   background:rgba(238,240,244,.08);
 }
 .galerie__grille:empty{display:none}
+.acte--vide .galerie__grille{background:none}
+/* Galerie encore vide : un viseur et une phrase, pas des cases
+   « emplacement libre » ni de consigne technique. */
+.galerie__vide{
+  grid-column:1 / -1;
+  position:relative;margin:0 auto;
+  width:min(100%,640px);
+  padding:clamp(2.4rem,6vh,3.6rem) 1.5rem;
+  display:grid;justify-items:center;gap:1.1rem;
+  text-align:center;
+}
+.galerie__vide svg{width:96px;height:64px;overflow:visible}
+.galerie__vide .viseur{fill:none;stroke:rgba(238,240,244,.35);stroke-width:1.2}
+.galerie__vide .viseur-rouge{fill:none;stroke:var(--rouge);stroke-width:1.2}
+.galerie__vide .point{fill:var(--braise);animation:pulse-rec 1.6s ease-in-out infinite}
+@keyframes pulse-rec{50%{opacity:.25}}
+.galerie__vide p{margin:0;max-width:44ch;color:rgba(238,240,244,.78);font-size:1rem;line-height:1.6}
+.galerie__vide small{
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.28em;text-transform:uppercase;
+  color:rgba(134,139,149,.7);
+}
+@media (prefers-reduced-motion:reduce){.galerie__vide .point{animation:none}}
+
 .acte--galerie.acte--vide{min-height:auto;padding-block:clamp(4rem,10vh,7rem)}
 
 .attente{
@@ -1607,14 +1678,17 @@ h2.balaye{
 
 .holo{display:grid;gap:clamp(1rem,2vw,1.6rem)}
 
+/* Neuf onglets dans une grille à colonnes libres laissaient des
+   cases vides en fin de rangée, grises comme les séparateurs. En
+   flex, la dernière rangée s'étire et remplit la largeur. */
 .holo__onglets{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));
+  display:flex;flex-wrap:wrap;
   gap:1px;
   background:rgba(238,240,244,.1);
   border:1px solid rgba(238,240,244,.1);
 }
 .onglet{
+  flex:1 1 150px;
   display:flex;flex-direction:column;align-items:center;gap:.35rem;
   padding:.95rem .6rem;
   background:rgba(6,6,8,.9);
@@ -1715,6 +1789,66 @@ h2.balaye{
   .holo__onglets{grid-area:onglets}
   .holo__table{grid-area:table}
   .holo__fiche{grid-area:fiche;align-self:stretch}
+}
+
+/* =========================================================
+   LE SCEAU DE LA RÈGLE
+   ---------------------------------------------------------
+   Vingt-neuf graduations, une par article, qui s'allument tour
+   à tour ; la devise tourne lentement sur l'anneau ; un balai
+   rouge fait le tour en une minute. Tout est vectoriel, rien
+   n'est illustré.
+   ========================================================= */
+.sceau-regle{
+  position:relative;margin:0;
+  display:grid;place-items:center;
+  width:100%;height:100%;
+  min-height:clamp(320px,52vh,560px);
+}
+.sceau-regle__svg{
+  width:min(88%,520px);height:auto;aspect-ratio:1;
+  overflow:visible;
+}
+.sceau-regle__trait{fill:none;stroke:rgba(238,240,244,.16);stroke-width:1}
+.sceau-regle__trait--fin{stroke:rgba(238,240,244,.08);stroke-dasharray:2 5}
+.sceau-regle__fines{fill:none;stroke:rgba(238,240,244,.14);stroke-width:1}
+.sceau-regle__article{
+  stroke:rgba(238,240,244,.42);stroke-width:2;stroke-linecap:square;
+  animation:lecture 14.5s linear infinite;
+  animation-delay:calc(var(--i) * .5s);
+}
+@keyframes lecture{
+  0%{stroke:#ff4d4d;stroke-width:3.2}
+  5%{stroke:#e01020;stroke-width:2.4}
+  14%,100%{stroke:rgba(238,240,244,.42);stroke-width:2}
+}
+.sceau-regle__anneau{transform-origin:200px 200px;animation:tourne 140s linear infinite}
+.sceau-regle__devise{
+  font-family:var(--titre);font-size:9.5px;letter-spacing:.32em;text-transform:uppercase;
+  fill:rgba(134,139,149,.75);
+}
+.sceau-regle__balai{
+  fill:rgba(224,16,32,.07);
+  transform-origin:200px 200px;animation:tourne 60s linear infinite;
+  mix-blend-mode:screen;
+}
+@keyframes tourne{to{transform:rotate(360deg)}}
+.sceau-regle__embleme{
+  position:absolute;left:50%;top:50%;
+  width:clamp(84px,13vw,150px);height:auto;
+  transform:translate(-50%,-54%);
+  filter:drop-shadow(0 0 22px rgba(224,16,32,.35));
+  opacity:.92;
+}
+.sceau-regle__legende{
+  position:absolute;left:0;right:0;bottom:clamp(.6rem,3vh,2rem);
+  text-align:center;
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.3em;text-transform:uppercase;
+  color:rgba(134,139,149,.7);
+}
+.sceau-regle__legende span{color:var(--rouge)}
+@media (prefers-reduced-motion:reduce){
+  .sceau-regle__article,.sceau-regle__anneau,.sceau-regle__balai{animation:none}
 }
 
 /* =========================================================

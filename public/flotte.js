@@ -258,7 +258,7 @@
     var texte = document.getElementById('flotte-texte');
     var liste = document.getElementById('flotte-fiche');
     if (titre) { titre.textContent = f.nom; }
-    if (classe) { classe.textContent = f.classe + ' — ' + f.division; }
+    if (classe) { classe.textContent = f.classe + ' · ' + f.division; }
     if (texte) { texte.textContent = f.texte; }
     if (liste) {
       liste.innerHTML = '';

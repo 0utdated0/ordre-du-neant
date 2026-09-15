@@ -61,7 +61,7 @@
      --------------------------------------------------------- */
   function poserChiffre(cle, valeur) {
     var n = document.querySelector('[data-chiffre="' + cle + '"]');
-    if (n) { n.textContent = valeur === null || valeur === undefined ? '—' : valeur; }
+    if (n) { n.textContent = valeur === null || valeur === undefined ? '·' : valeur; }
   }
 
   function rendreVigie(d, exemple) {
@@ -349,22 +349,23 @@
         reveler(grille);
       })
       .catch(function () {
-        /* Plutôt qu'un écran vide : des emplacements visibles, qui
-           disent ce qui manque au lieu de laisser un trou. */
+        /* Galerie vide. Il y avait trois cases « emplacement libre »
+           et, dessous, la consigne technique pour les remplir : un
+           visiteur lisait le mode d'emploi du site. Il voit
+           maintenant un viseur en attente et une phrase. */
         var acte = document.getElementById('galerie');
         if (acte) { acte.classList.add('acte--vide'); }
-        for (var i = 0; i < 3; i++) {
-          var f = document.createElement('figure');
-          f.className = 'cliche attente revele';
-          var t = document.createElement('span');
-          t.textContent = 'Emplacement libre';
-          f.appendChild(t);
-          grille.appendChild(f);
-        }
+        var vide = document.createElement('figure');
+        vide.className = 'galerie__vide revele';
+        vide.innerHTML =
+          '<svg viewBox="0 0 96 64" aria-hidden="true" focusable="false">' +
+          '<path class="viseur" d="M2 16V2h14M80 2h14v14M94 48v14H80M16 62H2V48"/>' +
+          '<path class="viseur-rouge" d="M42 32h12M48 26v12"/>' +
+          '<circle class="point" cx="86" cy="10" r="2.4"/></svg>' +
+          '<p>Les premières captures arrivent avec les premières opérations.</p>' +
+          '<small>Enregistrement en attente</small>';
+        grille.appendChild(vide);
         reveler(grille);
-        avis('avis-galerie',
-          "Aucune capture déposée pour l'instant. Les images se placent dans le dossier galerie du site, listées dans galerie/manifeste.json.",
-          'discret');
       });
   }
 

@@ -7,7 +7,7 @@
     "enVocal": 5,
     "salons": [
       { "nom": "Passerelle", "occupants": ["GrilareX", "Hades", "Yod"] },
-      { "nom": "Soute — Convoi Hurston", "occupants": ["Minetor", "Kaelith"] }
+      { "nom": "Soute · Convoi Hurston", "occupants": ["Minetor", "Kaelith"] }
     ]
   },
   "effectif": {
@@ -36,7 +36,7 @@
   },
   "operations": [
     {
-      "nom": "Convoi de ravitaillement — Hurston",
+      "nom": "Convoi de ravitaillement · Hurston",
       "resume": "Escorte de trois cargos jusqu'à Lorville. Inscription d'équipage ouverte, partage des gains au tonnage livré.",
       "debut": "2026-09-16T19:00:00.000Z",
       "fin": "2026-09-16T21:30:00.000Z",
@@ -45,7 +45,7 @@
       "encours": false
     },
     {
-      "nom": "Cycle de raffinage — ceinture d'Aaron",
+      "nom": "Cycle de raffinage · ceinture d'Aaron",
       "resume": "Prospection en groupe, deux Mole et un Prospector. Retour au raffinage d'ARC-L1.",
       "debut": "2026-09-18T20:00:00.000Z",
       "fin": "2026-09-18T22:00:00.000Z",
@@ -54,7 +54,7 @@
       "encours": false
     },
     {
-      "nom": "Instruction — manœuvres d'escadre",
+      "nom": "Instruction · manœuvres d'escadre",
       "resume": "Formation, rupture, rassemblement. Ouvert aux Adeptes, obligatoire avant toute sortie ERT.",
       "debut": "2026-09-21T19:30:00.000Z",
       "fin": "2026-09-21T21:00:00.000Z",

@@ -114,7 +114,7 @@ async function lireEffectif(jeton, guilde, avecNoms) {
 
     if (avecNoms && echelon) {
       liste.push({
-        nom: m.nick || (m.user && m.user.global_name) || (m.user && m.user.username) || '—',
+        nom: m.nick || (m.user && m.user.global_name) || (m.user && m.user.username) || '?',
         echelon: echelon.nom,
         rang: echelon.rang,
         voie: echelon.voie,

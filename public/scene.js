@@ -134,9 +134,50 @@
      Le Néant : astre éclipsé, loin en bas à gauche
      --------------------------------------------------------- */
   var neantGroupe = new THREE.Group();
-  neantGroupe.position.set(-540, -280, -1180);
-  neantGroupe.scale.setScalar(2.3);
-  scene.add(neantGroupe);
+  neantGroupe.scale.setScalar(3.3);
+
+  /* L'astre était posé dans le monde, et la caméra avance de six
+     cents unités au fil de la page : il grossissait et remontait
+     vers le milieu de l'écran, jusqu'à passer derrière les titres
+     et les boutons. On le voyait comme un petit disque noir cerclé
+     de rouge égaré dans la mise en page. Il est maintenant tenu
+     dans l'angle bas gauche de la vue, à distance fixe, à moitié
+     sorti du cadre, avec la légère parallaxe du curseur. */
+  var VISEE = new THREE.Vector3(), DROITE = new THREE.Vector3(), HAUT = new THREE.Vector3();
+  function placerNeant(t) {
+    var d = 1500;
+    var demiH = Math.tan(camera.fov * Math.PI / 360) * d;
+    var demiL = demiH * camera.aspect;
+    camera.getWorldDirection(VISEE);
+    DROITE.crossVectors(VISEE, camera.up).normalize();
+    HAUT.crossVectors(DROITE, VISEE).normalize();
+    porteNeant.position.copy(camera.position)
+      .addScaledVector(VISEE, d)
+      .addScaledVector(DROITE, -demiL * 0.92 + 30)
+      .addScaledVector(HAUT, -demiH * 0.78 + Math.sin(t * 0.35) * 3.2);
+
+    /* direction de l'étirement : dans le plan (axe de visée, ligne
+       de visée), perpendiculaire à la ligne de visée */
+    LIGNE.subVectors(porteNeant.position, camera.position);
+    var dist = LIGNE.length();
+    LIGNE.divideScalar(dist);
+    var cosTheta = d / dist;
+    ETIRE.copy(VISEE).multiplyScalar(-1).addScaledVector(LIGNE, cosTheta);
+    ETIRE.addScaledVector(LIGNE, -ETIRE.dot(LIGNE));
+    if (ETIRE.lengthSq() > 1e-8) {
+      ETIRE.normalize();
+      porteNeant.quaternion.setFromUnitVectors(AXE_X, ETIRE);
+      porteNeant.scale.set(cosTheta, 1, 1);
+    }
+  }
+  var LIGNE = new THREE.Vector3(), ETIRE = new THREE.Vector3(), AXE_X = new THREE.Vector3(1, 0, 0);
+  /* Porteur de l'astre, qui corrige la déformation de perspective :
+     au bord du champ, une sphère se projette en ovale, et l'astre
+     se lisait comme un disque de travers. On l'écrase d'autant
+     dans la direction où l'image l'étire. */
+  var porteNeant = new THREE.Group();
+  porteNeant.add(neantGroupe);
+  scene.add(porteNeant);
 
   neantGroupe.add(new THREE.Mesh(
     new THREE.SphereGeometry(30, 48, 48),
@@ -391,7 +432,7 @@
 
     lisereMat.uniforms.temps.value = t;
     neantGroupe.rotation.y += dt * 0.035;
-    neantGroupe.position.y = -280 + Math.sin(t * 0.35) * 3.2;
+    placerNeant(t);
 
     var ap = anneauGeo.attributes.position.array;
     for (var k = 0; k < nbAnneau; k++) {
@@ -420,5 +461,5 @@
     moteur.render(scene, camera);
   }
 
-  if (doux) { moteur.render(scene, camera); } else { boucle(); }
+  if (doux) { camera.lookAt(0, 0, -160); placerNeant(0); moteur.render(scene, camera); } else { boucle(); }
 })();

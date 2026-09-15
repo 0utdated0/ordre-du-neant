@@ -34,6 +34,7 @@
   var scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x000000, 0.0022);
   var camera = new THREE.PerspectiveCamera(56, 1, 0.5, 2000);
+  var recul = 1;
 
   var ROUGE = 0xe01020;
   var ARGENT = 0xeef0f4;
@@ -258,8 +259,19 @@
        glisse dans la moitié gauche et la fiche garde un fond noir. */
     if (camera.aspect > 1.15) {
       camera.setViewOffset(l, h, Math.round(l * 0.15), 0, l, h);
+      recul = 1;
+    } else if (camera.aspect < 0.9) {
+      /* Sur un téléphone en hauteur, le champ horizontal tombe à
+         vingt-six degrés : la tour remplissait l'écran, ses paliers
+         passaient derrière la fiche et on ne lisait plus ni l'un ni
+         l'autre. La caméra recule, et la fenêtre de rendu descend
+         pour remonter la tour dans la moitié haute, au-dessus de la
+         fiche. */
+      camera.setViewOffset(l, h, 0, Math.round(h * 0.16), l, h);
+      recul = 1.7;
     } else {
       camera.clearViewOffset();
+      recul = 1.2;
     }
     moteur.setSize(l, h, false);
     moteur.domElement.style.width = '100%';
@@ -298,7 +310,7 @@
     /* la caméra monte, en tournant lentement autour du fût */
     var hauteur = -46 + avance * 322;
     var angle = -0.5 + avance * 1.5;
-    var rayon = 72 - avance * 14;
+    var rayon = (72 - avance * 14) * recul;
     camera.position.set(
       Math.sin(angle) * rayon,
       hauteur,
