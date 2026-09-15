@@ -34,18 +34,22 @@
       /* Un trait de 0,4 d'épaisseur vu à trois cents unités fait
          moins d'un pixel : il ne se voyait pas du tout. Sur un
          bâtiment de 300, une batterie se lit à 1,7. */
-      var geo = new THREE.CylinderGeometry(1.7, 1.7, 1, 6, 1, true);
+      var geo = new THREE.CylinderGeometry(0.85, 0.85, 1, 6, 1, true);
       geo.rotateX(Math.PI / 2);
       for (var i = 0; i < nb; i++) {
         var ami = i < nb * 0.62;
         var m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({
-          color: ami ? 0xff6a5a : 0xbfe0ff, transparent: true, opacity: 0,
+          /* Le tir adverse était bleu : hors charte. Un argent
+             froid le distingue tout aussi bien du rouge de l'Ordre. */
+          color: ami ? 0xff6a5a : 0xcfd6e2, transparent: true, opacity: 0,
           blending: THREE.AdditiveBlending, depthWrite: false
         }));
         m.userData = {
           ami: ami, phase: Math.random(),
           vitesse: 0.28 + Math.random() * 0.22,
-          longueur: 26 + Math.random() * 34,
+          /* Des fuseaux de soixante se lisaient comme des barres
+             tombant en travers du cadre, pas comme des coups. */
+          longueur: 15 + Math.random() * 17,
           poste: (i * 7) % 8
         };
         c.scene.add(m);
@@ -64,17 +68,19 @@
         c.bouches.push(s);
       }
 
-      /* impacts de bouclier sur la coque */
+      /* Impacts sur la coque. C'étaient de simples halos qui
+         grossissaient : ça se lisait comme une lampe, pas comme
+         un coup au but. Ce sont maintenant de vraies explosions,
+         avec cœur, boule de feu, anneau de souffle et éclats. */
       c.impacts = [];
-      for (var k = 0; k < 6; k++) {
-        var im = new THREE.Sprite(new THREE.SpriteMaterial({
-          map: T.halo(c), transparent: true, opacity: 0,
-          blending: THREE.AdditiveBlending, depthWrite: false
-        }));
-        im.scale.setScalar(22);
-        im.userData.phase = Math.random() * 6.2832;
-        c.scene.add(im);
-        c.impacts.push(im);
+      for (var k = 0; k < 4; k++) {
+        /* Sur une coque de trois cents, un impact de treize ne se
+           voit pas : il fallait le lire, pas le deviner. */
+        var ex = T.explosion(c, 24);
+        ex.userData.phase = Math.random() * 6.2832;
+        ex.userData.rythme = 0.34 + Math.random() * 0.2;
+        c.scene.add(ex);
+        c.impacts.push(ex);
       }
     },
 
@@ -89,8 +95,9 @@
          à la main ils tombaient à côté du bâtiment, et un trait qui
          part du vide ne se lit pas comme un tir. */
       c.amiral.userData.quandPret = function (n) {
-        c.postes = n.userData.tourelles.map(function (v) { return v.clone(); });
-        c.caps = c.postes.map(function (p, i) {
+        c.postesLocaux = n.userData.tourelles.map(function (v) { return v.clone(); });
+        c.postes = c.postesLocaux.map(function (v) { return v.clone(); });
+        c.caps = c.postesLocaux.map(function (p, i) {
           /* Chaque poste tire vers l'extérieur, du côté où il est,
              et vers le haut ou le bas selon sa position sur la
              coque : une bordée n'est pas un peigne parallèle. */
@@ -101,6 +108,9 @@
           ).normalize();
         });
       };
+
+      c.perte = T.explosion(c, 48);
+      c.scene.add(c.perte);
 
       c.chasseurs = [];
       for (var i = 0; i < (c.petit ? 3 : 5); i++) {
@@ -123,6 +133,14 @@
       var intensite = (0.35 + plein * 0.65) * feu;
 
       if (c.postes && c.postes.length) {
+        /* Les postes sont relus en repère monde : le bâtiment a un
+           lacet, et une position locale posée telle quelle plaçait
+           les départs de coup à côté de la coque. */
+        c.amiral.updateMatrixWorld(true);
+        for (var q = 0; q < c.postes.length; q++) {
+          c.postes[q].copy(c.postesLocaux[q]);
+          c.amiral.localToWorld(c.postes[q]);
+        }
         /* les traits */
         c.traits.forEach(function (m) {
           var u = m.userData;
@@ -159,15 +177,28 @@
           s.scale.setScalar(16 + bat * 26);
         });
 
-        /* impacts sur la coque : ce qui arrive touche */
-        c.impacts.forEach(function (im, i) {
-          var ph = im.userData.phase;
-          var bat = Math.pow(Math.max(0, Math.sin(t * 1.6 + ph)), 18);
-          im.position.set(
-            (i % 2 ? 1 : -1) * 20, -18 + ((i * 29) % 40), -120 + ((i * 71) % 250));
-          im.material.opacity = bat * intensite * 0.85;
-          im.scale.setScalar(16 + bat * 26);
+        /* Ce qui arrive touche, et ça se voit : chaque impact
+           joue un cycle d'explosion complet à son propre rythme. */
+        c.impacts.forEach(function (ex, i) {
+          var p2 = c.postes[i % c.postes.length];
+          ex.position.set(p2.x * 1.15, p2.y * 1.2, p2.z - 30 + ((i * 53) % 120));
+          /* Un impact n'est pas un métronome : il occupe un tiers
+             du cycle et le reste du temps il n'y a rien. Sans ce
+             temps mort, six explosions permanentes se lisaient
+             comme un motif décoratif. */
+          var cy = ((t * ex.userData.rythme + ex.userData.phase) % 1);
+          var v = cy < 0.32 ? cy / 0.32 : 1;
+          ex.userData.jouer(intensite > 0.06 ? v : 1, c.camera);
+          ex.scale.setScalar(0.6 + intensite * 0.8);
         });
+      }
+
+      /* Une Sentinelle adverse qui ne repart pas : c'est ce qui
+         donne son poids à la scène. Une seule, au plus fort. */
+      if (c.perte) {
+        var mort = P(avance, 0.52, 0.70);
+        c.perte.position.set(148, 38, -40);
+        c.perte.userData.jouer(mort, c.camera);
       }
 
       /* les chasseurs louvoient, cap tangent à leur course */

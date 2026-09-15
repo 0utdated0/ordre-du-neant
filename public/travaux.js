@@ -54,6 +54,7 @@
      partaient du vide et les faisceaux du milieu de nulle part. */
   function coque(nom, longueur, teinte, opaciteAretes) {
     var n = new THREE.Group();
+    n.userData.coque = nom;
     n.userData.longueur = longueur;
     n.userData.moteurs = [];
     n.userData.tourelles = [];
@@ -95,15 +96,34 @@
   var TRAINEE = null;
   function trainee(c) {
     if (!TRAINEE) {
+      /* Un dégradé vertical sur un rectangle donnait une bande
+         plate à bords nets : de profil, ça se lisait comme un
+         drapeau, pas comme une flamme. Le panache est peint
+         point par point, avec une demi-largeur qui se referme
+         vers la queue et un bord qui s'éteint en douceur. */
+      var W = 48, H = 160;
       var t = document.createElement('canvas');
-      t.width = 8; t.height = 128;
+      t.width = W; t.height = H;
       var x = t.getContext('2d');
-      var g = x.createLinearGradient(0, 0, 0, 128);
-      g.addColorStop(0, 'rgba(255,240,240,0.95)');
-      g.addColorStop(0.18, 'rgba(255,120,110,0.55)');
-      g.addColorStop(0.55, 'rgba(224,16,32,0.18)');
-      g.addColorStop(1, 'rgba(224,16,32,0)');
-      x.fillStyle = g; x.fillRect(0, 0, 8, 128);
+      var img = x.createImageData(W, H);
+      for (var j = 0; j < H; j++) {
+        var v = j / (H - 1);                       /* 0 tuyère, 1 queue */
+        var demi = 0.07 + 0.41 * Math.pow(1 - v, 0.55);
+        var force = Math.pow(1 - v, 1.35) * (1 - Math.pow(v, 6));
+        var blanc = Math.pow(1 - Math.min(1, v / 0.22), 2);
+        for (var i = 0; i < W; i++) {
+          var u = (i + 0.5) / W - 0.5;
+          var r = Math.abs(u) / demi;
+          var t2 = r < 1 ? Math.pow(1 - r * r, 1.5) : 0;
+          var a = force * t2;
+          var k = (j * W + i) * 4;
+          img.data[k]     = 255;
+          img.data[k + 1] = Math.round(30 + 210 * blanc * t2);
+          img.data[k + 2] = Math.round(38 + 202 * blanc * t2);
+          img.data[k + 3] = Math.round(Math.min(1, a) * 255);
+        }
+      }
+      x.putImageData(img, 0, 0);
       TRAINEE = new THREE.CanvasTexture(t);
     }
     void c;
@@ -138,7 +158,9 @@
         map: trainee(), transparent: true, opacity: 0.8, color: 0xffffff,
         blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide, fog: false
       }));
-      q1.rotation.x = -Math.PI / 2;
+      /* +PI/2 et non -PI/2 : avec -PI/2 le plan part vers +Z, donc
+         vers l'avant. Les traînées sortaient par la proue. */
+      q1.rotation.x = Math.PI / 2;
       var q2 = q1.clone();
       q2.material = q1.material.clone();
       q2.rotation.z = Math.PI / 2;
@@ -159,12 +181,18 @@
       var puls = 0.86 + 0.14 * Math.sin(t * 9 + i * 1.7);
       var f = Math.max(0, force) * puls;
       e.coeur.material.opacity = Math.min(1, f * 1.15);
-      e.coeur.scale.setScalar(e.rayon * (1.5 + f * 1.1));
-      e.lueur.material.opacity = Math.min(0.8, f * 0.55);
-      e.lueur.scale.setScalar(e.rayon * (4.5 + f * 4));
+      e.coeur.scale.setScalar(e.rayon * (1.1 + f * 0.8));
+      /* Le halo est une lueur, pas une boule. À 8,5 rayons il se
+         lisait comme trois sphères rouges posées sous la coque du
+         Portefaix, détachées d'elle. Ce qui doit porter la poussée,
+         c'est le panache, pas le halo. */
+      e.lueur.material.opacity = Math.min(0.40, f * 0.30);
+      e.lueur.scale.setScalar(e.rayon * (1.8 + f * 1.2));
       for (var v = 0; v < e.voiles.length; v++) {
         e.voiles[v].material.opacity = Math.min(0.9, f * 0.85);
-        e.voiles[v].scale.set(e.rayon * (1.8 + f * 0.8), e.rayon * (5 + f * 26), 1);
+        /* Le panache s'ouvre à la tuyère et s'allonge avec la
+           poussée ; sa largeur, elle, bouge peu. */
+        e.voiles[v].scale.set(e.rayon * (2.6 + f * 0.6), e.rayon * (5 + f * 26), 1);
       }
     }
   }
@@ -262,9 +290,148 @@
     g.scale.set(1, 1, de.distanceTo(vers));
   }
 
+  /* Une explosion : un cœur blanc, une boule de feu, un anneau de
+     souffle qui s'aplatit, et des éclats. Les quatre ensemble,
+     sinon ça ne se lit pas comme une explosion : un simple halo
+     qui grossit se lit comme une lampe qu'on allume.
+
+     Tout est piloté par une seule valeur entre 0 et 1, pour que
+     l'appelant puisse la brancher sur le défilement comme sur
+     l'horloge. */
+  /* L'onde de souffle. Un THREE.RingGeometry donnait un cercle au
+     trait net, d'épaisseur constante quelle que soit sa taille :
+     à l'écran, une mire tracée au compas. Une pastille peinte,
+     avec une crête floue et deux bords qui s'éteignent, se lit
+     comme un front de souffle. */
+  var ONDE = null;
+  function onde() {
+    if (!ONDE) {
+      var N = 256;
+      var t = document.createElement('canvas');
+      t.width = t.height = N;
+      var x = t.getContext('2d');
+      var img = x.createImageData(N, N);
+      for (var j = 0; j < N; j++) {
+        for (var i = 0; i < N; i++) {
+          var dx = (i + 0.5) / N - 0.5, dy = (j + 0.5) / N - 0.5;
+          var r = Math.sqrt(dx * dx + dy * dy) * 2;
+          var a = r < 1 ? Math.pow(Math.max(0, 1 - Math.abs(r - 0.8) / 0.32), 2.6) : 0;
+          var k = (j * N + i) * 4;
+          img.data[k]     = 255;
+          img.data[k + 1] = Math.round(140 + 100 * a);
+          img.data[k + 2] = Math.round(112 + 90 * a);
+          img.data[k + 3] = Math.round(a * 255);
+        }
+      }
+      x.putImageData(img, 0, 0);
+      ONDE = new THREE.CanvasTexture(t);
+    }
+    return ONDE;
+  }
+
+  function explosion(c, taille, devant) {
+    /* rond() vit dans le moteur d'acte, pas ici : il faut passer
+       par le contexte. */
+    var rond = c.rond;
+    var g = new THREE.Group();
+
+    /* « devant » désactive le test de profondeur : une détonation
+       posée au cœur d'un astéroïde était entièrement masquée par
+       les blocs, et on voyait la roche s'ouvrir sans rien qui
+       l'ouvre. Un éclat de cette puissance passe devant. */
+    var coeur = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: halo(c), transparent: true, opacity: 0, color: 0xffffff,
+      blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+      depthTest: !devant
+    }));
+    coeur.renderOrder = devant ? 30 : 0;
+    g.add(coeur);
+
+    var boule = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: halo(c), transparent: true, opacity: 0, color: 0xff6a4a,
+      blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+      depthTest: !devant
+    }));
+    boule.renderOrder = devant ? 29 : 0;
+    g.add(boule);
+
+    /* L'anneau de souffle est ce qui dit « détonation » plutôt que
+       « lumière » : il part vite, il s'aplatit, il s'éteint. */
+    var anneau = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: onde(), transparent: true, opacity: 0, color: 0xffffff,
+      blending: THREE.AdditiveBlending, depthWrite: false, fog: false,
+      depthTest: !devant
+    }));
+    anneau.renderOrder = devant ? 31 : 0;
+    g.add(anneau);
+
+    var n = 26;
+    var pos = new Float32Array(n * 3);
+    var dirs = [];
+    for (var i = 0; i < n; i++) {
+      var u = Math.random() * 2 - 1, a = Math.random() * 6.2832;
+      var sq = Math.sqrt(1 - u * u);
+      dirs.push([sq * Math.cos(a), u, sq * Math.sin(a), 0.4 + Math.random() * 1.5]);
+    }
+    var ge = new THREE.BufferGeometry();
+    ge.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    var eclats = new THREE.Points(ge, new THREE.PointsMaterial({
+      color: 0xffc0a0, size: taille * 0.05, sizeAttenuation: true, map: rond(),
+      transparent: true, opacity: 0, depthWrite: false,
+      blending: THREE.AdditiveBlending, depthTest: !devant
+    }));
+    eclats.renderOrder = devant ? 28 : 0;
+    g.add(eclats);
+
+    g.userData.jouer = function (v, camera) {
+      g.visible = v > 0.001 && v < 0.999;
+      if (!g.visible) { return; }
+      /* montée brutale, retombée lente : une explosion n'est pas
+         symétrique dans le temps */
+      var eclat = Math.pow(Math.max(0, 1 - v * 2.6), 1.9);
+      var feu = Math.pow(Math.max(0, 1 - v * 1.5), 1.4);
+      var souffle = v;
+
+      coeur.material.opacity = eclat;
+      coeur.scale.setScalar(taille * (0.2 + eclat * 1.35));
+      boule.material.opacity = feu * 0.95;
+      boule.scale.setScalar(taille * (0.3 + souffle * 1.5));
+
+      /* L'anneau part vite et s'éteint vite. Étalé sur trois fois
+         la taille de la boule et éteint en puissance 2,8, il tenait
+         l'écran assez longtemps pour se lire comme une mire tracée
+         au compas : trois cercles gris en travers de la bordée.
+         Moitié moins large, éteint cinq fois plus vite. */
+      anneau.material.opacity = Math.pow(1 - souffle, 3.4) * Math.min(1, souffle * 12) * 0.8;
+      var ra = taille * (0.3 + Math.pow(souffle, 0.45) * 2.2);
+      anneau.scale.set(ra, ra, 1);
+      void camera;
+
+      var ep = ge.attributes.position.array;
+      for (var k = 0; k < dirs.length; k++) {
+        var d = dirs[k], r = taille * souffle * 2.6 * d[3];
+        ep[k * 3] = d[0] * r; ep[k * 3 + 1] = d[1] * r; ep[k * 3 + 2] = d[2] * r;
+      }
+      ge.attributes.position.needsUpdate = true;
+      eclats.material.opacity = Math.pow(1 - souffle, 1.6) * 0.9;
+    };
+    return g;
+  }
+
+  /* Un point d'accroche dans le repère du monde. Les coques sont
+     inclinées dans leurs scènes : ajouter simplement la position
+     du groupe ignore sa rotation, et le faisceau partait à côté. */
+  function enMonde(n, nom) {
+    var v = n.userData[nom];
+    if (!v) { return new THREE.Vector3(); }
+    n.updateMatrixWorld(true);
+    return n.localToWorld(v.clone());
+  }
+
   window.ODN.travaux = {
     ARGENT: ARGENT, ROUGE: ROUGE, BRAISE: BRAISE,
-    peintre: peintre, coque: coque, tuyeres: tuyeres, halo: halo,
+    peintre: peintre, coque: coque, tuyeres: tuyeres, halo: halo, enMonde: enMonde,
+    explosion: explosion,
     pousser: pousser,
     etoiles: etoiles, poussiere: poussiere, faisceau: faisceau, tendre: tendre
   };

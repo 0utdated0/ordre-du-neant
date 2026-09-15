@@ -76,16 +76,23 @@
       c.braise.scale.setScalar(RAYON * 1.6);
       c.roche.add(c.braise);
 
+      /* La détonation qui ouvre la roche. Sans elle, les blocs
+         s'écartaient poliment : on voyait une fleur s'ouvrir, pas
+         un caillou qui explose. */
+      c.detonation = T.explosion(c, RAYON * 1.25, true);
+      c.detonation.position.set(0, 0, RAYON * 0.55);
+      c.roche.add(c.detonation);
+
       /* ---- le faisceau ---- */
-      c.rai = T.faisceau(1.5, 0xffb0b0, 0.55);
+      c.rai = T.faisceau(0.85, 0xffb0b0, 0.55);
       c.rai.visible = false;
       c.scene.add(c.rai);
-      c.raiCoeur = T.faisceau(0.5, 0xffffff, 0.9);
+      c.raiCoeur = T.faisceau(0.26, 0xffffff, 0.9);
       c.raiCoeur.visible = false;
       c.scene.add(c.raiCoeur);
 
       /* ---- les fines : ce que le forage arrache ---- */
-      var nf = c.petit ? 500 : 1400;
+      var nf = c.petit ? 900 : 2600;
       c.finesDir = [];
       var pos = new Float32Array(nf * 3);
       var col = new Float32Array(nf * 3);
@@ -103,7 +110,7 @@
       gf.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       gf.setAttribute('color', new THREE.BufferAttribute(col, 3));
       c.fines = new THREE.Points(gf, new THREE.PointsMaterial({
-        size: 2.4, sizeAttenuation: true, vertexColors: true, map: c.rond(),
+        size: 1.35, sizeAttenuation: true, vertexColors: true, map: c.rond(),
         transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending
       }));
       c.roche.add(c.fines);
@@ -115,9 +122,7 @@
       c.scene.add(c.foreuse);
       /* La tête de forage est relevée sur le maillage, pas posée
          à l'estime : c'est l'extrémité avant-basse de la coque. */
-      c.foreuse.userData.quandPret = function (n) {
-        c.tete = n.userData.bras.clone().add(n.position);
-      };
+      c.foreuse.userData.quandPret = function () { c.pret = true; };
     },
 
     jouer: function (c, avance, dt, t) {
@@ -128,7 +133,11 @@
       var emport = P(avance, 0.66, 1.0);
 
       /* le faisceau */
-      if (c.tete) {
+      /* Le point est relu chaque image dans le repère du monde :
+         la coque est inclinée, et une simple addition de position
+         ignorait sa rotation. */
+      if (c.pret) {
+        c.tete = T.enMonde(c.foreuse, 'bras');
         var cible = new THREE.Vector3(0, 0, -150 + RAYON * 0.4);
         var de = c.tete.clone();
         de.x += Math.sin(t * 0.7) * 0.6;
@@ -149,7 +158,12 @@
       c.braise.scale.setScalar(RAYON * (0.7 + morsure * 1.5));
       c.matiereRoche.color.setRGB(0.105 + morsure * 0.26, 0.113 + morsure * 0.03, 0.133 + morsure * 0.03);
 
-      var ecart = rupture * 1.0 + emport * 0.9;
+      /* La rupture est une détonation, pas une ouverture : les
+         blocs partent vite au début et ralentissent, et l'éclat
+         arrive avant eux. */
+      c.detonation.userData.jouer(P(avance, 0.44, 0.78), c.camera);
+
+      var ecart = Math.pow(rupture, 0.55) * 1.25 + emport * 0.9;
       c.blocs.forEach(function (b, i) {
         var d = b.userData.dir, e = b.userData.etal;
         var k = 1 + ecart * 2.6 * e;

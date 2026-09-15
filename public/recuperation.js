@@ -59,7 +59,7 @@
       }
 
       /* ---- la poussière de découpe ---- */
-      var nf = c.petit ? 400 : 1100;
+      var nf = c.petit ? 800 : 2200;
       c.grainDir = [];
       var pos = new Float32Array(nf * 3);
       for (var f = 0; f < nf; f++) {
@@ -71,16 +71,16 @@
       var gf = new THREE.BufferGeometry();
       gf.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       c.grain = new THREE.Points(gf, new THREE.PointsMaterial({
-        color: 0xffb098, size: 1.9, sizeAttenuation: true, map: c.rond(),
+        color: 0xffb098, size: 1.15, sizeAttenuation: true, map: c.rond(),
         transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending
       }));
       c.scene.add(c.grain);
 
       /* ---- le faisceau de découpe, large et plat ---- */
-      c.lame = T.faisceau(1.3, 0xffc0a0, 0.3);
+      c.lame = T.faisceau(0.7, 0xffc0a0, 0.32);
       c.lame.visible = false;
       c.scene.add(c.lame);
-      c.lameCoeur = T.faisceau(0.38, 0xfff0e0, 0.9);
+      c.lameCoeur = T.faisceau(0.2, 0xfff0e0, 0.92);
       c.lameCoeur.visible = false;
       c.scene.add(c.lameCoeur);
 
@@ -107,9 +107,7 @@
       c.scene.add(c.recuperateur);
       /* Le bras de découpe est relevé sur le maillage : extrémité
          avant-basse, là où le Reclaimer porte réellement sa pince. */
-      c.recuperateur.userData.quandPret = function (n) {
-        c.bras = n.userData.bras.clone().add(n.position);
-      };
+      c.recuperateur.userData.quandPret = function () { c.pret = true; };
 
       /* L'Ironclad rangé à côté : c'est lui qui emporte. */
       c.porteur = T.coque('ironclad', 110, T.ARGENT, 0.36);
@@ -127,7 +125,11 @@
 
       /* Le bras balaie l'épave dans sa longueur : c'est ce
          mouvement-là qui dit « découpe » et pas « laser ». */
-      if (c.bras) {
+      /* La Carrière est inclinée de trois angles : son bras de
+         découpe se relit en repère monde à chaque image, sinon le
+         faisceau part d'un point qui n'est pas sur la coque. */
+      if (c.pret) {
+        c.bras = T.enMonde(c.recuperateur, 'bras');
         var le = -46 + depece * 92;
         var cible = new THREE.Vector3(
           Math.cos(le * 0.06) * 6, Math.sin(le * 0.05) * 5 + 2, le);

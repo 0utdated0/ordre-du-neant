@@ -87,14 +87,14 @@
       var gf = new THREE.BufferGeometry();
       gf.setAttribute('position', new THREE.BufferAttribute(fp, 3));
       c.feux = new THREE.Points(gf, new THREE.PointsMaterial({
-        color: 0xff4d4d, size: 6.5, sizeAttenuation: true, map: c.rond(),
+        color: 0xff4d4d, size: 3.4, sizeAttenuation: true, map: c.rond(),
         transparent: true, opacity: 0.9, depthWrite: false, blending: THREE.AdditiveBlending
       }));
       c.pont.add(c.feux);
 
       /* ---- poussière soulevée ----
          Elle ne monte que quand les rétrofusées mordent le pont. */
-      var np = c.petit ? 300 : 800;
+      var np = c.petit ? 600 : 1700;
       c.grains = [];
       var pp = new Float32Array(np * 3);
       for (var g2 = 0; g2 < np; g2++) {
@@ -104,7 +104,7 @@
       var gg = new THREE.BufferGeometry();
       gg.setAttribute('position', new THREE.BufferAttribute(pp, 3));
       c.poudre = new THREE.Points(gg, new THREE.PointsMaterial({
-        color: 0xcfa79a, size: 3.4, sizeAttenuation: true, map: c.rond(),
+        color: 0xcfa79a, size: 1.5, sizeAttenuation: true, map: c.rond(),
         transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending
       }));
       c.pont.add(c.poudre);
@@ -139,16 +139,20 @@
         /* De haut et de biais vers l'axe du pont, puis droit en bas. */
         /* Il se pose SUR le pont, pas dedans : le tablier est à
            zéro et la coque fait une douzaine d'unités de haut. */
-        var h = 168 - descente * 148 - pose * 11;
-        c.navire.position.set(
-          (1 - descente) * 58,
-          h,
-          (1 - descente) * 96 - 4
-        );
+        /* Il arrive de l'arrière-gauche et descend vers le cercle.
+           Sa proue est en +Z : son cap doit suivre son déplacement,
+           sinon il aborde le pont en marche arrière. */
+        var depart = new THREE.Vector3(-64, 168, -108);
+        var arrivee = new THREE.Vector3(0, 9, -2);
+        var av = descente;
+        c.navire.position.lerpVectors(depart, arrivee, av);
+        c.navire.position.y -= pose * 1.5;
+        var dep = arrivee.clone().sub(depart);
+        var cap = Math.atan2(dep.x, dep.z) * (1 - av);
         c.navire.rotation.set(
-          -0.16 * (1 - descente) + 0.02 * Math.sin(t * 0.7) * (1 - pose),
-          -0.5 * (1 - descente),
-          0.1 * (1 - descente) + 0.015 * Math.sin(t * 0.5) * (1 - pose)
+          0.14 * (1 - av) + 0.02 * Math.sin(t * 0.7) * (1 - pose),
+          cap,
+          -0.09 * (1 - av) + 0.015 * Math.sin(t * 0.5) * (1 - pose)
         );
         /* Les moteurs principaux se coupent quand les rétrofusées
            prennent le relais : on ne se pose pas en poussant. */
@@ -196,7 +200,7 @@
         136 - m1 * 24 - m2 * 30 - m3 * 18
       );
       c.camera.lookAt(new THREE.Vector3(
-        (1 - descente) * 26, 52 - descente * 44 - pose * 4, -4));
+        (1 - descente) * -18, 52 - descente * 44 - pose * 4, -4));
       c.camera.rotation.z += Math.sin(t * 0.27) * 0.014;
       void approche;
     }

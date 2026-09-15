@@ -1548,12 +1548,14 @@ h2.balaye{
   text-shadow:0 0 48px rgba(0,0,0,.95), 0 0 16px rgba(0,0,0,.9);
   opacity:0;
   transform:translateY(26px);
-  transition:opacity .4s ease, transform .7s var(--sortie), filter .5s ease;
+  /* Le fondu sortant doit être fini avant que l'entrant commence,
+     sinon les deux titres se superposent au milieu de l'écran. */
+  transition:opacity .22s ease, transform .7s var(--sortie), filter .5s ease;
   filter:blur(7px);
 }
 /* le fragment sortant s'efface vite, l'entrant attend un souffle :
    sans ce décalage, les deux se chevauchent à chaque bascule */
-.fragment--vu{transition-delay:.16s}
+.fragment--vu{transition-delay:.26s}
 .fragment--long{
   max-width:26ch;
   font-family:var(--texte);

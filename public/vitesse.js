@@ -113,11 +113,15 @@
       var bp = c.tunnel.geometry.attributes.position.array;
       for (var i = 0; i < c.brins.length; i++) {
         var b = c.brins[i];
-        var z = b.z + glisse * b.v;
-        z = ((z + LONG / 2) % LONG) - LONG / 2;
+        /* Le bâtiment file vers +Z, donc le tunnel vient de +Z et
+           s'en va vers -Z. Il partait dans l'autre sens, ce qui
+           faisait reculer le vaisseau. La traînée d'un trait
+           pointe vers d'où il vient, donc vers +Z. */
+        var z = b.z - glisse * b.v;
+        z = ((z % LONG) + LONG * 1.5) % LONG - LONG / 2;
         bp[i * 6] = b.x; bp[i * 6 + 1] = b.y; bp[i * 6 + 2] = z;
         bp[i * 6 + 3] = b.x; bp[i * 6 + 4] = b.y;
-        bp[i * 6 + 5] = z - etirement * b.v;
+        bp[i * 6 + 5] = z + etirement * b.v;
       }
       c.tunnel.geometry.attributes.position.needsUpdate = true;
       c.tunnel.material.opacity = 0.14 + vit * 0.46;
@@ -145,17 +149,22 @@
 
       /* caméra : elle part de l'arrière, remonte le long du
          bâtiment, et finit devant l'étrave */
-      var m1 = P(avance, 0.0, 0.42);
-      var m2 = P(avance, 0.36, 0.78);
-      var m3 = P(avance, 0.7, 1.0);
-      /* Elle reste au large du bâtiment et le garde dans le cadre :
-         sinon il disparaît dans son propre sillage. */
+      var m1 = P(avance, 0.0, 0.40);
+      var m2 = P(avance, 0.34, 0.76);
+      var m3 = P(avance, 0.70, 1.0);
+
+      /* Le bâtiment fait quatre-vingt-douze de long pour une
+         vingtaine de large : tant que la caméra est à sa hauteur,
+         elle doit rester à plus de quarante de l'axe. L'ancien
+         trajet passait par (-20, 10, -27), c'est-à-dire dans la
+         coque, entre 50 et 60 % du défilement. Mesuré, pas
+         supposé. */
       c.camera.position.set(
-        -54 + m1 * 18 + m2 * 40 - m3 * 24,
-        16 - m1 * 8 + m2 * 6 + m3 * 14,
-        -126 + m1 * 62 + m2 * 96 + m3 * 76
+        -34 - m1 * 40 + m2 * 16 + m3 * 56,
+        8 + m1 * 12 + m2 * 6 - m3 * 8,
+        -178 + m1 * 92 + m2 * 128 + m3 * 108
       );
-      c.camera.lookAt(new THREE.Vector3(0, 0, -10 + m1 * 14 + m2 * 26 + m3 * 40));
+      c.camera.lookAt(new THREE.Vector3(0, 0, -30 + m1 * 20 + m2 * 26 + m3 * 20));
       c.camera.rotation.z += Math.sin(t * 0.5) * 0.02 + vit * Math.sin(t * 26) * 0.004;
       void croisiere;
     }

@@ -61,6 +61,14 @@
     [0, 'rgba(255,245,245,1)'], [0.18, 'rgba(255,90,90,0.9)'],
     [0.5, 'rgba(224,16,32,0.35)'], [1, 'rgba(224,16,32,0)']
   ]);
+  /* Le foyer du tunnel a besoin d'une chute plus longue : avec la
+     cassure de BRAISE à 18 %, il se lisait comme une bille cerclée
+     de rouge posée au fond du trou. */
+  var FOYER = pastille([
+    [0, 'rgba(255,252,250,1)'], [0.07, 'rgba(255,226,216,0.95)'],
+    [0.16, 'rgba(255,150,134,0.68)'], [0.32, 'rgba(238,60,66,0.34)'],
+    [0.58, 'rgba(224,16,32,0.12)'], [1, 'rgba(224,16,32,0)']
+  ]);
 
   /* ---------------------------------------------------------
      Champ d'étoiles local
@@ -97,12 +105,15 @@
      Un disque plat posé à l'entrée se coupait avec le cône et
      laissait un quartier net en travers de l'ouverture. Ici la
      paroi masque les étoiles sur toute la profondeur. */
-  var fondGeo = new THREE.CylinderGeometry(RAYON * 0.955, RAYON * 0.08, 520, 64, 1, true);
+  /* Le petit bout du cône doit être un point, pas un disque :
+     à 0,145 de rayon, sa lèvre se détachait en cercle net au fond
+     du trou, et on y lisait une bulle posée là. */
+  var fondGeo = new THREE.CylinderGeometry(RAYON * 0.955, 0, 560, 64, 1, true);
   var fond = new THREE.Mesh(fondGeo, new THREE.MeshBasicMaterial({
     color: 0x000000, transparent: true, opacity: 0, side: THREE.BackSide, depthWrite: false
   }));
   fond.rotation.x = Math.PI / 2;
-  fond.position.z = -260;
+  fond.position.z = -280;
   fond.renderOrder = 1;
   trou.add(fond);
 
@@ -115,15 +126,35 @@
     fragmentShader: [
       'uniform float temps; uniform float ouverture; varying vec2 vUv;',
       'void main(){',
-      '  float d = vUv.y;',
-      /* stries en spirale : elles tournent vers le fond */
-      '  float s = sin(vUv.x * 46.0 + d * 26.0 - temps * 3.2);',
-      '  float s2 = sin(vUv.x * 19.0 - d * 12.0 + temps * 1.7);',
-      '  float stries = smoothstep(0.1, 1.0, s * 0.6 + s2 * 0.4);',
-      '  vec3 chaud = vec3(1.0, 0.86, 0.86);',
-      '  vec3 sang  = vec3(0.88, 0.06, 0.13);',
-      '  vec3 c = mix(sang, chaud, pow(d, 2.6));',
-      '  float a = (0.08 + stries * 0.42) * (0.2 + d * 1.1) * ouverture;',
+      /* p vaut 0 à la bouche, 1 au fond : la géométrie est un cône
+         vu de l'intérieur, et vUv.y = 1 du côté large. */
+      '  float p = clamp(1.0 - vUv.y, 0.0, 1.0);',
+      /* Des anneaux répartis régulièrement le long du cône. C'est
+         la perspective qui les resserre vers le fond, et c'est ce
+         resserrement qui se lit comme de la profondeur ; les
+         spirales seules donnaient un éventail plat. */
+      '  float anneaux = pow(sin(p * 26.0 - temps * 3.2) * 0.5 + 0.5, 3.0);',
+      /* Les fréquences angulaires sont des multiples entiers de
+         2 pi : sinon le motif ne se referme pas sur lui-même et la
+         couture du cylindre se voit, en travers du fond, comme un
+         coup de règle. */
+      '  float h1 = pow(sin(vUv.x * 25.1327 + p * 20.0 - temps * 1.2) * 0.5 + 0.5, 2.5);',
+      '  float h2 = pow(sin(vUv.x * -12.5664 + p * 11.0 + temps * 0.8) * 0.5 + 0.5, 2.5);',
+      '  float fil = h1 * 0.6 + h2 * 0.4;',
+      /* Là où la paroi ne fait plus que quelques pixels, le détail
+         moire : on l'y éteint, mais on le remplace par une lueur
+         continue, sinon le fond se creuse d'un anneau noir autour
+         du foyer. */
+      '  float net = 1.0 - smoothstep(0.55, 0.88, p);',
+      '  float creuset = pow(p, 2.2);',
+      '  float lum = (anneaux * 0.50 + fil * 0.42) * net * (0.35 + p * 0.9) + creuset * 0.75;',
+      '  float coeur = pow(p, 6.0);',
+      '  vec3 sang  = vec3(0.72, 0.03, 0.07);',
+      '  vec3 chaud = vec3(1.00, 0.55, 0.48);',
+      '  vec3 blanc = vec3(1.00, 0.95, 0.93);',
+      '  vec3 c = mix(sang, chaud, clamp(creuset * 1.2 + fil * 0.3, 0.0, 1.0));',
+      '  c = mix(c, blanc, coeur);',
+      '  float a = (lum * 0.8 + coeur * 1.8) * ouverture;',
       '  gl_FragColor = vec4(c, a);',
       '}'
     ].join('\n'),
@@ -131,13 +162,26 @@
     depthWrite: false, side: THREE.BackSide
   });
   var gorge = new THREE.Mesh(
-    new THREE.CylinderGeometry(RAYON * 0.96, RAYON * 0.1, 520, 72, 1, true),
+    new THREE.CylinderGeometry(RAYON * 0.96, 0, 560, 72, 1, true),
     gorgeMat
   );
   gorge.rotation.x = Math.PI / 2;
-  gorge.position.z = -260;
+  gorge.position.z = -280;
   gorge.renderOrder = 2;
   trou.add(gorge);
+
+  /* Le point de fuite. La gorge se terminait sur une ouverture de
+     dix unités par laquelle on voyait les étoiles : le tunnel
+     n'avait pas de fond, et sans fond il se lisait comme un
+     disque qui tourne, pas comme un passage. */
+  var foyer = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: FOYER, transparent: true, opacity: 0,
+    blending: THREE.AdditiveBlending, depthWrite: false
+  }));
+  foyer.position.z = -552;
+  foyer.scale.setScalar(RAYON * 0.7);
+  foyer.renderOrder = 2;
+  trou.add(foyer);
 
   /* l'anneau de déchirure */
   var anneauMat = new THREE.ShaderMaterial({
@@ -148,8 +192,9 @@
     fragmentShader: [
       'uniform float temps; uniform float ouverture; varying vec2 vUv;',
       'void main(){',
-      '  float b = sin(vUv.x * 78.0 - temps * 5.0) * 0.5 + 0.5;',
-      '  float b2 = sin(vUv.x * 23.0 + temps * 2.2) * 0.5 + 0.5;',
+      /* Multiples de 2 pi, pour la même raison que la gorge. */
+      '  float b = sin(vUv.x * 75.3982 - temps * 5.0) * 0.5 + 0.5;',
+      '  float b2 = sin(vUv.x * 25.1327 + temps * 2.2) * 0.5 + 0.5;',
       '  float bord = sin(vUv.y * 3.1416);',
       '  vec3 c = mix(vec3(1.0,0.09,0.15), vec3(1.0,0.97,0.95), pow(b * b2, 0.7));',
       '  float a = ouverture * bord * (0.45 + b * 0.55);',
@@ -500,7 +545,13 @@
     anneauMat.uniforms.ouverture.value = Math.max(charge * 0.35, ouverture) * (1 - fermeture);
     gorgeMat.uniforms.temps.value = t;
     gorgeMat.uniforms.ouverture.value = ouverture * (1 - fermeture);
-    fond.material.opacity = ouverture * (1 - fermeture);
+    /* La paroi noire doit être opaque bien avant la pleine
+       ouverture : à demi transparente, elle laissait passer la
+       gerbe et les étoiles, et le fond du trou virait au gris. */
+    fond.material.opacity = Math.min(1, ouverture * 2.6) * (1 - fermeture);
+    foyer.material.opacity = Math.pow(ouverture, 1.6) * (1 - fermeture) *
+      (0.72 + 0.28 * Math.sin(t * 3.1));
+    foyer.scale.setScalar(RAYON * (0.52 + ouverture * 0.34));
     halo.material.opacity = (0.15 * charge + 0.55 * ouverture) * (1 - fermeture * 0.7) * retrait;
     halo.scale.setScalar(RAYON * (4 + ouverture * 2.4));
     trou.rotation.z += dt * 0.12;

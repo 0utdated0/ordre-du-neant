@@ -105,15 +105,29 @@
       cible = course <= 0 ? 0 : Math.min(Math.max(-r.top / course, 0), 1);
     }
 
+    var actifCourant = -1;
     function marquer() {
       var n = c.fragments.length;
       if (!n) { return; }
       /* Un fragment par tranche égale de la course. Le texte
          appartient à un moment du trajet, il ne flotte pas
          au-dessus d'une boucle. */
-      var actif = Math.min(n - 1, Math.floor(avance * n));
-      for (var i = 0; i < n; i++) {
-        c.fragments[i].classList.toggle('fragment--vu', i === actif);
+      var brut = avance * n;
+      var actif = Math.min(n - 1, Math.floor(brut));
+      /* Hystérésis. Sans elle, un défilement arrêté pile sur une
+         frontière fait basculer l'indice à chaque image, parce que
+         « avance » n'atteint jamais tout à fait sa cible : les deux
+         fragments restaient alors figés à mi-fondu, l'un par-dessus
+         l'autre. Vu sur l'appontage et la récupération. */
+      if (actifCourant >= 0 && actif !== actifCourant) {
+        var ecart = brut - actifCourant;
+        if (ecart > -0.12 && ecart < 1.12) { actif = actifCourant; }
+      }
+      if (actif !== actifCourant) {
+        actifCourant = actif;
+        for (var i = 0; i < n; i++) {
+          c.fragments[i].classList.toggle('fragment--vu', i === actif);
+        }
       }
       if (def.marquer) { def.marquer(c, avance); }
     }
@@ -194,6 +208,12 @@
 
     window.addEventListener('load', dimensionner);
     setTimeout(dimensionner, 300);
+
+    /* Le contexte reste accessible : c'est ce qui permet de
+       mesurer, depuis l'extérieur, qu'aucune caméra ne traverse
+       une coque, plutôt que de l'espérer. */
+    global.ODN.actes = global.ODN.actes || {};
+    global.ODN.actes[def.id] = c;
 
     return c;
   }

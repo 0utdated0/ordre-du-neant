@@ -22,7 +22,7 @@
 
     monter: function (c) {
       T.etoiles(c, c.petit ? 900 : 2200, 700, 2400, 3.4, 0.55);
-      c.poussiere = T.poussiere(c, c.petit ? 900 : 2400, 26, 190, 1400, 2.2);
+      c.poussiere = T.poussiere(c, c.petit ? 1400 : 3600, 30, 190, 1400, 1.25);
 
       c.convoi = new THREE.Group();
       c.scene.add(c.convoi);
@@ -74,21 +74,23 @@
       var P = c.palier;
 
       /* Le décor défile : c'est lui qui porte la vitesse. */
+      /* Le convoi avance vers +Z, donc le décor défile vers -Z.
+         Il partait dans l'autre sens : les vaisseaux reculaient. */
       var course = P(avance, 0, 1) * 1900;
-      c.eclats.position.z = course;
+      c.eclats.position.z = -course;
       c.eclats.children.forEach(function (m) { m.rotation.x += m.userData.v; });
-      c.poussiere.position.z = (course * 1.35) % c.poussiere.userData.longueur;
+      c.poussiere.position.z = -((course * 1.35) % c.poussiere.userData.longueur);
 
       /* Les chasseurs louvoient autour du convoi. Leur cap suit
          leur déplacement, sinon ils volent en crabe. */
       if (c.chasseurs) {
         c.chasseurs.forEach(function (g, i) {
           var b = g.userData.base, ph = g.userData.phase;
-          var x = b.x + Math.sin(t * 0.42 + ph) * 26;
-          var y = b.y + Math.sin(t * 0.31 + ph * 1.7) * 11;
-          var z = b.z + Math.cos(t * 0.37 + ph) * 34;
-          var dx = Math.cos(t * 0.42 + ph) * 0.42 * 26;
-          var dz = -Math.sin(t * 0.37 + ph) * 0.37 * 34;
+          var x = b.x + Math.sin(t * 0.42 + ph) * 18;
+          var y = b.y + Math.sin(t * 0.31 + ph * 1.7) * 8;
+          var z = b.z + Math.cos(t * 0.37 + ph) * 22;
+          var dx = Math.cos(t * 0.42 + ph) * 0.42 * 18;
+          var dz = -Math.sin(t * 0.37 + ph) * 0.37 * 22;
           g.position.set(x, y, z);
           g.rotation.y = Math.atan2(dx, dz);
           g.rotation.z = -Math.sin(t * 0.42 + ph) * 0.5;
@@ -101,14 +103,16 @@
       var m2 = P(avance, 0.36, 0.74);
       var m3 = P(avance, 0.7, 1.0);
 
-      /* Plus près : à cent cinquante d'un cargo de quarante-quatre,
-         le convoi n'était qu'une poignée de traits. */
-      var x = -14 - m1 * 40 + m2 * 26 + m3 * 34;
-      var y = -9 + m1 * 16 + m2 * 8 - m3 * 20;
-      var z = -92 + m1 * 58 + m2 * 116 - m3 * 92;
+      /* Le trajet passe par le flanc droit, le seul côté libre :
+         le Passeur tient le flanc gauche à x = -46 et l'ancien
+         trajet le frôlait à moins d'un mètre avant de finir dans
+         le Portefaix. Mesuré coque par coque, pas estimé. */
+      var x = 22 + m1 * 58 + m2 * 10 - m3 * 30;
+      var y = -16 + m1 * 20 + m2 * 12 + m3 * 8;
+      var z = -140 + m1 * 74 + m2 * 150 - m3 * 66;
       c.camera.position.set(x, y, z);
 
-      var visee = new THREE.Vector3(0, 0, 6 - m3 * 90);
+      var visee = new THREE.Vector3(-6, 4, -4 + m2 * 10 - m3 * 30);
       c.camera.lookAt(visee);
       c.camera.rotation.z = Math.sin(t * 0.2) * 0.02 + m2 * 0.06;
 
