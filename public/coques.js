@@ -203,11 +203,20 @@
   /* Une coque n'est chargée qu'une fois, même si trois actes la
      demandent en même temps : on mémorise la promesse, pas le
      résultat. */
-  window.ODN.coque = function (nom) {
-    if (!cache[nom]) {
-      var suffixe = (PETIT && VAISSEAUX[nom]) ? '-p' : '';
+  /* « menu » force le niveau de détail. Sans lui, c'est la largeur
+     de l'écran qui décide, ce qui est faux pour un appareil qu'on
+     voit de loin : dans la ligne de feu, une Sentinelle occupe cent
+     pixels de haut et coûtait 416 000 triangles, soit quarante
+     triangles par pixel. Mesuré acte par acte. */
+  window.ODN.coque = function (nom, menu) {
+    var petit = menu === 'petit' || (menu !== 'plein' && PETIT);
+    var suffixe = (petit && VAISSEAUX[nom]) ? '-p' : '';
+    /* La clé est le nom du fichier : une station n'a pas de
+       variante, sa clé ne doit pas prétendre le contraire. */
+    var cle = nom + suffixe;
+    if (!cache[cle]) {
       var fichier = '/coques/' + nom + suffixe + '.odnm';
-      cache[nom] = fetch(fichier + '?e=' + EDITION)
+      cache[cle] = fetch(fichier + '?e=' + EDITION)
         .then(function (r) {
           if (!r.ok) { throw new Error('coque ' + nom + ' : ' + r.status); }
           return r.arrayBuffer();
@@ -222,7 +231,7 @@
           var suite = Promise.resolve(
             version === 3 ? decoderV3(tampon) : decoderV2(tampon));
           return suite.then(function (geo) {
-            window.ODN.coques[nom] = {
+            window.ODN.coques[cle] = {
               fichier: fichier, version: version, octets: octets,
               sommets: geo.attributes.position.count,
               triangles: geo.index.count / 3,
@@ -232,6 +241,6 @@
           });
         });
     }
-    return cache[nom];
+    return cache[cle];
   };
 })();

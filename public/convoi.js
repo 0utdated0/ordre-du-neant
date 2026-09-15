@@ -62,7 +62,9 @@
       /* Deux Sentinelles qui louvoient. */
       c.chasseurs = [];
       for (var i = 0; i < 2; i++) {
-        var g = T.coque('gladius', 13, i ? T.ARGENT : T.BRAISE, 0.5);
+        /* Même raison que dans la ligne de feu : cent soixante-dix
+           pixels au plus près, quatorze triangles par pixel. */
+        var g = T.coque('gladius', 13, i ? T.ARGENT : T.BRAISE, 0.5, 'petit');
         g.userData.base = new THREE.Vector3(i ? 34 : -26, i ? -12 : 19, i ? 34 : 52);
         g.userData.phase = i * 2.1;
         c.convoi.add(g);

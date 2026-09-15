@@ -114,7 +114,12 @@
 
       c.chasseurs = [];
       for (var i = 0; i < (c.petit ? 3 : 5); i++) {
-        var g = T.coque('gladius', 20, i % 2 ? T.ARGENT : T.BRAISE, 0.5);
+        /* Niveau de détail choisi sur la taille apparente, pas sur
+           celle de l'écran : au plus près, une Sentinelle fait cent
+           deux pixels de haut ici. À pleine géométrie, cinq d'entre
+           elles pesaient deux millions de triangles pour trois pour
+           cent de l'image, soit quarante triangles par pixel. */
+        var g = T.coque('gladius', 20, i % 2 ? T.ARGENT : T.BRAISE, 0.5, 'petit');
         g.userData.base = new THREE.Vector3(
           -120 + i * 62, -40 + ((i * 37) % 90), 120 - i * 58);
         g.userData.phase = i * 1.37;

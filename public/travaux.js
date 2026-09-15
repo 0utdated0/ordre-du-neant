@@ -105,7 +105,7 @@
      postes de tir, proue, bras de travail. Ils étaient écrits à la
      main dans chaque scène, et ça se voyait : les traits
      partaient du vide et les faisceaux du milieu de nulle part. */
-  function coque(nom, longueur, teinte, opaciteAretes) {
+  function coque(nom, longueur, teinte, opaciteAretes, menu) {
     var n = new THREE.Group();
     n.userData.coque = nom;
     n.userData.longueur = longueur;
@@ -117,7 +117,7 @@
     if (!window.ODN.coque) { return n; }
 
     var k = 1;
-    window.ODN.coque(nom).then(function (geo) {
+    window.ODN.coque(nom, menu).then(function (geo) {
       var g = peintre(teinte || ARGENT, opaciteAretes === undefined ? 0.4 : opaciteAretes)(geo);
       geo.computeBoundingBox();
       var b = geo.boundingBox;
