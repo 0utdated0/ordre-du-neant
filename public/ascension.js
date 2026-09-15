@@ -58,7 +58,7 @@
 
   function contour(geo, couleur, opacite) {
     return new THREE.LineSegments(
-      new THREE.EdgesGeometry(geo, 18),
+      window.ODN.aretesDe(geo, 18),
       new THREE.LineBasicMaterial({
         color: couleur, transparent: true, opacity: opacite,
         blending: THREE.AdditiveBlending, depthWrite: false, fog: true
@@ -74,42 +74,72 @@
   var tour = new THREE.Group();
   scene.add(tour);
 
-  var futG = new THREE.CylinderGeometry(7, 7, 300, 12, 1, true);
-  var fut = plein(futG);
-  fut.position.y = 115;
-  tour.add(fut);
-  var futL = contour(futG, ARGENT, 0.22);
-  futL.position.y = 115;
-  tour.add(futL);
+  /* Le fût et le palier sont deux maillages modelés à part, aux
+     unités de la scène. Deux et pas un : le palier est répété six
+     fois et chacun tourne pour son compte, les fondre ensemble
+     aurait coûté l'animation. Ils arrivent par le réseau, comme
+     les coques de vaisseaux. */
+  function chargerTour() {
+    if (!window.ODN || !window.ODN.coque) { return null; }
+    return window.ODN.coque('ascension-fut');
+  }
 
   var paliers = [];
+
+  function poserFut(geo) {
+    tour.add(plein(geo));
+    tour.add(contour(geo, ARGENT, 0.3));
+  }
+
+  function poserPaliers(geo) {
+    NIVEAUX.forEach(function (y, i) {
+      var g = paliers[i];
+      var couleur = CONFERES[i] ? ROUGE : ARGENT;
+      var corps = plein(geo);
+      var traits = contour(geo, couleur, CONFERES[i] ? 0.62 : 0.4);
+      /* Un palier sur deux part décalé : six copies du même
+         maillage alignées au degré près se verraient. */
+      g.rotation.y = (i % 2 ? 0.4 : 0) + i * 0.17;
+      g.add(corps);
+      g.add(traits);
+      g.userData.plateau = traits;
+    });
+  }
+
+  /* Repli : la silhouette d'origine, si les maillages manquent. */
+  function repliFut() {
+    var futG = new THREE.CylinderGeometry(7, 7, 300, 12, 1, true);
+    var fut = plein(futG); fut.position.y = 115; tour.add(fut);
+    var futL = contour(futG, ARGENT, 0.22); futL.position.y = 115; tour.add(futL);
+  }
+  function repliPaliers() {
+    NIVEAUX.forEach(function (y, i) {
+      var g = paliers[i];
+      var couleur = CONFERES[i] ? ROUGE : ARGENT;
+      var plateau = contour(new THREE.TorusGeometry(21, 1.1, 8, 40), couleur,
+        CONFERES[i] ? 0.85 : 0.5);
+      plateau.rotation.x = Math.PI / 2;
+      g.add(plateau);
+      var anneau = contour(new THREE.TorusGeometry(15, 0.5, 6, 32), couleur, 0.35);
+      anneau.rotation.x = Math.PI / 2;
+      g.add(anneau);
+      for (var b = 0; b < 4; b++) {
+        var a = (b / 4) * Math.PI * 2 + (i % 2 ? 0.4 : 0);
+        var bras = contour(new THREE.BoxGeometry(14, 0.7, 0.7), couleur, 0.4);
+        bras.position.set(Math.cos(a) * 14, 0, Math.sin(a) * 14);
+        bras.rotation.y = -a;
+        g.add(bras);
+      }
+      g.userData.plateau = plateau;
+    });
+  }
+
   NIVEAUX.forEach(function (y, i) {
     var g = new THREE.Group();
     g.position.y = y;
 
-    var couleur = CONFERES[i] ? ROUGE : ARGENT;
-
-    var plateauG = new THREE.TorusGeometry(21, 1.1, 8, 40);
-    var plateau = contour(plateauG, couleur, CONFERES[i] ? 0.85 : 0.5);
-    plateau.rotation.x = Math.PI / 2;
-    g.add(plateau);
-
-    var anneauG = new THREE.TorusGeometry(15, 0.5, 6, 32);
-    var anneau = contour(anneauG, couleur, 0.35);
-    anneau.rotation.x = Math.PI / 2;
-    g.add(anneau);
-
-    /* traverses : elles donnent l'échelle et marquent le passage */
-    for (var b = 0; b < 4; b++) {
-      var a = (b / 4) * Math.PI * 2 + (i % 2 ? 0.4 : 0);
-      var brasG = new THREE.BoxGeometry(14, 0.7, 0.7);
-      var bras = contour(brasG, couleur, 0.4);
-      bras.position.set(Math.cos(a) * 14, 0, Math.sin(a) * 14);
-      bras.rotation.y = -a;
-      g.add(bras);
-    }
-
-    /* feu du palier */
+    /* feu du palier : il reste un point, c'est lui qui s'allume
+       quand la caméra arrive à hauteur */
     var feuG = new THREE.BufferGeometry();
     feuG.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0, 0]), 3));
     var feu = new THREE.Points(feuG, new THREE.PointsMaterial({
@@ -120,10 +150,26 @@
     g.add(feu);
 
     g.userData.feu = feu;
-    g.userData.plateau = plateau;
+    g.userData.plateau = null;
     tour.add(g);
     paliers.push(g);
   });
+
+  /* Le fût et le palier pèsent 280 Ko à eux deux, et l'acte VI est
+     loin dans la page : on ne les demande qu'à l'approche, pas au
+     chargement. */
+  var tourDemandee = false;
+  function demanderTour() {
+    if (tourDemandee) { return; }
+    tourDemandee = true;
+    if (window.ODN && window.ODN.coque) {
+      window.ODN.coque('ascension-fut').then(poserFut, repliFut);
+      window.ODN.coque('ascension-palier').then(poserPaliers, repliPaliers);
+    } else {
+      repliFut();
+      repliPaliers();
+    }
+  }
 
   /* ---------------------------------------------------------
      Braises qui montent
@@ -228,9 +274,12 @@
   var aLecran = false;
   if ('IntersectionObserver' in window) {
     new IntersectionObserver(function (es) {
-      es.forEach(function (x) { aLecran = x.isIntersecting; });
-    }, { rootMargin: '200px' }).observe(section);
-  } else { aLecran = true; }
+      es.forEach(function (x) {
+        aLecran = x.isIntersecting;
+        if (aLecran) { demanderTour(); }
+      });
+    }, { rootMargin: '900px' }).observe(section);
+  } else { aLecran = true; demanderTour(); }
 
   var visible = true;
   document.addEventListener('visibilitychange', function () { visible = !document.hidden; });
@@ -261,8 +310,12 @@
     for (var i = 0; i < paliers.length; i++) {
       var proche = 1 - Math.min(1, Math.abs(NIVEAUX[i] - hauteur) / 60);
       paliers[i].userData.feu.material.opacity = 0.25 + proche * 0.75 * (0.7 + 0.3 * Math.sin(t * 2.4 + i));
-      paliers[i].userData.plateau.material.opacity =
-        (CONFERES[i] ? 0.45 : 0.3) + proche * 0.55;
+      /* Le palier peut ne pas être encore arrivé : il tourne quand
+         même, seul son allumage attend la géométrie. */
+      if (paliers[i].userData.plateau) {
+        paliers[i].userData.plateau.material.opacity =
+          (CONFERES[i] ? 0.45 : 0.3) + proche * 0.55;
+      }
       paliers[i].rotation.y += dt * (CONFERES[i] ? 0.09 : 0.05);
     }
 

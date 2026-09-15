@@ -30,7 +30,15 @@ const FLOTTE = {
      axe est déjà le bon, et l'échelle se prend sur l'envergure et
      non sur la longueur. */
   'seuil':       {nom:'seuil',       longueur:268, cible:20000, aretes:14000,
-                  ply:true, station:true}
+                  ply:true, station:true},
+  /* La tour de l'acte VI : deux pièces, parce que le palier est
+     répété six fois et que chacun tourne pour son compte. Elles
+     sont modelées aux unités de la scène, donc ni recentrées ni
+     remises à l'échelle : « brut » veut dire qu'on n'y touche pas. */
+  'ascension-fut':    {nom:'ascension-fut',    cible:15000, aretes:11000,
+                       ply:true, station:true, brut:true},
+  'ascension-palier': {nom:'ascension-palier', cible: 9000, aretes: 7000,
+                       ply:true, station:true, brut:true}
 };
 
 function souder(pos, idx, eps){
@@ -105,10 +113,12 @@ function poupeEnZplus(pos){
     const retourner = fi.station ? false
       : ((fi.nom in forcer) ? forcer[fi.nom] : poupeEnZplus(pos));
     ({mn,mx}=boite(pos));
-    const cx=(mn[0]+mx[0])/2, cy=(mn[1]+mx[1])/2, cz=(mn[2]+mx[2])/2;
-    const ech = fi.station
+    const cx = fi.brut ? 0 : (mn[0]+mx[0])/2;
+    const cy = fi.brut ? 0 : (mn[1]+mx[1])/2;
+    const cz = fi.brut ? 0 : (mn[2]+mx[2])/2;
+    const ech = fi.brut ? 1 : (fi.station
       ? fi.longueur/Math.max(mx[0]-mn[0], mx[1]-mn[1], mx[2]-mn[2])
-      : fi.longueur/(mx[2]-mn[2]);
+      : fi.longueur/(mx[2]-mn[2]));
     for(let i=0;i<pos.length;i+=3){
       let x=(pos[i]-cx)*ech, y=(pos[i+1]-cy)*ech, z=(pos[i+2]-cz)*ech;
       if(retourner){ x=-x; z=-z; }   /* lacet de PI, proue ramenee en +Z */
@@ -151,7 +161,7 @@ function poupeEnZplus(pos){
     fiches.push({nom:fi.nom, longueur:fi.longueur, tri:ni.length/3, som:nSom,
       aretes:aretes.length/2, moteurs:moteurs});
     console.log(fi.nom.padEnd(12), String(ni.length/3).padStart(6)+' tri',
-      String(nSom).padStart(6)+' som', String(fi.longueur).padStart(4)+' m',
+      String(nSom).padStart(6)+' som', String(fi.longueur||0).padStart(4)+' m',
       (buf.length/1024).toFixed(0).padStart(4)+' Ko', ' brotli '+(br/1024).toFixed(0).padStart(3)+' Ko',
       String(aretes.length/2).padStart(5)+' ar '+seuil.toFixed(0)+'deg',
       ' '+moteurs.length+' tuyeres', retourner?' retourne':'');
