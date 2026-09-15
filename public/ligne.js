@@ -109,6 +109,29 @@
         });
       };
 
+      /* ---- le plan d'échelle ----
+         Aucun plan ne disait qu'un Javelin fait trois cent
+         quarante-cinq mètres. Les Sentinelles qui louvoient au
+         large ne le disent pas non plus : sans rien à côté d'elles,
+         un chasseur lointain et un bâtiment lointain ont la même
+         taille. Celle-ci rase la quille, du côté de l'objectif, de
+         la poupe à la proue, pendant que la caméra remonte en sens
+         inverse. C'est la coque qui sert de règle. */
+      c.rase = T.coque('gladius', 20, T.BRAISE, 0.55, 'petit');
+      c.rase.visible = false;
+      c.scene.add(c.rase);
+      var quandAmiral = c.amiral.userData.quandPret;
+      c.amiral.userData.quandPret = function (n) {
+        quandAmiral(n);
+        var corps = n.children[0] && n.children[0].children[0];
+        if (!corps) { return; }
+        if (!corps.geometry.boundingBox) { corps.geometry.computeBoundingBox(); }
+        c.gabarit = corps.geometry.boundingBox.clone();
+        var k = n.userData.echelle || 1;
+        c.gabarit.min.multiplyScalar(k);
+        c.gabarit.max.multiplyScalar(k);
+      };
+
       c.perte = T.explosion(c, 48);
       c.scene.add(c.perte);
 
@@ -220,6 +243,45 @@
           g.rotation.z = -Math.sin(w1) * 0.8;
           g.rotation.x = Math.sin(w2) * 0.12;
         });
+      }
+
+      /* le plan d'échelle : tout est fonction du défilement */
+      if (c.rase && c.gabarit && c.rase.userData.pret) {
+        var g0 = c.gabarit;
+        var passe = (avance - 0.2) / 0.42;
+        var dansFenetre = passe > 0 && passe < 1;
+        c.rase.visible = dansFenetre;
+        if (dansFenetre) {
+          /* Entrée et sortie loin des extrémités, en fondu : un
+             chasseur qui surgit d'un coup au milieu du vide se
+             remarque plus que la coque. */
+          var voileR = P(passe, 0, 0.12) * (1 - P(passe, 0.88, 1));
+          /* de 170 derrière la poupe à 170 devant la proue, un peu
+             plus lent au milieu, là où la coque sert de règle */
+          var zR = (g0.min.z - 170) + (g0.max.z - g0.min.z + 340) *
+                   (passe * 1.35 - P(passe, 0, 1) * 0.35);
+          /* Sous la quille, côté objectif. Posée devant le flanc,
+             elle se perdait dans le détail des tôles : il lui faut
+             le noir derrière elle et la coque juste au-dessus. */
+          var local = new THREE.Vector3(
+            g0.min.x * 0.45 - Math.sin(passe * Math.PI) * 6,
+            g0.min.y - 9 + Math.sin(passe * 5.1) * 2,
+            zR
+          );
+          c.amiral.updateMatrixWorld(true);
+          c.rase.position.copy(c.amiral.localToWorld(local));
+          c.rase.rotation.set(0, c.amiral.rotation.y, Math.sin(passe * 4.3) * 0.35);
+          if (!c.rase.userData.bases) {
+            c.rase.userData.bases = [];
+            c.rase.traverse(function (o) {
+              if (o.material && o.material.transparent) {
+                c.rase.userData.bases.push([o.material, o.material.opacity]);
+              }
+            });
+          }
+          c.rase.userData.bases.forEach(function (b) { b[0].opacity = b[1] * voileR; });
+          T.pousser(c.rase, 1.25 * voileR, t);
+        }
       }
 
       T.pousser(c.amiral, 0.45 + plein * 0.4, t);
