@@ -12,7 +12,9 @@ const OUT=process.argv[2] || '/home/claude/wtest/public/coques/';
 const FLOTTE = {
   'javelin':     {nom:'javelin',     longueur:345, cible:14000, aretes:9000},
   'idris-p':     {nom:'idris',       longueur:239, cible:12000, aretes:8000},
+  'perseus':     {nom:'perseus',     longueur:180, cible:13000, aretes:9000},
   'polaris':     {nom:'polaris',     longueur:155, cible:12000, aretes:8000},
+  'orion':       {nom:'orion',       longueur:170, cible:13000, aretes:9000},
   'reclaimer':   {nom:'reclaimer',   longueur:155, cible:12000, aretes:8000},
   'caterpillar': {nom:'caterpillar', longueur:111, cible:11000, aretes:7500},
   /* Le Hammerhead a ete retire. Son maillage est fait de coques

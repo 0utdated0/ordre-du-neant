@@ -419,6 +419,22 @@
       [-12.264, 2.952, -109.662, 2.868],
       [8.595, 0.582, -111.808, 2.868]
     ] },
+    perseus: { longueur: 180, moteurs: [
+      [29.389, 3.697, -82.774, 4.705],
+      [-29.25, 3.743, -82.823, 4.102],
+      [-25.882, -9.369, -84.652, 3.632],
+      [26.13, -9.331, -84.623, 3.499],
+      [19.925, 4.582, -81.771, 3.402],
+      [-19.995, 4.672, -81.812, 3.402]
+    ] },
+    orion: { longueur: 170, moteurs: [
+      [15.161, 7.803, -80.005, 3.511],
+      [15.32, -7.773, -80.153, 3.303],
+      [-15.724, 7.879, -79.594, 3.413],
+      [-13.184, -6.8, -80.128, 3.315],
+      [-17.266, -8.23, -80.311, 2.947],
+      [-11.612, 5.994, -80.298, 2.04]
+    ] },
     polaris: { longueur: 155, moteurs: [
       [25.428, 11.879, -72.321, 5.411],
       [-24.274, 11.47, -72.611, 5.451],
@@ -528,6 +544,8 @@
   /* Les noms d'appel restent ceux des actes : ils décrivent un
      rôle dans le récit, pas un modèle. */
   var corvetteReelle   = fabrique('polaris',     7.6);
+  var canonniereReelle = fabrique('perseus',     8.2);
+  var foreuseLourde    = fabrique('orion',       9.0);
   var cargoReel        = fabrique('caterpillar', 9.6);
   var foreuseReelle    = fabrique('reclaimer',   6.4);
   var porteNeantReel   = fabrique('javelin',    28.0);
@@ -570,6 +588,17 @@
       texte: "Rapide pour sa masse, conçu pour tenir la distance autour d'un convoi plutôt que pour engager seul. Il escorte, il dissuade, il rentre."
     },
     {
+      cle: 'canonniere', nom: 'Le Rempart', classe: 'Canonnière',
+      division: 'Combat et Sécurité', construire: pourLaTable('perseus'), echelle: 1,
+      fiche: [
+        ['Modèle', 'RSI Perseus'],
+        ['Rôle', 'Défense de convoi, chasse aux gros'],
+        ['Équipage', '4 à 6'],
+        ['Longueur', '180 m']
+      ],
+      texte: "Quatre tourelles de gros calibre et rien d'autre. Elle ne poursuit personne : elle se place entre le convoi et ce qui arrive, et elle attend."
+    },
+    {
       cle: 'cargo', nom: 'Le Portefaix', classe: 'Cargo modulaire',
       division: 'Logistique et Industrie', construire: pourLaTable('caterpillar'), echelle: 1,
       fiche: [
@@ -590,6 +619,17 @@
         ['Longueur', '155 m']
       ],
       texte: "Bras de découpe, salle de traitement, deux soutes. Elle passe des heures accrochée à une épave, et c'est ce qui paie les autres."
+    },
+    {
+      cle: 'foreuse-lourde', nom: 'Le Gisement', classe: 'Plateforme de forage',
+      division: 'Extraction', construire: pourLaTable('orion'), echelle: 1,
+      fiche: [
+        ['Modèle', 'RSI Orion'],
+        ['Rôle', 'Forage, raffinage embarqué'],
+        ['Équipage', '5 à 7'],
+        ['Longueur', '170 m']
+      ],
+      texte: "Tête de forage à l'avant, raffinerie au milieu, soutes derrière. Elle entre dans une ceinture d'astéroïdes et n'en ressort qu'une fois pleine."
     },
     {
       cle: 'chasseur', nom: 'La Sentinelle', classe: 'Chasseur léger',
@@ -624,6 +664,8 @@
     cargo: cargoReel,
     foreuse: foreuseReelle,
     porteNeant: porteNeantReel,
+    canonniere: canonniereReelle,
+    foreuseLourde: foreuseLourde,
     chasseur: chasseurReel,
     fregate: fregateReelle,
     station: station,
