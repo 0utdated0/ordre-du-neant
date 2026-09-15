@@ -70,6 +70,44 @@ const PAGES = [
     scripts: ['trois', 'coques', 'scene', 'ascension', 'site']
   },
   {
+    cle: 'codex', fichier: 'codex.html', url: '/codex',
+    menu: 'Codex', etiquette: 'Chapitre',
+    titre: "Le Codex - récit, échelons et usages | L'Ordre du Néant",
+    description: "Le récit de l'Ordre du Néant : le convoi perdu, le Seuil, le sens des six échelons, des fonctions et du nom des appareils, et les usages de l'Ordre.",
+    sections: ['codex-prologue', 'codex-neant', 'codex-convoi', 'codex-seuil',
+               'codex-echelle', 'codex-fonctions', 'codex-noms', 'codex-usages',
+               'codex-temps', ':appel'],
+    rail: [['codex-neant', 'I', 'Le Néant'], ['codex-convoi', 'II', 'Le convoi perdu'],
+           ['codex-seuil', 'III', 'Le Seuil'], ['codex-echelle', 'IV', "L'échelle"],
+           ['codex-fonctions', 'V', 'Les fonctions'], ['codex-noms', 'VI', 'Les noms'],
+           ['codex-usages', 'VII', 'Les usages'], ['codex-temps', 'VIII', 'Les quatre temps'],
+           ['appel', 'IX', 'Entrer']],
+    scripts: ['trois', 'scene', 'site']
+  },
+  {
+    cle: 'regle', fichier: 'regle.html', url: '/regle',
+    menu: 'La Règle',
+    titre: "La Règle de l'Ordre - vingt-neuf articles | L'Ordre du Néant",
+    description: "La Règle de l'Ordre du Néant en vingt-neuf articles : principes, admission, présence et échelons, opérations et partage des gains, conduite, commandement.",
+    sections: ['regle-preambule', 'regle-principes', 'regle-admission', 'regle-presence',
+               'regle-operations', 'regle-conduite', 'regle-commandement', ':appel'],
+    rail: [['regle-principes', 'I', 'Principes'], ['regle-admission', 'II', 'Admission'],
+           ['regle-presence', 'III', 'Présence'], ['regle-operations', 'IV', 'Opérations'],
+           ['regle-conduite', 'V', 'Conduite'], ['regle-commandement', 'VI', 'Commandement'],
+           ['appel', 'VII', 'Entrer']],
+    scripts: ['trois', 'scene', 'site']
+  },
+  {
+    cle: 'divisions', fichier: 'divisions.html', url: '/divisions',
+    menu: 'Divisions', horsMenu: true,
+    titre: "Divisions et instruction | L'Ordre du Néant",
+    description: "Les huit divisions de l'Ordre du Néant en détail : missions, activités, appareils typiques, et l'instruction des nouveaux membres pendant leur premier mois.",
+    sections: ['divisions-ouverture', 'divisions-liste', 'instruction', ':appel'],
+    rail: [['divisions-liste', 'I', 'Divisions'], ['instruction', 'II', 'Instruction'],
+           ['appel', 'III', 'Entrer']],
+    scripts: ['trois', 'scene', 'site']
+  },
+  {
     cle: 'flotte', fichier: 'flotte.html', url: '/flotte',
     menu: 'La flotte',
     titre: "La flotte | L'Ordre du Néant",
@@ -80,7 +118,7 @@ const PAGES = [
   },
   {
     cle: 'vie', fichier: 'vie.html', url: '/vie',
-    menu: 'La vie de l’Ordre',
+    menu: 'La vie',
     titre: "La vie de l'Ordre - effectif, opérations, galerie | L'Ordre du Néant",
     description: "L'effectif en direct depuis le Discord, les opérations planifiées et la galerie des sorties de l'Ordre du Néant.",
     sections: ['vigie', 'operations', 'galerie', ':appel'],
@@ -94,8 +132,9 @@ const PAGES = [
     menu: 'Rejoindre',
     titre: "Rejoindre l'Ordre du Néant - recrutement Star Citizen francophone",
     description: "Comment entrer dans l'Ordre du Néant : conditions, sas d'admission, instruction du dossier. Recrutement ouvert aux pilotes majeurs parlant français.",
-    sections: ['passage'],
-    rail: [],
+    sections: ['passage', 'entree', 'allies', 'faq'],
+    rail: [['passage', 'I', 'Entrer'], ['entree', 'II', 'Parcours'],
+           ['allies', 'III', 'Alliés'], ['faq', 'IV', 'Questions']],
     scripts: ['trois', 'scene', 'site']
   }
 ];
@@ -109,8 +148,12 @@ const FICHIERS = {
   vitesse: 'vitesse.js', appontage: 'appontage.js'
 };
 
-function menuDe(courante) {
-  return PAGES.map(function (p) {
+/* Le menu du haut ne peut pas tout porter : au-delà de sept
+   entrées il ne tient plus sur un écran de portable. Une page
+   « horsMenu » reste dans le plan du site en pied de page, et on
+   y arrive par les renvois des pages voisines. */
+function menuDe(courante, plan) {
+  return PAGES.filter(function (p) { return plan || !p.horsMenu; }).map(function (p) {
     const actif = p.cle === courante.cle;
     return '    <a href="' + p.url + '"' + (actif ? ' aria-current="page"' : '') +
            '>' + p.menu + '</a>';
@@ -138,7 +181,7 @@ function corpsDe(p) {
     const cle = nom[0] === ':' ? nom.slice(1) : nom;
     let html = nom[0] === ':' ? bloc(cle) : section(cle);
     if (numeros[cle]) {
-      html = html.replace(/\{\{ACTE\}\}/g, 'Acte ' + numeros[cle]);
+      html = html.replace(/\{\{ACTE\}\}/g, (p.etiquette || 'Acte') + ' ' + numeros[cle]);
     } else {
       html = html
         .replace(/\s*<p class="(?:acte__num|approche__num|ascension__num)[^"]*"[^>]*>\{\{ACTE\}\}<\/p>/g, '')
@@ -165,7 +208,7 @@ for (const p of PAGES) {
     .replace('{{RAIL}}', railDe(p))
     .replace('{{CORPS}}', corpsDe(p))
     .replace('{{VISIONNEUSE}}', p.visionneuse ? bloc('visionneuse') : '')
-    .replace('{{PIED}}', bloc('pied').replace('{{PLAN}}', menuDe(p)))
+    .replace('{{PIED}}', bloc('pied').replace('{{PLAN}}', menuDe(p, true)))
     .replace('{{SCRIPTS}}', p.scripts.map(function (s) {
       return '<script src="/' + FICHIERS[s] + '?v=' + empreinte(FICHIERS[s]) + '" defer></script>';
     }).join('\n'))

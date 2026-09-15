@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     Page assemblée par outils/pages/batir.js.
+     Ne rien modifier ici : tout se perd au prochain assemblage.
+     Le contenu est dans outils/pages/sections, la coquille dans
+     outils/pages/gabarit.html, la répartition dans batir.js.
+     ============================================================ -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>La Règle de l'Ordre - vingt-neuf articles | L'Ordre du Néant</title>
+<meta name="description" content="La Règle de l'Ordre du Néant en vingt-neuf articles : principes, admission, présence et échelons, opérations et partage des gains, conduite, commandement.">
+<link rel="canonical" href="https://ordre-du-neant.fr/regle">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="L'Ordre du Néant">
+<meta property="og:title" content="La Règle de l'Ordre - vingt-neuf articles | L'Ordre du Néant">
+<meta property="og:description" content="La Règle de l'Ordre du Néant en vingt-neuf articles : principes, admission, présence et échelons, opérations et partage des gains, conduite, commandement.">
+<meta property="og:url" content="https://ordre-du-neant.fr/regle">
+<meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="/assets/embleme-512.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v=6d6e6b8ec8">
+
+</head>
+
+<body class="page-regle">
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<canvas id="neant" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignettage" aria-hidden="true"></div>
+
+<div class="barre" id="barre">
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
+  <span class="barre__nom">L'Ordre du Néant</span>
+
+  <button class="barre__bouton" type="button" id="menu-bouton"
+          aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Sections du site">
+        <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex">Codex</a>
+    <a href="/regle" aria-current="page">La Règle</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+  </nav>
+
+  <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
+       d'admission. Ce bouton-ci ouvre le Discord : deux destinations
+       différentes ne peuvent pas porter le même mot. -->
+  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+</div>
+<nav class="rail" id="rail" aria-label="Sections">
+  <a href="#regle-principes" data-cible="regle-principes"><span>I</span><em>Principes</em></a>
+  <a href="#regle-admission" data-cible="regle-admission"><span>II</span><em>Admission</em></a>
+  <a href="#regle-presence" data-cible="regle-presence"><span>III</span><em>Présence</em></a>
+  <a href="#regle-operations" data-cible="regle-operations"><span>IV</span><em>Opérations</em></a>
+  <a href="#regle-conduite" data-cible="regle-conduite"><span>V</span><em>Conduite</em></a>
+  <a href="#regle-commandement" data-cible="regle-commandement"><span>VI</span><em>Commandement</em></a>
+  <a href="#appel" data-cible="appel"><span>VII</span><em>Entrer</em></a>
+</nav>
+<main id="contenu">
+<section class="acte acte--texte acte--codex-ouverture" id="regle-preambule">
+  <div class="contenu contenu--centre">
+    <p class="acte__num revele">La Règle</p>
+    <h2 class="revele balaye">Vingt-neuf articles, aucune surprise</h2>
+    <p class="chapeau revele">
+      La Règle ne dit pas tout. Elle dit ce qui ne se négocie pas, pour que personne
+      n'ait à le deviner et que personne ne puisse prétendre l'ignorer.
+    </p>
+    <p class="revele">
+      Chaque membre la lit avant d'entrer. Elle tient en six titres : ce qu'est l'Ordre,
+      comment on y entre, ce qu'on attend de chacun, comment se mènent les opérations, ce
+      qui exclut, et qui décide. Chaque article a son adresse : on peut citer
+      l'article 20 d'un simple lien.
+    </p>
+    <ol class="sommaire-regle revele" role="list">
+      <li><a href="#regle-principes"><span>I</span>Principes<em>Art. 1 à 4</em></a></li>
+      <li><a href="#regle-admission"><span>II</span>Admission<em>Art. 5 à 9</em></a></li>
+      <li><a href="#regle-presence"><span>III</span>Présence et échelons<em>Art. 10 à 15</em></a></li>
+      <li><a href="#regle-operations"><span>IV</span>Opérations et partage<em>Art. 16 à 21</em></a></li>
+      <li><a href="#regle-conduite"><span>V</span>Conduite<em>Art. 22 à 26</em></a></li>
+      <li><a href="#regle-commandement"><span>VI</span>Commandement et sanctions<em>Art. 27 à 29</em></a></li>
+    </ol>
+  </div>
+</section>
+
+<section class="acte acte--texte acte--titre" id="regle-principes">
+  <div class="contenu contenu--large">
+    <header class="titre-regle revele">
+      <p class="acte__num">Titre I</p>
+      <h2>Principes</h2>
+      <p class="intro">Ce que l'Ordre est, et ce qu'il n'est pas.</p>
+    </header>
+    <ol class="articles" role="list">
+      <li class="article revele" id="article-1">
+        <a class="article__num" href="#article-1" aria-label="Article 1">Art. 01</a>
+        <p>L'Ordre du Néant est une organisation francophone de Star Citizen. Il se joue en français, entre adultes.</p>
+      </li>
+      <li class="article revele" id="article-2">
+        <a class="article__num" href="#article-2" aria-label="Article 2">Art. 02</a>
+        <p>L'Ordre ne court pas après le nombre. Il préfère vingt pilotes présents à quatre cents noms sur une liste.</p>
+      </li>
+      <li class="article revele" id="article-3">
+        <a class="article__num" href="#article-3" aria-label="Article 3">Art. 03</a>
+        <p>L'Ordre n'exige pas d'exclusivité. Un membre peut appartenir à d'autres organisations, à condition de ne jamais agir contre l'Ordre ni contre ses membres.</p>
+      </li>
+      <li class="article revele" id="article-4">
+        <a class="article__num" href="#article-4" aria-label="Article 4">Art. 04</a>
+        <p>Tout ce qui se possède se perd. Personne n'est jugé sur ce qu'il a perdu, chacun l'est sur la manière dont il s'est tenu.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="acte acte--texte acte--titre" id="regle-admission">
+  <div class="contenu contenu--large">
+    <header class="titre-regle revele">
+      <p class="acte__num">Titre II</p>
+      <h2>Admission</h2>
+      <p class="intro">Comment on franchit le Seuil.</p>
+    </header>
+    <ol class="articles" role="list">
+      <li class="article revele" id="article-5">
+        <a class="article__num" href="#article-5" aria-label="Article 5">Art. 05</a>
+        <p>Il faut avoir dix-huit ans révolus pour entrer dans l'Ordre.</p>
+      </li>
+      <li class="article revele" id="article-6">
+        <a class="article__num" href="#article-6" aria-label="Article 6">Art. 06</a>
+        <p>Toute entrée passe par le sas d'admission. On y arrive Initié.</p>
+      </li>
+      <li class="article revele" id="article-7">
+        <a class="article__num" href="#article-7" aria-label="Article 7">Art. 07</a>
+        <p>L'Initié dépose un dossier : son pseudonyme RSI, ses disponibilités, les divisions qui l'intéressent et ce qu'il attend de l'Ordre. Le dossier déposé, il devient Postulant.</p>
+      </li>
+      <li class="article revele" id="article-8">
+        <a class="article__num" href="#article-8" aria-label="Article 8">Art. 08</a>
+        <p>Un officier instruit le dossier et s'entretient avec le Postulant. Il prononce l'entrée ou la refuse. Un refus est toujours motivé.</p>
+      </li>
+      <li class="article revele" id="article-9">
+        <a class="article__num" href="#article-9" aria-label="Article 9">Art. 09</a>
+        <p>L'entrée prononcée, le Postulant devient Adepte. Il déclare avoir lu la Règle et l'accepter.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="acte acte--texte acte--titre" id="regle-presence">
+  <div class="contenu contenu--large">
+    <header class="titre-regle revele">
+      <p class="acte__num">Titre III</p>
+      <h2>Présence et échelons</h2>
+      <p class="intro">Ce qu'on attend de chacun, et comment on monte.</p>
+    </header>
+    <ol class="articles" role="list">
+      <li class="article revele" id="article-10">
+        <a class="article__num" href="#article-10" aria-label="Article 10">Art. 10</a>
+        <p>Un membre se montre de temps en temps. Personne n'est tenu à un horaire, mais un membre qui n'apparaît jamais n'est pas un membre.</p>
+      </li>
+      <li class="article revele" id="article-11">
+        <a class="article__num" href="#article-11" aria-label="Article 11">Art. 11</a>
+        <p>Une absence prévue se signale, sans avoir à se justifier. Elle ne coûte rien, ni échelon ni fonction.</p>
+      </li>
+      <li class="article revele" id="article-12">
+        <a class="article__num" href="#article-12" aria-label="Article 12">Art. 12</a>
+        <p>Un membre resté soixante jours sans nouvelles repasse au sas d'admission. Il en ressort sur simple demande, à l'échelon qu'il avait.</p>
+      </li>
+      <li class="article revele" id="article-13">
+        <a class="article__num" href="#article-13" aria-label="Article 13">Art. 13</a>
+        <p>L'échelle compte six échelons : Adepte, Paladin, Sentinelle, Ange, Archange et Séraphin.</p>
+      </li>
+      <li class="article revele" id="article-14">
+        <a class="article__num" href="#article-14" aria-label="Article 14">Art. 14</a>
+        <p>Paladin, Sentinelle et Ange s'obtiennent par la présence et l'activité. Archange et Séraphin sont conférés par le commandement.</p>
+      </li>
+      <li class="article revele" id="article-15">
+        <a class="article__num" href="#article-15" aria-label="Article 15">Art. 15</a>
+        <p>Aucun échelon ne s'achète, ne s'échange ni ne se demande.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="acte acte--texte acte--titre" id="regle-operations">
+  <div class="contenu contenu--large">
+    <header class="titre-regle revele">
+      <p class="acte__num">Titre IV</p>
+      <h2>Opérations et partage</h2>
+      <p class="intro">Comment on part, et comment on rentre.</p>
+    </header>
+    <ol class="articles" role="list">
+      <li class="article revele" id="article-16">
+        <a class="article__num" href="#article-16" aria-label="Article 16">Art. 16</a>
+        <p>Une opération est annoncée à l'avance par un ordre de mission qui précise l'objectif, le lieu, l'heure, les appareils et les rôles.</p>
+      </li>
+      <li class="article revele" id="article-17">
+        <a class="article__num" href="#article-17" aria-label="Article 17">Art. 17</a>
+        <p>On s'inscrit à une opération pour y participer, et on se désinscrit dès qu'on sait qu'on ne viendra pas.</p>
+      </li>
+      <li class="article revele" id="article-18">
+        <a class="article__num" href="#article-18" aria-label="Article 18">Art. 18</a>
+        <p>Le partage des gains est écrit dans l'ordre de mission, avant le départ. Il ne se renégocie pas au retour.</p>
+      </li>
+      <li class="article revele" id="article-19">
+        <a class="article__num" href="#article-19" aria-label="Article 19">Art. 19</a>
+        <p>Pendant l'opération, le chef d'opération a le dernier mot. On discute avant et après, jamais pendant l'engagement.</p>
+      </li>
+      <li class="article revele" id="article-20">
+        <a class="article__num" href="#article-20" aria-label="Article 20">Art. 20</a>
+        <p>Personne n'est laissé derrière. On rentre tous, ou l'on retourne chercher ceux qui manquent.</p>
+      </li>
+      <li class="article revele" id="article-21">
+        <a class="article__num" href="#article-21" aria-label="Article 21">Art. 21</a>
+        <p>Toute opération se clôt par un compte rendu : ce qui a marché, ce qui a coûté, ce qui change la prochaine fois.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="acte acte--texte acte--titre" id="regle-conduite">
+  <div class="contenu contenu--large">
+    <header class="titre-regle revele">
+      <p class="acte__num">Titre V</p>
+      <h2>Conduite</h2>
+      <p class="intro">Ce qui se fait, et ce qui exclut.</p>
+    </header>
+    <ol class="articles" role="list">
+      <li class="article revele" id="article-22">
+        <a class="article__num" href="#article-22" aria-label="Article 22">Art. 22</a>
+        <p>Le respect est dû à tous, dans l'Ordre comme en dehors. Les insultes, le harcèlement et les propos discriminatoires excluent.</p>
+      </li>
+      <li class="article revele" id="article-23">
+        <a class="article__num" href="#article-23" aria-label="Article 23">Art. 23</a>
+        <p>La triche, l'exploitation volontaire de failles du jeu et la vente d'objets du jeu contre de l'argent réel sont interdites.</p>
+      </li>
+      <li class="article revele" id="article-24">
+        <a class="article__num" href="#article-24" aria-label="Article 24">Art. 24</a>
+        <p>Aucun membre ne s'en prend en jeu à un autre membre, à son appareil ou à ses biens.</p>
+      </li>
+      <li class="article revele" id="article-25">
+        <a class="article__num" href="#article-25" aria-label="Article 25">Art. 25</a>
+        <p>Nul ne parle au nom de l'Ordre sans en avoir le droit. Ce droit s'ouvre à l'échelon d'Ange.</p>
+      </li>
+      <li class="article revele" id="article-26">
+        <a class="article__num" href="#article-26" aria-label="Article 26">Art. 26</a>
+        <p>Ce qui se dit dans les salons de l'Ordre reste dans les salons de l'Ordre.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="acte acte--texte acte--titre" id="regle-commandement">
+  <div class="contenu contenu--large">
+    <header class="titre-regle revele">
+      <p class="acte__num">Titre VI</p>
+      <h2>Commandement et sanctions</h2>
+      <p class="intro">Qui décide, et comment on corrige.</p>
+    </header>
+    <ol class="articles" role="list">
+      <li class="article revele" id="article-27">
+        <a class="article__num" href="#article-27" aria-label="Article 27">Art. 27</a>
+        <p>Le commandement répond. Toute question adressée à un officier reçoit une réponse, même quand la réponse est non.</p>
+      </li>
+      <li class="article revele" id="article-28">
+        <a class="article__num" href="#article-28" aria-label="Article 28">Art. 28</a>
+        <p>Un manquement se règle d'abord par la parole, puis par un avertissement écrit, puis par l'exclusion. Les Gardiens instruisent, le commandement décide.</p>
+      </li>
+      <li class="article revele" id="article-29">
+        <a class="article__num" href="#article-29" aria-label="Article 29">Art. 29</a>
+        <p>La Règle peut changer. Toute modification est annoncée, datée et motivée, et chaque membre en est informé avant qu'elle ne s'applique.</p>
+      </li>
+    </ol>
+  </div>
+</section>
+
+<section class="acte acte--appel" id="appel">
+  <div class="contenu contenu--centre">
+    <p class="appel__devise revele">Tout n'est que passage</p>
+    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
+    <p class="chapeau revele">
+      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
+      parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
+      le moment est maintenant.
+    </p>
+    <div class="portes portes--bas revele">
+      <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
+      <a class="porte" href="/rejoindre">Comment entrer</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="pied">
+    <p class="devise-pied">Tout n'est que passage</p>
+    <nav class="pied__plan" aria-label="Plan du site">
+          <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex">Codex</a>
+    <a href="/regle" aria-current="page">La Règle</a>
+    <a href="/divisions">Divisions</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+    </nav>
+    <nav aria-label="Liens de l'Ordre">
+      <a href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+      <a href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">RSI</a>
+      <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
+    </nav>
+    <p class="mention">
+      Site non officiel, sans but lucratif, sans affiliation avec Cloud Imperium
+      Games. Star Citizen, Roberts Space Industries et les noms de vaisseaux sont
+      des marques de Cloud Imperium Rights LLC. Les modèles 3D présentés ici
+      proviennent du holoviewer de Roberts Space Industries et restent la
+      propriété de leur éditeur. La station Le Seuil est une conception propre à
+      l'Ordre. Fait par la communauté.
+    </p>
+  </div>
+</footer>
+
+<script src="/vendor/three.min.js?v=7a7802bf4f" defer></script>
+<script src="/scene.js?v=5839ff321f" defer></script>
+<script src="/site.js?v=5c91f5aaed" defer></script>
+</body>
+</html>

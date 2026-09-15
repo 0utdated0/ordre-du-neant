@@ -2289,3 +2289,278 @@ h2.ascension__titre.balaye{margin-inline:0}
   opacity:var(--eclat,0);
   mix-blend-mode:screen;
 }
+
+
+/* =========================================================
+   PAGES DE TEXTE : CODEX, RÈGLE, DIVISIONS, REJOINDRE
+   ---------------------------------------------------------
+   Des sections qui se lisent au lieu de se regarder. Elles ne
+   prennent pas un écran entier chacune : un chapitre fait la
+   hauteur de son texte.
+   ========================================================= */
+.acte--texte{
+  min-height:auto;
+  padding-block:clamp(4rem,10vh,7.5rem);
+}
+.acte--codex-ouverture{
+  min-height:82vh;min-height:82svh;
+  padding-top:clamp(6rem,14vh,9rem);
+}
+.acte--texte::before{
+  /* un filet entre deux sections, qui s'éteint sur les bords */
+  content:'';position:absolute;left:10%;right:10%;top:0;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(238,240,244,.1),transparent);
+}
+.acte--codex-ouverture::before{display:none}
+
+.epigraphe,.citation{margin:2.4rem auto;padding:0;max-width:40ch}
+.epigraphe p,.citation p{
+  margin:0;
+  font-family:var(--titre);
+  font-size:clamp(.78rem,.7rem + .4vw,1rem);
+  letter-spacing:.24em;text-transform:uppercase;line-height:1.9;
+  color:var(--argent) !important;
+}
+.epigraphe{position:relative;padding-block:1.4rem}
+.epigraphe::before,.epigraphe::after{
+  content:'';position:absolute;left:50%;transform:translateX(-50%);
+  width:clamp(80px,14vw,150px);height:1px;
+  background:linear-gradient(90deg,transparent,var(--rouge),transparent);
+}
+.epigraphe::before{top:0}
+.epigraphe::after{bottom:0}
+.citation{border-left:2px solid var(--rouge);padding:.3rem 0 .3rem 1.4rem;margin:2rem 0}
+.citation p{text-align:left}
+
+/* ---------- lecture longue ---------- */
+.lecture{
+  position:relative;z-index:4;
+  width:100%;max-width:760px;
+  margin-inline:auto;
+  padding-inline:var(--marge);
+}
+.lecture__tete{margin-bottom:2.2rem}
+.lecture__tete h2{font-size:clamp(1.7rem,1.1rem + 2.4vw,3rem);margin-bottom:0}
+.lecture__corps p{
+  color:rgba(238,240,244,.74);
+  font-size:clamp(1rem,.96rem + .2vw,1.12rem);
+  line-height:1.85;
+  margin:0 0 1.35rem;
+  max-width:68ch;
+}
+.lettrine::first-letter{
+  float:left;
+  font-family:var(--titre);
+  font-size:3.6em;line-height:.9;
+  padding:.3rem .38rem 0 0;
+  color:var(--argent);
+  text-shadow:0 0 22px rgba(224,16,32,.55);
+}
+
+.echelons-codex{
+  list-style:none;margin:2rem 0 2.4rem;padding:0;
+  display:grid;gap:1px;
+  background:rgba(238,240,244,.08);
+  border:1px solid rgba(238,240,244,.08);
+}
+.echelons-codex li{
+  display:grid;grid-template-columns:3.2rem 1fr;column-gap:1rem;align-items:baseline;
+  padding:1.1rem 1.3rem;
+  background:rgba(4,4,6,.9);
+}
+.echelons-codex__rang{
+  grid-row:span 2;
+  font-family:var(--titre);font-size:1.7rem;color:rgba(238,240,244,.22);
+}
+.echelons-codex li:nth-child(n+5) .echelons-codex__rang{color:rgba(224,16,32,.55)}
+.echelons-codex h3{margin:0 0 .35rem;color:var(--argent)}
+.echelons-codex p{margin:0;color:var(--cendre);font-size:.95rem;line-height:1.6}
+
+.fonctions-codex,.noms-codex{margin:2rem 0 0;display:grid;gap:1.1rem}
+.fonctions-codex > div,.noms-codex > div{
+  padding:1.1rem 1.3rem;
+  border-left:2px solid rgba(224,16,32,.7);
+  background:linear-gradient(90deg,rgba(224,16,32,.06),transparent 70%);
+}
+.noms-codex{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1px;
+  background:rgba(238,240,244,.07);border:1px solid rgba(238,240,244,.07)}
+.noms-codex > div{border-left:0;background:rgba(4,4,6,.92)}
+/* neuf noms sur deux colonnes : le dernier prend la rangée entière
+   plutôt que de laisser une case vide à côté de lui */
+@media (min-width:640px){.noms-codex > div:last-child:nth-child(odd){grid-column:1 / -1}}
+.fonctions-codex dt,.noms-codex dt{
+  font-family:var(--titre);font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--argent);margin-bottom:.5rem;
+}
+.noms-codex dt{color:var(--braise)}
+.fonctions-codex dd,.noms-codex dd{margin:0;color:var(--cendre);font-size:.95rem;line-height:1.65}
+
+.usages-codex{list-style:none;margin:2rem 0 0;padding:0;display:grid;gap:1.6rem}
+.usages-codex li{position:relative;padding-left:1.6rem}
+.usages-codex li::before{
+  content:'';position:absolute;left:0;top:.45rem;width:7px;height:7px;
+  background:var(--rouge);transform:rotate(45deg);box-shadow:0 0 10px rgba(224,16,32,.8);
+}
+.usages-codex h3{margin:0 0 .45rem;color:var(--argent)}
+.usages-codex p{margin:0;color:var(--cendre);line-height:1.7}
+
+.temps-codex{list-style:none;margin:0;padding:0 0 0 1.6rem;position:relative}
+.temps-codex::before{
+  content:'';position:absolute;left:.3rem;top:.4rem;bottom:.4rem;width:1px;
+  background:linear-gradient(180deg,rgba(238,240,244,.25),var(--rouge));
+}
+.temps-codex li{position:relative;padding:0 0 2rem 1.2rem}
+.temps-codex li::before{
+  content:'';position:absolute;left:-1.6rem;top:.35rem;width:9px;height:9px;margin-left:.02rem;
+  border:1px solid rgba(238,240,244,.5);background:#000;transform:rotate(45deg);
+}
+.temps-codex__present::before{background:var(--rouge) !important;border-color:var(--braise) !important;
+  box-shadow:0 0 14px rgba(224,16,32,.9)}
+.temps-codex__marque{
+  display:block;margin-bottom:.35rem;
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.26em;text-transform:uppercase;
+  color:rgba(224,16,32,.85);
+}
+.temps-codex h3{margin:0 0 .4rem;color:var(--argent)}
+.temps-codex p{margin:0;color:var(--cendre);line-height:1.7}
+
+.renvois{display:flex;flex-wrap:wrap;gap:1.2rem 2rem;margin-top:2.6rem}
+.renvois--centre{justify-content:center}
+.renvoi-centre{text-align:center;margin:2.4rem 0 0}
+
+/* ---------- la Règle ---------- */
+.sommaire-regle{
+  list-style:none;margin:2.6rem auto 0;padding:0;max-width:760px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,230px),1fr));gap:1px;
+  background:rgba(238,240,244,.08);border:1px solid rgba(238,240,244,.08);
+  text-align:left;
+}
+.sommaire-regle a{
+  display:grid;grid-template-columns:2.2rem 1fr;align-items:baseline;row-gap:.25rem;
+  padding:1rem 1.1rem;background:rgba(4,4,6,.9);
+  color:var(--argent);text-decoration:none;font-size:.92rem;
+  transition:background .3s ease;
+}
+.sommaire-regle a:hover{background:rgba(224,16,32,.1)}
+.sommaire-regle span{grid-row:span 2;font-family:var(--titre);font-size:.7rem;color:var(--rouge)}
+.sommaire-regle em{font-style:normal;font-size:.72rem;color:var(--cendre);letter-spacing:.04em}
+
+.titre-regle{max-width:760px;margin:0 auto 2rem}
+.titre-regle h2{font-size:clamp(1.6rem,1.1rem + 2vw,2.7rem);margin-bottom:.6rem}
+.articles{list-style:none;margin:0 auto;padding:0;max-width:760px;display:grid;gap:.7rem}
+.article{
+  position:relative;
+  display:grid;grid-template-columns:5.2rem 1fr;gap:1rem;align-items:baseline;
+  padding:1.15rem 1.3rem;
+  border:1px solid rgba(238,240,244,.08);
+  background:linear-gradient(90deg,rgba(10,10,13,.92),rgba(3,3,5,.86));
+  scroll-margin-top:6rem;
+}
+.article__num{
+  font-family:var(--titre);font-size:.62rem;letter-spacing:.16em;
+  color:var(--rouge);text-decoration:none;white-space:nowrap;
+}
+.article__num:hover{color:var(--braise)}
+.article p{margin:0;color:rgba(238,240,244,.8);line-height:1.7;font-size:1rem}
+.article:target{
+  border-color:rgba(224,16,32,.6);
+  box-shadow:0 0 0 1px rgba(224,16,32,.35), 0 0 30px rgba(224,16,32,.15);
+}
+@media (max-width:520px){
+  .article{grid-template-columns:1fr;gap:.4rem}
+}
+
+/* ---------- les divisions ---------- */
+.divisions{display:grid;gap:1.2rem;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr))}
+.division{
+  position:relative;
+  padding:clamp(1.4rem,2.6vw,2.2rem);
+  border:1px solid rgba(238,240,244,.1);
+  background:linear-gradient(160deg,rgba(10,10,13,.94),rgba(3,3,5,.9));
+  scroll-margin-top:6rem;
+}
+.division::before{
+  content:'';position:absolute;left:0;top:0;width:44px;height:2px;background:var(--rouge);
+  box-shadow:0 0 14px rgba(224,16,32,.8);
+}
+.division__tete{display:grid;grid-template-columns:auto 1fr auto;align-items:baseline;column-gap:.9rem;margin-bottom:1.1rem}
+.division__num{font-family:var(--titre);font-size:.6rem;letter-spacing:.2em;color:var(--rouge)}
+.division__code{grid-column:3;font-family:var(--titre);font-size:.55rem;letter-spacing:.24em;color:rgba(134,139,149,.7)}
+.division__tete h3{grid-column:1 / -1;grid-row:2;margin:.6rem 0 .3rem;font-size:clamp(.95rem,.85rem + .4vw,1.2rem);color:var(--argent)}
+.division__devise{grid-column:1 / -1;grid-row:3;margin:0;color:var(--braise) !important;font-size:.9rem}
+.division__texte{color:rgba(238,240,244,.72) !important;line-height:1.75}
+.division__bloc h4{
+  margin:1.4rem 0 .8rem;font-family:var(--titre);font-weight:400;
+  font-size:.52rem;letter-spacing:.26em;text-transform:uppercase;color:rgba(134,139,149,.8);
+}
+.division__donnees{margin:1.3rem 0 0;padding-top:1.1rem;border-top:1px solid rgba(238,240,244,.08);display:grid;gap:.7rem}
+.division__donnees div{display:grid;grid-template-columns:9.5rem 1fr;gap:1rem}
+.division__donnees dt{font-family:var(--titre);font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(134,139,149,.75);padding-top:.2rem}
+.division__donnees dd{margin:0;color:var(--argent);font-size:.9rem}
+@media (max-width:520px){.division__donnees div{grid-template-columns:1fr;gap:.2rem}}
+
+.parcours,.etapes{
+  list-style:none;margin:0 0 3rem;padding:0;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:1px;
+  background:rgba(238,240,244,.08);border:1px solid rgba(238,240,244,.08);
+  counter-reset:etape;
+}
+.parcours li,.etapes li{position:relative;padding:1.5rem 1.4rem 1.7rem;background:rgba(4,4,6,.92)}
+.parcours li::after,.etapes li::after{
+  counter-increment:etape;content:counter(etape,decimal-leading-zero);
+  position:absolute;right:1.1rem;top:1rem;
+  font-family:var(--titre);font-size:1.6rem;color:rgba(238,240,244,.06);
+}
+.parcours__temps,.etapes__role{
+  display:inline-block;margin-bottom:.8rem;padding:.3rem .55rem;
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--braise);border:1px solid rgba(224,16,32,.45);
+}
+.parcours h3,.etapes h3{margin:0 0 .6rem;color:var(--argent)}
+.parcours p,.etapes p{margin:0;color:var(--cendre);font-size:.92rem;line-height:1.65}
+
+.modules{max-width:980px;margin:0 auto}
+.modules__titre{text-align:center;margin-bottom:1.4rem;color:var(--argent)}
+.modules__liste{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,290px),1fr));gap:1rem 2rem}
+.modules__liste li{display:grid;gap:.35rem;padding:.9rem 0;border-bottom:1px solid rgba(238,240,244,.07)}
+.modules__liste strong{font-family:var(--titre);font-weight:400;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--argent)}
+.modules__liste span{color:var(--cendre);font-size:.9rem;line-height:1.6}
+
+/* ---------- rejoindre ---------- */
+.duo-colonnes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:2rem 3rem;max-width:980px;margin:0 auto}
+.cartes-duo{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:1.2rem;margin-top:2.2rem;text-align:left}
+.carte-simple{padding:1.6rem 1.5rem;border:1px solid rgba(238,240,244,.1);background:linear-gradient(160deg,rgba(10,10,13,.92),rgba(3,3,5,.88))}
+.carte-simple h3{color:var(--argent);margin-bottom:.8rem}
+.carte-simple p{margin:0;font-size:.95rem;line-height:1.7}
+
+.faq{max-width:760px;margin:0 auto;text-align:left;border-top:1px solid rgba(238,240,244,.1)}
+.faq__item{border-bottom:1px solid rgba(238,240,244,.1)}
+.faq__item summary{
+  position:relative;list-style:none;cursor:pointer;
+  padding:1.2rem 3rem 1.2rem 0;
+  color:var(--argent);font-size:1.02rem;line-height:1.5;
+  transition:color .3s ease;
+}
+.faq__item summary::-webkit-details-marker{display:none}
+.faq__item summary::after{
+  content:'';position:absolute;right:.6rem;top:50%;width:10px;height:10px;
+  border-right:1px solid var(--rouge);border-bottom:1px solid var(--rouge);
+  transform:translateY(-70%) rotate(45deg);transition:transform .35s var(--sortie);
+}
+.faq__item[open] summary::after{transform:translateY(-30%) rotate(225deg)}
+.faq__item summary:hover{color:#fff}
+.faq__item p{margin:0 0 1.4rem;padding-right:2rem;color:var(--cendre);line-height:1.75}
+
+/* ---------- manifeste long ---------- */
+.manifeste{max-width:64ch;margin:1.6rem auto 0;text-align:left}
+.manifeste p{font-size:clamp(1rem,.96rem + .2vw,1.1rem);line-height:1.85;color:rgba(238,240,244,.72)}
+.manifeste__fin{
+  text-align:center;margin-top:2.2rem !important;
+  font-family:var(--titre);font-size:.72rem !important;letter-spacing:.28em;text-transform:uppercase;
+  color:var(--argent) !important;
+}
+
+/* Sept entrées de menu : entre 901 et 1180 px, le nom en toutes
+   lettres à côté de l'emblème passait sur deux ou trois lignes. On
+   le retire sur cette plage, l'emblème reste et mène à l'accueil. */
+@media (max-width:1180px){.barre__nom{display:none}}

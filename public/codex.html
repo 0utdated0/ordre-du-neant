@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     Page assemblée par outils/pages/batir.js.
+     Ne rien modifier ici : tout se perd au prochain assemblage.
+     Le contenu est dans outils/pages/sections, la coquille dans
+     outils/pages/gabarit.html, la répartition dans batir.js.
+     ============================================================ -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Le Codex - récit, échelons et usages | L'Ordre du Néant</title>
+<meta name="description" content="Le récit de l'Ordre du Néant : le convoi perdu, le Seuil, le sens des six échelons, des fonctions et du nom des appareils, et les usages de l'Ordre.">
+<link rel="canonical" href="https://ordre-du-neant.fr/codex">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="L'Ordre du Néant">
+<meta property="og:title" content="Le Codex - récit, échelons et usages | L'Ordre du Néant">
+<meta property="og:description" content="Le récit de l'Ordre du Néant : le convoi perdu, le Seuil, le sens des six échelons, des fonctions et du nom des appareils, et les usages de l'Ordre.">
+<meta property="og:url" content="https://ordre-du-neant.fr/codex">
+<meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="/assets/embleme-512.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v=6d6e6b8ec8">
+
+</head>
+
+<body class="page-codex">
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<canvas id="neant" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignettage" aria-hidden="true"></div>
+
+<div class="barre" id="barre">
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
+  <span class="barre__nom">L'Ordre du Néant</span>
+
+  <button class="barre__bouton" type="button" id="menu-bouton"
+          aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Sections du site">
+        <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex" aria-current="page">Codex</a>
+    <a href="/regle">La Règle</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+  </nav>
+
+  <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
+       d'admission. Ce bouton-ci ouvre le Discord : deux destinations
+       différentes ne peuvent pas porter le même mot. -->
+  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+</div>
+<nav class="rail" id="rail" aria-label="Sections">
+  <a href="#codex-neant" data-cible="codex-neant"><span>I</span><em>Le Néant</em></a>
+  <a href="#codex-convoi" data-cible="codex-convoi"><span>II</span><em>Le convoi perdu</em></a>
+  <a href="#codex-seuil" data-cible="codex-seuil"><span>III</span><em>Le Seuil</em></a>
+  <a href="#codex-echelle" data-cible="codex-echelle"><span>IV</span><em>L'échelle</em></a>
+  <a href="#codex-fonctions" data-cible="codex-fonctions"><span>V</span><em>Les fonctions</em></a>
+  <a href="#codex-noms" data-cible="codex-noms"><span>VI</span><em>Les noms</em></a>
+  <a href="#codex-usages" data-cible="codex-usages"><span>VII</span><em>Les usages</em></a>
+  <a href="#codex-temps" data-cible="codex-temps"><span>VIII</span><em>Les quatre temps</em></a>
+  <a href="#appel" data-cible="appel"><span>IX</span><em>Entrer</em></a>
+</nav>
+<main id="contenu">
+<section class="acte acte--texte acte--codex-ouverture" id="codex-prologue">
+  <div class="contenu contenu--centre">
+    <p class="acte__num revele">Le Codex</p>
+    <h2 class="revele balaye">Ce que l'Ordre se raconte</h2>
+    <p class="chapeau revele">
+      Toute organisation finit par avoir une histoire. La nôtre commence par une perte,
+      et elle tient en une phrase que chacun connaît avant d'entrer.
+    </p>
+    <blockquote class="epigraphe revele">
+      <p>Rien ne dure. Rien ne se garde. Tout n'est que passage.</p>
+    </blockquote>
+    <p class="revele">
+      Le Codex rassemble le récit de l'Ordre, le sens de ses noms et ses usages. Ce qui
+      se passe en jeu y entre quand cela a eu lieu. Le reste est la manière dont nous
+      tenons ces moments ensemble. Personne n'est obligé d'y croire, ni d'en jouer le rôle :
+      il suffit de savoir d'où viennent les mots qu'on emploie ici.
+    </p>
+  </div>
+</section>
+
+<section class="acte acte--texte" id="codex-neant">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre I</p>
+      <h2>Le Néant</h2>
+    </header>
+    <div class="lecture__corps revele">
+      <p class="lettrine">
+        Entre deux points de travail, il y a des milliards de kilomètres de rien. Les
+        cartes les appellent des routes quantiques, les pilotes les appellent le vide.
+        L'Ordre les appelle le Néant, et il n'y met aucune menace.
+      </p>
+      <p>
+        Le Néant n'est pas la destruction. C'est l'espace qui sépare ce qu'on quitte de ce
+        qu'on rejoint : le temps d'un saut, le silence d'un trajet, l'attente au bord d'une
+        ceinture d'astéroïdes. C'est là qu'un équipage se découvre, parce qu'il n'y a plus
+        personne d'autre.
+      </p>
+      <p>
+        Dans le verse, tout ce qui se possède finit par se perdre. Les coques brûlent, les
+        cargaisons changent de mains, les stations ferment leurs ponts. Ceux qui s'attachent
+        à ce qu'ils ont passent leur vie à le défendre. Ceux qui l'acceptent peuvent enfin
+        s'occuper d'autre chose : de la manière dont ils se tiennent pendant que ça arrive.
+      </p>
+      <p>
+        L'Ordre est né de cette idée. On ne juge personne sur ce qu'il a perdu. On le juge
+        sur ce qu'il a fait au moment de le perdre.
+      </p>
+    </div>
+  </article>
+</section>
+
+<section class="acte acte--texte" id="codex-convoi">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre II</p>
+      <h2>Le convoi perdu</h2>
+    </header>
+    <div class="lecture__corps revele">
+      <p class="lettrine">
+        Le récit de fondation ne donne pas de noms. Il parle d'un cargo lourd, de quelques
+        chasseurs d'escorte et d'une poignée de pilotes francophones qui ne se connaissaient
+        pas encore très bien. Ils devaient mener une cargaison jusqu'à un point de saut.
+      </p>
+      <p>
+        Quelqu'un les attendait. Le cargo a été perdu, la cargaison aussi, et deux des
+        chasseurs avec. Personne n'est venu les chercher. Il n'y avait pas d'organisation
+        derrière eux pour envoyer des renforts, ni pour payer les pertes, ni même pour
+        demander ce qui s'était passé.
+      </p>
+      <p>
+        Ce dont ils se sont souvenus, pourtant, ce n'est pas la perte. C'est que personne
+        n'avait fui. Ceux qui avaient encore un appareil étaient retournés chercher ceux qui
+        n'en avaient plus, et tout le monde était rentré.
+      </p>
+      <blockquote class="citation">
+        <p>On rentre. Tous.</p>
+      </blockquote>
+      <p>
+        Ils ont décidé que cette phrase valait plus que la cargaison, et qu'elle méritait une
+        maison. L'Ordre du Néant est cette maison. La phrase est devenue l'article 20 de la
+        Règle.
+      </p>
+    </div>
+  </article>
+</section>
+
+<section class="acte acte--texte" id="codex-seuil">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre III</p>
+      <h2>Le Seuil</h2>
+    </header>
+    <div class="lecture__corps revele">
+      <p class="lettrine">
+        Une maison a une porte. Celle de l'Ordre s'appelle le Seuil : une station d'attache
+        faite d'un fût segmenté, d'anneaux empilés, de deux ponts d'amarrage et de quatre
+        bras terminés en croix. On y entre, on y repart.
+      </p>
+      <p>
+        Le Seuil n'est pas une forteresse. Rien n'y est entreposé pour toujours, et personne
+        n'y habite vraiment. C'est le point où l'on se retrouve avant de partir et où l'on
+        rend compte en rentrant. Ses ponts ne restent jamais occupés longtemps.
+      </p>
+      <p>
+        Tout nouveau venu passe par le Seuil. Sur le serveur de l'Ordre, c'est le sas
+        d'admission : on y arrive Initié, on y dépose un dossier, on en sort Adepte quand
+        l'entrée est prononcée. Franchir le Seuil ne donne aucun droit particulier. Cela
+        signifie seulement qu'on a choisi d'entrer, et qu'on a été attendu.
+      </p>
+    </div>
+  </article>
+</section>
+
+<section class="acte acte--texte" id="codex-echelle">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre IV</p>
+      <h2>L'échelle</h2>
+    </header>
+    <div class="lecture__corps revele">
+      <p class="lettrine">
+        Les échelons de l'Ordre portent des noms anciens. Ce n'est pas de la dévotion : ce
+        sont les seuls mots que nous ayons trouvés pour dire qu'on ne monte pas pour être
+        au-dessus des autres, mais pour porter davantage.
+      </p>
+    </div>
+    <ol class="echelons-codex revele" role="list">
+      <li>
+        <span class="echelons-codex__rang">0</span>
+        <h3>Adepte</h3>
+        <p>Celui qui a franchi le Seuil. Il a lu la Règle et l'a acceptée. C'est tout, et c'est déjà beaucoup.</p>
+      </li>
+      <li>
+        <span class="echelons-codex__rang">1</span>
+        <h3>Paladin</h3>
+        <p>Celui qui tient. Il est revenu, puis revenu encore. On sait qu'on peut compter sur sa présence.</p>
+      </li>
+      <li>
+        <span class="echelons-codex__rang">2</span>
+        <h3>Sentinelle</h3>
+        <p>Celui qui veille. Il connaît les salons, les usages et les nouveaux, et il remarque quand quelqu'un manque.</p>
+      </li>
+      <li>
+        <span class="echelons-codex__rang">3</span>
+        <h3>Ange</h3>
+        <p>Le messager, au sens premier du mot. Il peut inviter et parler au nom de l'Ordre, parce qu'on sait ce qu'il en dira.</p>
+      </li>
+      <li>
+        <span class="echelons-codex__rang">4</span>
+        <h3>Archange</h3>
+        <p>Celui qui mène. Il organise les sorties, écrit les ordres de mission et ramène tout le monde.</p>
+      </li>
+      <li>
+        <span class="echelons-codex__rang">5</span>
+        <h3>Séraphin</h3>
+        <p>Ceux qui brûlent pour l'Ordre. Leur parole passe en premier, et c'est à eux qu'on demande des comptes.</p>
+      </li>
+    </ol>
+    <div class="lecture__corps revele">
+      <p>
+        Les trois premiers échelons se gagnent par la présence. Les deux derniers sont
+        conférés. Aucun ne s'achète et aucun ne se demande : un membre qui réclame un
+        échelon montre surtout qu'il ne l'a pas encore compris.
+      </p>
+    </div>
+  </article>
+</section>
+
+<section class="acte acte--texte" id="codex-fonctions">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre V</p>
+      <h2>Les fonctions</h2>
+    </header>
+    <div class="lecture__corps revele">
+      <p class="lettrine">
+        L'échelle dit ce qu'un membre a traversé. Les fonctions disent ce qu'il fait pour
+        les autres. Elles se cumulent avec n'importe quel échelon et se rendent quand on ne
+        peut plus les tenir.
+      </p>
+    </div>
+    <dl class="fonctions-codex revele">
+      <div>
+        <dt>Ancien</dt>
+        <dd>La mémoire. Ceux qui étaient là au début, ou qui ont assez duré pour s'en souvenir à leur place. On les consulte avant de changer ce qui existe.</dd>
+      </div>
+      <div>
+        <dt>Gardien</dt>
+        <dd>Celui qui garde le Seuil. Il accueille les Initiés, instruit les dossiers et veille au respect de la Règle. Il ne punit pas : il instruit, le commandement décide.</dd>
+      </div>
+      <div>
+        <dt>Missionnaire</dt>
+        <dd>Celui qui va chercher. Il représente l'Ordre au-dehors, auprès des pilotes et des organisations amies, et ramène ceux qui méritent d'être attendus.</dd>
+      </div>
+      <div>
+        <dt>Évangile</dt>
+        <dd>Celui qui porte la nouvelle. Annonces, comptes rendus d'opération, tenue du Codex : ce qui arrive à l'Ordre est écrit, et c'est lui qui l'écrit.</dd>
+      </div>
+    </dl>
+  </article>
+</section>
+
+<section class="acte acte--texte" id="codex-noms">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre VI</p>
+      <h2>Le nom des appareils</h2>
+    </header>
+    <div class="lecture__corps revele">
+      <p class="lettrine">
+        Un appareil de l'Ordre porte le nom de ce qu'il fait, jamais de ce qu'il est. Le
+        modèle change, le constructeur change, la coque finit toujours par être perdue. Le
+        rôle, lui, se transmet d'une coque à la suivante.
+      </p>
+    </div>
+    <dl class="noms-codex revele">
+      <div><dt>Le Silence</dt><dd>On ne l'entend pas arriver, et après son passage il n'y a plus rien à dire. Le bâtiment qui franchit les points de saut.</dd></div>
+      <div><dt>L'Écueil</dt><dd>Ce sur quoi une attaque vient se briser. La frégate qui tient un secteur seule en attendant le reste.</dd></div>
+      <div><dt>Le Passeur</dt><dd>Celui qui fait traverser. La corvette qui accompagne un convoi d'un bout à l'autre du vide.</dd></div>
+      <div><dt>Le Rempart</dt><dd>Il ne poursuit personne. Il se met entre la cargaison et ce qui arrive.</dd></div>
+      <div><dt>Le Portefaix</dt><dd>Le vieux nom de ceux qui portaient les charges sur leur dos. Lent et indispensable.</dd></div>
+      <div><dt>La Carrière</dt><dd>D'où l'on tire la matière. Elle découpe les épaves que personne n'est venu chercher.</dd></div>
+      <div><dt>Le Gisement</dt><dd>Là où la richesse dort dans la roche. Elle entre dans une ceinture et n'en ressort que pleine.</dd></div>
+      <div><dt>La Sentinelle</dt><dd>Le premier appareil qu'un Adepte pilote pour l'Ordre. Elle veille en avant des autres.</dd></div>
+      <div><dt>Le Seuil</dt><dd>La porte, le point de ralliement, le lieu où tout commence et où tout revient.</dd></div>
+    </dl>
+  </article>
+</section>
+
+<section class="acte acte--texte" id="codex-usages">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre VII</p>
+      <h2>Les usages</h2>
+    </header>
+    <div class="lecture__corps revele">
+      <p class="lettrine">
+        Quelques habitudes se sont installées avant même d'être écrites. Elles ne figurent
+        pas toutes dans la Règle, et personne ne sera exclu pour les avoir oubliées. Mais on
+        les reconnaît vite chez ceux qui sont là depuis longtemps.
+      </p>
+    </div>
+    <ul class="usages-codex revele" role="list">
+      <li><h3>L'ordre de mission</h3><p>Une sortie commence par un texte : objectif, lieu, heure, appareils, rôles, partage. Si ce n'est pas écrit, ce n'est pas une opération de l'Ordre.</p></li>
+      <li><h3>Le compte rendu</h3><p>Une sortie finit par trois lignes : ce qui a marché, ce qui a coûté, ce qui change la prochaine fois. On nomme les erreurs, jamais les coupables.</p></li>
+      <li><h3>Le relevé des pertes</h3><p>Chaque coque perdue en opération est inscrite avec son nom de rôle et la date. Pas pour s'en plaindre : pour se souvenir de ce qu'elle a permis.</p></li>
+      <li><h3>Le retour</h3><p>Personne ne quitte le vocal d'une opération tant que tout le monde n'est pas rentré ou pris en charge. On rentre. Tous.</p></li>
+      <li><h3>La signature</h3><p>Les annonces de l'Ordre se terminent par la devise. Ce n'est pas une formule de politesse, c'est un rappel : ce qu'on vient d'annoncer ne durera pas non plus.</p></li>
+    </ul>
+  </article>
+</section>
+
+<section class="acte acte--texte" id="codex-temps">
+  <article class="lecture">
+    <header class="lecture__tete revele">
+      <p class="acte__num">Chapitre VIII</p>
+      <h2>Les quatre temps</h2>
+    </header>
+    <ol class="temps-codex revele" role="list">
+      <li>
+        <span class="temps-codex__marque">Premier temps</span>
+        <h3>La perte</h3>
+        <p>Un convoi disparaît près d'un point de saut. Ceux qui en reviennent décident de ne plus voler seuls.</p>
+      </li>
+      <li>
+        <span class="temps-codex__marque">Deuxième temps</span>
+        <h3>Le Seuil</h3>
+        <p>L'Ordre se donne une porte. On y entre, on y repart, et chacun y est attendu.</p>
+      </li>
+      <li>
+        <span class="temps-codex__marque">Troisième temps</span>
+        <h3>La Règle</h3>
+        <p>Ce qui allait de soi est écrit en vingt-neuf articles, pour que personne n'ait à le deviner.</p>
+      </li>
+      <li class="temps-codex__present">
+        <span class="temps-codex__marque">Maintenant</span>
+        <h3>Les premiers</h3>
+        <p>L'Ordre est jeune et encore réduit. Ceux qui entrent aujourd'hui ne liront pas le Codex : ils l'écriront.</p>
+      </li>
+    </ol>
+    <nav class="renvois revele" aria-label="Pour aller plus loin">
+      <a class="lien-clair" href="/regle">Lire la Règle</a>
+      <a class="lien-clair" href="/divisions">Découvrir les divisions</a>
+      <a class="lien-clair" href="/rejoindre">Franchir le Seuil</a>
+    </nav>
+  </article>
+</section>
+
+<section class="acte acte--appel" id="appel">
+  <div class="contenu contenu--centre">
+    <p class="appel__devise revele">Tout n'est que passage</p>
+    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
+    <p class="chapeau revele">
+      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
+      parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
+      le moment est maintenant.
+    </p>
+    <div class="portes portes--bas revele">
+      <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
+      <a class="porte" href="/rejoindre">Comment entrer</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="pied">
+    <p class="devise-pied">Tout n'est que passage</p>
+    <nav class="pied__plan" aria-label="Plan du site">
+          <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex" aria-current="page">Codex</a>
+    <a href="/regle">La Règle</a>
+    <a href="/divisions">Divisions</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+    </nav>
+    <nav aria-label="Liens de l'Ordre">
+      <a href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+      <a href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">RSI</a>
+      <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
+    </nav>
+    <p class="mention">
+      Site non officiel, sans but lucratif, sans affiliation avec Cloud Imperium
+      Games. Star Citizen, Roberts Space Industries et les noms de vaisseaux sont
+      des marques de Cloud Imperium Rights LLC. Les modèles 3D présentés ici
+      proviennent du holoviewer de Roberts Space Industries et restent la
+      propriété de leur éditeur. La station Le Seuil est une conception propre à
+      l'Ordre. Fait par la communauté.
+    </p>
+  </div>
+</footer>
+
+<script src="/vendor/three.min.js?v=7a7802bf4f" defer></script>
+<script src="/scene.js?v=5839ff321f" defer></script>
+<script src="/site.js?v=5c91f5aaed" defer></script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     Page assemblée par outils/pages/batir.js.
+     Ne rien modifier ici : tout se perd au prochain assemblage.
+     Le contenu est dans outils/pages/sections, la coquille dans
+     outils/pages/gabarit.html, la répartition dans batir.js.
+     ============================================================ -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Divisions et instruction | L'Ordre du Néant</title>
+<meta name="description" content="Les huit divisions de l'Ordre du Néant en détail : missions, activités, appareils typiques, et l'instruction des nouveaux membres pendant leur premier mois.">
+<link rel="canonical" href="https://ordre-du-neant.fr/divisions">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="L'Ordre du Néant">
+<meta property="og:title" content="Divisions et instruction | L'Ordre du Néant">
+<meta property="og:description" content="Les huit divisions de l'Ordre du Néant en détail : missions, activités, appareils typiques, et l'instruction des nouveaux membres pendant leur premier mois.">
+<meta property="og:url" content="https://ordre-du-neant.fr/divisions">
+<meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="/assets/embleme-512.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v=6d6e6b8ec8">
+
+</head>
+
+<body class="page-divisions">
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<canvas id="neant" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignettage" aria-hidden="true"></div>
+
+<div class="barre" id="barre">
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
+  <span class="barre__nom">L'Ordre du Néant</span>
+
+  <button class="barre__bouton" type="button" id="menu-bouton"
+          aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Sections du site">
+        <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex">Codex</a>
+    <a href="/regle">La Règle</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+  </nav>
+
+  <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
+       d'admission. Ce bouton-ci ouvre le Discord : deux destinations
+       différentes ne peuvent pas porter le même mot. -->
+  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+</div>
+<nav class="rail" id="rail" aria-label="Sections">
+  <a href="#divisions-liste" data-cible="divisions-liste"><span>I</span><em>Divisions</em></a>
+  <a href="#instruction" data-cible="instruction"><span>II</span><em>Instruction</em></a>
+  <a href="#appel" data-cible="appel"><span>III</span><em>Entrer</em></a>
+</nav>
+<main id="contenu">
+<section class="acte acte--texte acte--codex-ouverture" id="divisions-ouverture">
+  <div class="contenu contenu--centre">
+    <p class="acte__num revele">Divisions et instruction</p>
+    <h2 class="revele balaye">Chacun son métier, personne seul</h2>
+    <p class="chapeau revele">
+      L'Ordre est organisé comme un équipage : huit métiers qui ont besoin les uns des autres.
+      Un convoi mobilise la Logistique, la Sécurité et souvent le Médical. Une expédition
+      part avec l'Exploration et revient chez l'Extraction.
+    </p>
+    <p class="revele">
+      On ne choisit pas une division pour la vie, et on n'a pas besoin d'y exceller pour y
+      entrer. On y vient pour apprendre un métier auprès de ceux qui le pratiquent déjà.
+    </p>
+  </div>
+</section>
+
+<section class="acte acte--texte" id="divisions-liste">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">Acte I</p>
+      <h2 class="balaye">Les huit divisions</h2>
+      <p class="intro">
+        Chaque division a ses salons, ses référents et ses opérations. On en choisit
+        librement, la plupart des membres en suivent deux ou trois. Les appareils cités sont
+        ceux qu'on y croise le plus, aucun n'est exigé pour entrer.
+      </p>
+    </div>
+    <div class="divisions">
+    <article class="division revele" id="division-logistique">
+      <header class="division__tete">
+        <span class="division__num">01</span>
+        <span class="division__code">LOG</span>
+        <h3>Logistique</h3>
+        <p class="division__devise">Faire arriver.</p>
+      </header>
+      <p class="division__texte">Une opération qui n'est pas ravitaillée s'arrête, une cargaison qui n'arrive pas ne vaut rien. La Logistique organise ce qui circule : ce qui part, ce qui revient, et dans quel ordre.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Transport de marchandises entre stations et avant-postes</li>
+          <li>Ravitaillement des opérations longues en carburant, munitions et fournitures</li>
+          <li>Préparation des convois avec la Sécurité : route, horaires, escorte</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Caterpillar, C2 Hercules, Hull C, Cutlass Black</dd></div>
+        <div><dt>Travaille avec</dt><dd>Sécurité, Industrie</dd></div>
+      </dl>
+    </article>
+    <article class="division revele" id="division-extraction">
+      <header class="division__tete">
+        <span class="division__num">02</span>
+        <span class="division__code">EXT</span>
+        <h3>Extraction</h3>
+        <p class="division__devise">Arracher la matière à la roche.</p>
+      </header>
+      <p class="division__texte">Le minerai ne se ramasse pas au sol. L'Extraction prospecte, fore et remplit les soutes, en surface comme dans les ceintures d'astéroïdes, puis mène le minerai jusqu'au raffinage.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Prospection et relevé des gisements</li>
+          <li>Minage en équipage, du véhicule de surface à la plateforme de forage</li>
+          <li>Cycles de raffinage et revente coordonnée avec l'Industrie</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Prospector, MOLE, ROC, Orion</dd></div>
+        <div><dt>Travaille avec</dt><dd>Exploration, Industrie, Sécurité</dd></div>
+      </dl>
+    </article>
+    <article class="division revele" id="division-combat">
+      <header class="division__tete">
+        <span class="division__num">03</span>
+        <span class="division__code">CBT</span>
+        <h3>Combat</h3>
+        <p class="division__devise">Frapper quand il le faut.</p>
+      </header>
+      <p class="division__texte">Le Combat ne cherche pas la bagarre. Il prend des contrats, forme des escadrilles et défend les intérêts de l'Ordre quand quelqu'un s'en prend à ce qu'on a construit.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Contrats de primes en escadrille</li>
+          <li>Interventions rapides en équipe</li>
+          <li>Défense des opérations et des convois attaqués</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Gladius, Arrow, Hornet Mk II, Perseus</dd></div>
+        <div><dt>Travaille avec</dt><dd>Sécurité, Médical et sauvetage</dd></div>
+      </dl>
+    </article>
+    <article class="division revele" id="division-securite">
+      <header class="division__tete">
+        <span class="division__num">04</span>
+        <span class="division__code">SEC</span>
+        <h3>Sécurité</h3>
+        <p class="division__devise">Dissuader avant d'avoir à combattre.</p>
+      </header>
+      <p class="division__texte">La meilleure attaque est celle qui n'a pas lieu. La Sécurité escorte, patrouille et protège les sites de travail, pour que les autres divisions puissent faire leur métier sans regarder derrière elles.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Escorte de convois et de plateformes d'extraction</li>
+          <li>Protection de sites pendant les opérations</li>
+          <li>Patrouilles et reconnaissance des approches</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Polaris, Hammerhead, Constellation Andromeda, Cutlass Black</dd></div>
+        <div><dt>Travaille avec</dt><dd>Logistique, Extraction, Combat</dd></div>
+      </dl>
+    </article>
+    <article class="division revele" id="division-exploration">
+      <header class="division__tete">
+        <span class="division__num">05</span>
+        <span class="division__code">EXP</span>
+        <h3>Exploration</h3>
+        <p class="division__devise">Voir avant les autres.</p>
+      </header>
+      <p class="division__texte">Personne n'engage un convoi sur une route qu'il ne connaît pas. L'Exploration part devant, relève ce qu'elle trouve et revient avec des cartes, des gisements et des épaves à signaler.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Reconnaissance avant les opérations</li>
+          <li>Relevé de gisements, d'épaves et de points d'intérêt</li>
+          <li>Expéditions longues hors des routes habituelles, jusque dans Pyro</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Terrapin, Carrack, 600i Explorer</dd></div>
+        <div><dt>Travaille avec</dt><dd>Extraction, Ingénierie, Sécurité</dd></div>
+      </dl>
+    </article>
+    <article class="division revele" id="division-medical">
+      <header class="division__tete">
+        <span class="division__num">06</span>
+        <span class="division__code">MED</span>
+        <h3>Médical et sauvetage</h3>
+        <p class="division__devise">Ramener tout le monde.</p>
+      </header>
+      <p class="division__texte">L'article 20 de la Règle tient en une phrase : personne n'est laissé derrière. Le Médical et sauvetage est la division qui rend cette phrase possible, en opération comme en dehors.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Réponse aux balises de détresse des membres</li>
+          <li>Soins et réanimation sur le terrain</li>
+          <li>Évacuation des équipages pendant et après un engagement</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Cutlass Red, C8R Pisces Rescue, Carrack</dd></div>
+        <div><dt>Travaille avec</dt><dd>Combat, Sécurité, Exploration</dd></div>
+      </dl>
+    </article>
+    <article class="division revele" id="division-ingenierie">
+      <header class="division__tete">
+        <span class="division__num">07</span>
+        <span class="division__code">ING</span>
+        <h3>Ingénierie</h3>
+        <p class="division__devise">Garder les coques en vie.</p>
+      </header>
+      <p class="division__texte">À bord d'un appareil à équipage, quelqu'un doit tenir l'énergie, le refroidissement et les réparations pendant que les autres pilotent et tirent. L'Ingénierie forme ces équipages, et récupère ce qui reste des coques qui n'ont pas tenu.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Postes d'ingénieur à bord des appareils multi-équipage</li>
+          <li>Récupération d'épaves et revente des matériaux</li>
+          <li>Réparation et ravitaillement en vol</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Vulture, Reclaimer, Starfarer</dd></div>
+        <div><dt>Travaille avec</dt><dd>Industrie, Exploration, Logistique</dd></div>
+      </dl>
+    </article>
+    <article class="division revele" id="division-industrie">
+      <header class="division__tete">
+        <span class="division__num">08</span>
+        <span class="division__code">IND</span>
+        <h3>Industrie</h3>
+        <p class="division__devise">Transformer le travail en ressources.</p>
+      </header>
+      <p class="division__texte">Ce que l'Ordre extrait, récupère et transporte doit finir quelque part. L'Industrie tient le négoce, suit les prix et fait vivre un marché interne où les membres s'échangent ce dont ils ont besoin.</p>
+      <div class="division__bloc">
+        <h4>Sur le terrain</h4>
+        <ul class="liste" role="list">
+          <li>Négoce de marchandises et suivi des cours</li>
+          <li>Revente coordonnée du minerai raffiné et des matériaux récupérés</li>
+          <li>Marché interne entre membres, à prix d'Ordre</li>
+        </ul>
+      </div>
+      <dl class="division__donnees">
+        <div><dt>Appareils typiques</dt><dd>Hull C, Caterpillar, Freelancer MAX</dd></div>
+        <div><dt>Travaille avec</dt><dd>Logistique, Extraction, Ingénierie</dd></div>
+      </dl>
+    </article>
+    </div>
+  </div>
+</section>
+
+<section class="acte acte--texte" id="instruction">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">Acte II</p>
+      <h2 class="balaye">L'instruction</h2>
+      <p class="intro">
+        Personne n'apprend seul. Chaque Adepte est suivi par un référent pendant son premier
+        mois, et les divisions ouvrent régulièrement des séances pour ceux qui veulent
+        progresser.
+      </p>
+    </div>
+
+    <ol class="parcours revele" role="list">
+      <li>
+        <span class="parcours__temps">Semaine 1</span>
+        <h3>Le Seuil</h3>
+        <p>Visite des salons, réglages du vocal et des commandes, présentation au référent. Premier vol en patrouille avec un membre expérimenté.</p>
+      </li>
+      <li>
+        <span class="parcours__temps">Semaine 2</span>
+        <h3>La formation</h3>
+        <p>Vol en formation, communications radio, lecture d'un ordre de mission. Les bases qui servent dans toutes les divisions.</p>
+      </li>
+      <li>
+        <span class="parcours__temps">Semaine 3</span>
+        <h3>La première sortie</h3>
+        <p>Participation à une opération encadrée, dans la division de son choix, à un poste simple et avec un référent sur le même canal.</p>
+      </li>
+      <li>
+        <span class="parcours__temps">Semaine 4</span>
+        <h3>Le choix</h3>
+        <p>Un point avec le référent : ce qui a plu, ce qui a coûté, les divisions à suivre ensuite. L'Adepte vole désormais sans tuteur.</p>
+      </li>
+    </ol>
+
+    <div class="modules revele">
+      <h3 class="modules__titre">Les séances ouvertes</h3>
+      <ul class="modules__liste" role="list">
+        <li><strong>Vol en formation</strong><span>Tenir sa place, suivre le chef de patrouille, changer de formation à la voix.</span></li>
+        <li><strong>Escorte de convoi</strong><span>Placement autour d'un cargo, gestion des menaces, communication avec le convoi.</span></li>
+        <li><strong>Minage et raffinage</strong><span>Prospection, fracturation, choix du raffinage et calcul du partage.</span></li>
+        <li><strong>Récupération d'épaves</strong><span>Découpe, tri des matériaux, revente.</span></li>
+        <li><strong>Secours</strong><span>Réponse aux balises, soins sur le terrain, évacuation sous le feu.</span></li>
+        <li><strong>Postes d'équipage</strong><span>Ingénieur, tourelle, copilote : tenir un poste à bord d'un appareil multi-équipage.</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="acte acte--appel" id="appel">
+  <div class="contenu contenu--centre">
+    <p class="appel__devise revele">Tout n'est que passage</p>
+    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
+    <p class="chapeau revele">
+      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
+      parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
+      le moment est maintenant.
+    </p>
+    <div class="portes portes--bas revele">
+      <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
+      <a class="porte" href="/rejoindre">Comment entrer</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="pied">
+    <p class="devise-pied">Tout n'est que passage</p>
+    <nav class="pied__plan" aria-label="Plan du site">
+          <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex">Codex</a>
+    <a href="/regle">La Règle</a>
+    <a href="/divisions" aria-current="page">Divisions</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+    </nav>
+    <nav aria-label="Liens de l'Ordre">
+      <a href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+      <a href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">RSI</a>
+      <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
+    </nav>
+    <p class="mention">
+      Site non officiel, sans but lucratif, sans affiliation avec Cloud Imperium
+      Games. Star Citizen, Roberts Space Industries et les noms de vaisseaux sont
+      des marques de Cloud Imperium Rights LLC. Les modèles 3D présentés ici
+      proviennent du holoviewer de Roberts Space Industries et restent la
+      propriété de leur éditeur. La station Le Seuil est une conception propre à
+      l'Ordre. Fait par la communauté.
+    </p>
+  </div>
+</footer>
+
+<script src="/vendor/three.min.js?v=7a7802bf4f" defer></script>
+<script src="/scene.js?v=5839ff321f" defer></script>
+<script src="/site.js?v=5c91f5aaed" defer></script>
+</body>
+</html>

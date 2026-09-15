@@ -1,7 +1,7 @@
 # Les pages
 
 Le site tenait sur une seule page de onze actes. Il en a maintenant
-cinq, avec un menu, parce qu'un site d'organisation doit pouvoir
+huit, avec un menu, parce qu'un site d'organisation doit pouvoir
 être envoyé par morceaux : « voilà nos règles », « voilà notre
 flotte ». Une ancre dans une page unique ne fait pas ça.
 
@@ -9,9 +9,12 @@ flotte ». Une ancre dans une page unique ne fait pas ça.
 |---|---|---|
 | `/` | `index.html` | L'histoire. Seulement de la 3D et l'appel au Discord en bas. |
 | `/ordre` | `ordre.html` | Manifeste, divisions, ascension avec sa tour, la Règle. |
+| `/codex` | `codex.html` | Le récit : le Néant, le convoi perdu, le Seuil, l'échelle, les fonctions, le nom des appareils, les usages. |
+| `/regle` | `regle.html` | La Règle en vingt-neuf articles, six titres, une ancre par article (`/regle#article-20`). |
+| `/divisions` | `divisions.html` | Les huit divisions en détail et l'instruction du premier mois. Hors du menu du haut (`horsMenu`), présente dans le plan du pied. |
 | `/flotte` | `flotte.html` | La table d'hologrammes. |
 | `/vie` | `vie.html` | La Vigie en direct, les opérations, la galerie. |
-| `/rejoindre` | `rejoindre.html` | Conditions, sas d'admission, parrainage. |
+| `/rejoindre` | `rejoindre.html` | Conditions, sas d'admission, parrainage, parcours d'entrée, Alliés, questions fréquentes. |
 
 ## Assemblage
 
