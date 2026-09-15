@@ -363,7 +363,13 @@
       if (!n.material) { return; }
       var mats = Array.isArray(n.material) ? n.material : [n.material];
       mats.forEach(function (m) {
-        if (m.transparent) { liste.push({ m: m, base: m.opacity }); }
+        /* On sépare le corps sombre des arêtes lumineuses : au
+           fondu, les arêtes doivent mourir les premières, sinon
+           le bâtiment finit en spectre blanc au lieu de
+           s'enfoncer dans le noir de la gorge. */
+        if (m.transparent) {
+          liste.push({ m: m, base: m.opacity, vif: m.blending === THREE.AdditiveBlending });
+        }
       });
     });
     return liste;
@@ -473,6 +479,12 @@
     var entree    = palier(avance, 0.58, 0.90);
     var fermeture = palier(avance, 0.88, 1.0);
 
+    /* Tout ce qui est un voile additif large doit s'effacer avant
+       que la caméra ne le traverse : vue de l'intérieur, une telle
+       nappe n'est plus un halo, c'est un écran blanc posé devant
+       le sujet. */
+    var retrait = 1 - palier(avance, 0.72, 0.88);
+
     /* --- le trou de ver --- */
     var ampleur = (0.06 + ouverture * 0.94) * (1 - fermeture * 0.98);
     trou.scale.setScalar(ampleur);
@@ -481,7 +493,7 @@
     gorgeMat.uniforms.temps.value = t;
     gorgeMat.uniforms.ouverture.value = ouverture * (1 - fermeture);
     fond.material.opacity = ouverture * (1 - fermeture);
-    halo.material.opacity = (0.15 * charge + 0.55 * ouverture) * (1 - fermeture * 0.7);
+    halo.material.opacity = (0.15 * charge + 0.55 * ouverture) * (1 - fermeture * 0.7) * retrait;
     halo.scale.setScalar(RAYON * (4 + ouverture * 2.4));
     trou.rotation.z += dt * 0.12;
 
@@ -489,14 +501,14 @@
     for (var q = 0; q < coquilles.length; q++) {
       var co = coquilles[q];
       co.rotation.z += dt * co.userData.vitesse;
-      co.material.opacity = (0.06 * charge + 0.3 * ouverture) * (1 - fermeture);
+      co.material.opacity = (0.06 * charge + 0.3 * ouverture) * (1 - fermeture) * retrait;
       co.scale.setScalar(1 + ouverture * 0.12 + Math.sin(t * 1.3 + q) * 0.01);
     }
 
     /* gerbe : elle culmine à l'instant où la déchirure cède,
        puis se retire. C'est le pic de l'acte. */
     var pic = 4 * ouverture * (1 - ouverture);
-    gerbe.material.opacity = Math.min(1, (0.12 * charge + pic * 0.9 + ouverture * 0.22)) * (1 - fermeture);
+    gerbe.material.opacity = Math.min(1, (0.12 * charge + pic * 0.9 + ouverture * 0.22)) * (1 - fermeture) * retrait;
     gerbe.scale.setScalar(RAYON * (4.4 + pic * 3.4 + ouverture * 1.6));
     gerbe.material.rotation = t * 0.06;
 
@@ -520,15 +532,13 @@
       /* Une onde qui grandit sans fin finit par barrer l'écran
          d'un cercle parfait : on la borne et on l'éteint tôt. */
       ondes[w].scale.setScalar(1 + pr * 1.9);
-      ondes[w].material.opacity = pr < 0.02 ? 0 : Math.pow(1 - pr, 2.2) * 0.6;
+      ondes[w].material.opacity = pr < 0.02 ? 0 : Math.pow(1 - pr, 2.2) * 0.6 * retrait;
     }
 
     /* spirale aspirée */
     var sp = spGeo.attributes.position.array;
-    /* Elle s'efface avant que la caméra ne la traverse : vue de
-       trop près, un point de 3 px devient une tache de 200 px et
-       la fin de l'acte se couvrait de gros ronds flous. */
-    var retrait = 1 - palier(avance, 0.64, 0.86);
+    /* Même raison pour la spirale : vue de trop près, un point de
+       3 px devient une tache de 200 px. */
     spirale.material.opacity = Math.min(1, charge * 0.9 + ouverture * 0.4) * (1 - fermeture) * retrait;
     for (var k2 = 0; k2 < nbSpire; k2++) {
       spA[k2] += dt * (2.4 + charge * 5) / (spR[k2] / RAYON);
@@ -556,10 +566,14 @@
       /* Aligné sur l'axe du trou, il ne fait qu'avancer. Le
          volume vient de l'angle de la caméra, pas d'une
          trajectoire de travers. */
+      /* Il ne s'arrête pas au plan de la déchirure : il continue
+         de s'enfoncer jusqu'au bout de l'acte. C'est la distance,
+         autant que le fondu, qui le fait disparaître. */
+      var plongeon = palier(avance, 0.58, 1.0);
       navire.position.set(
         Math.sin(t * 0.3) * 2.2,
         Math.cos(t * 0.24) * 1.8,
-        300 - entree * 452
+        300 - plongeon * 640
       );
       /* La proue des modèles est en +Z : pour descendre vers -Z
          il faut un lacet de PI. Les valeurs écrites à la main le
@@ -570,23 +584,30 @@
         0.08 - entree * 0.08 + Math.sin(t * 0.17) * 0.012
       );
       /* il s'étire en franchissant le seuil */
-      navire.scale.set(4.2, 4.2, 4.2 * (1 + entree * entree * 2.6));
+      navire.scale.set(4.2, 4.2, 4.2 * (1 + plongeon * plongeon * 2.2));
 
-      /* Il ne s'éteint pas : il est avalé. Le fondu commence quand
-         la proue franchit l'anneau et s'achève quand la poupe a
-         disparu dans la gorge. */
-      var voile = 1 - palier(entree, 0.74, 0.99);
+      /* Il ne s'éteint pas : il est avalé. Le fondu court sur
+         toute la fin de l'acte, et les arêtes lumineuses partent
+         avant le corps : le bâtiment s'assombrit en s'enfonçant
+         au lieu de blanchir puis de sauter d'un coup. */
+      var voile = 1 - palier(plongeon, 0.52, 1.0);
+      var voileVif = Math.pow(voile, 3.2);
       for (var v2 = 0; v2 < coques.length; v2++) {
-        coques[v2].m.opacity = coques[v2].base * voile;
+        var cq = coques[v2];
+        cq.m.opacity = cq.base * (cq.vif ? voileVif : voile);
       }
-      navire.visible = voile > 0.005;
+      navire.visible = voile > 0.002;
 
-      var pousse = 0.5 + charge * 0.6 + entree * 1.8;
+      var pousse = 0.5 + charge * 0.6 + plongeon * 1.8;
       for (var y = 0; y < tuyeres.length; y++) {
         var ty = tuyeres[y];
         var puls = 0.82 + 0.18 * Math.sin(t * 8 + y * 1.3);
-        ty.halo.material.opacity = Math.min(1, 0.55 * pousse * puls) * voile;
-        ty.halo.scale.setScalar(ty.base * 5.5 * (0.8 + pousse * 0.5));
+        /* Les tuyères s'éteignent avant la coque : un halo additif
+           qui survit au fondu se lit comme une tache blanche. */
+        ty.halo.material.opacity = Math.min(1, 0.55 * pousse * puls) * voileVif;
+        /* Bridé : à pleine poussée les halos additifs grossissaient
+           au point de recouvrir la coque d'un voile blanc. */
+        ty.halo.scale.setScalar(ty.base * 5.5 * (0.8 + Math.min(pousse, 1.5) * 0.34));
       }
     }
 
