@@ -70,6 +70,25 @@
     return geo;
   }
 
+  /* Les points d'accroche relevés à la conversion : tuyères,
+     postes de tir, proue, bras de travail. Les scènes en ont
+     besoin pour savoir d'où part un trait ou un faisceau ; posés
+     à la main, ils tombaient à côté de la coque. */
+  var fiches = null;
+  window.ODN.points = function (nom) {
+    if (!fiches) {
+      fiches = fetch('/coques/fiches.json').then(function (r) { return r.json(); })
+        .then(function (liste) {
+          var m = {};
+          liste.forEach(function (f) { m[f.nom] = f; });
+          return m;
+        });
+    }
+    return fiches.then(function (m) {
+      return m[nom] || { moteurs: [], tourelles: [], proue: [0, 0, 0], bras: [0, 0, 0] };
+    });
+  };
+
   /* Les silhouettes dessinées à la main n'ont pas d'arêtes toutes
      prêtes : on les calcule comme avant. Les coques réelles, si,
      et il ne faut surtout pas les recalculer ici. */

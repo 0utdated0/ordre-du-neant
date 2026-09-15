@@ -51,8 +51,6 @@
       c.cargo = T.coque('caterpillar', 44, T.ARGENT, 0.42);
       c.cargo.position.set(0, 0, 0);
       c.convoi.add(c.cargo);
-      c.feuxCargo = T.tuyeres(c, c.cargo, [[-5.2, 0.6, -21], [5.2, 0.6, -21],
-                                           [-5.2, -3.4, -21], [5.2, -3.4, -21]], 2.6);
 
       /* Le Passeur, un peu au-dessus et en retrait : une escorte
          se place là où elle voit, pas là où elle gêne. */
@@ -60,8 +58,6 @@
       c.corvette.position.set(-46, 15, -30);
       c.corvette.rotation.y = 0.06;
       c.convoi.add(c.corvette);
-      c.feuxCorvette = T.tuyeres(c, c.corvette, [[-7, 2.4, -25], [7, 2.4, -25],
-                                                 [-6.4, -2.6, -25], [6.4, -2.6, -25]], 2.4);
 
       /* Deux Sentinelles qui louvoient. */
       c.chasseurs = [];
@@ -70,7 +66,6 @@
         g.userData.base = new THREE.Vector3(i ? 34 : -26, i ? -12 : 19, i ? 34 : 52);
         g.userData.phase = i * 2.1;
         c.convoi.add(g);
-        T.tuyeres(c, g, [[-1.8, 0.4, -6.4], [1.8, 0.4, -6.4]], 2.2);
         c.chasseurs.push(g);
       }
     },
@@ -117,12 +112,14 @@
       c.camera.lookAt(visee);
       c.camera.rotation.z = Math.sin(t * 0.2) * 0.02 + m2 * 0.06;
 
-      var pousse = 0.55 + 0.45 * Math.abs(Math.sin(t * 3.4));
-      if (c.feuxCargo) {
-        c.feuxCargo.forEach(function (s) { s.material.opacity = 0.7 * pousse; });
-      }
-      if (c.feuxCorvette) {
-        c.feuxCorvette.forEach(function (s) { s.material.opacity = 0.75 * pousse; });
+      /* Les tuyères sont celles relevées sur chaque coque, et la
+         poussée les allume toutes d'un seul réglage. */
+      T.pousser(c.cargo, 0.75, t);
+      T.pousser(c.corvette, 0.8, t);
+      if (c.chasseurs) {
+        c.chasseurs.forEach(function (g, i) {
+          T.pousser(g, 0.9 + 0.3 * Math.sin(t * 1.4 + i), t);
+        });
       }
     }
   });

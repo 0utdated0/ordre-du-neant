@@ -77,13 +77,15 @@
 <nav class="rail" id="rail" aria-label="Sections">
   <a href="#seuil" data-cible="seuil"><span>I</span><em>Seuil</em></a>
   <a href="#approche" data-cible="approche"><span>II</span><em>Approche</em></a>
-  <a href="#convoi" data-cible="convoi"><span>III</span><em>Convoi</em></a>
-  <a href="#extraction" data-cible="extraction"><span>IV</span><em>Extraction</em></a>
-  <a href="#recuperation" data-cible="recuperation"><span>V</span><em>Récupération</em></a>
-  <a href="#ligne" data-cible="ligne"><span>VI</span><em>Ligne de feu</em></a>
-  <a href="#saut" data-cible="saut"><span>VII</span><em>Saut</em></a>
-  <a href="#plongee" data-cible="plongee"><span>VIII</span><em>Passage</em></a>
-  <a href="#appel" data-cible="appel"><span>IX</span><em>Entrer</em></a>
+  <a href="#appontage" data-cible="appontage"><span>III</span><em>Appontage</em></a>
+  <a href="#vitesse" data-cible="vitesse"><span>IV</span><em>Départ</em></a>
+  <a href="#extraction" data-cible="extraction"><span>V</span><em>Extraction</em></a>
+  <a href="#recuperation" data-cible="recuperation"><span>VI</span><em>Récupération</em></a>
+  <a href="#convoi" data-cible="convoi"><span>VII</span><em>Convoi</em></a>
+  <a href="#ligne" data-cible="ligne"><span>VIII</span><em>Ligne de feu</em></a>
+  <a href="#saut" data-cible="saut"><span>IX</span><em>Saut</em></a>
+  <a href="#plongee" data-cible="plongee"><span>X</span><em>Passage</em></a>
+  <a href="#appel" data-cible="appel"><span>XI</span><em>Entrer</em></a>
 </nav>
 <main id="contenu">
 <header class="acte acte--seuil" id="seuil">
@@ -126,37 +128,62 @@
   </div>
 </section>
 
-<section class="travail" id="convoi" aria-label="Acte III, le Convoi">
+<section class="travail" id="appontage" aria-label="Acte III, l'Appontage">
   <div class="travail__collant">
-    <div class="travail__scene" id="convoi-scene"></div>
+    <div class="travail__scene" id="appontage-scene"></div>
     <div class="travail__voile" aria-hidden="true"></div>
 
     <p class="approche__num" aria-hidden="true">Acte III</p>
 
     <div class="travail__fiche" aria-hidden="true">
-      <p class="travail__titre">Convoi <strong>ODN-14</strong></p>
+      <p class="travail__titre">Appontage <strong>pont 3</strong></p>
       <dl class="travail__lignes">
-        <div><dt>Charge</dt><dd>Le Portefaix</dd></div>
-        <div><dt>Escorte</dt><dd>Le Passeur, deux Sentinelles</dd></div>
-        <div><dt>Cap</dt><dd>Secteur extérieur</dd></div>
+        <div><dt>Appareil</dt><dd>Le Portefaix, cargo</dd></div>
+        <div><dt>Station</dt><dd>Le Seuil</dd></div>
+        <div><dt>Manœuvre</dt><dd>Descente sur rétrofusées</dd></div>
       </dl>
     </div>
 
     <div class="approche__textes">
-      <p class="fragment"><span>Une cargaison qui part seule n'arrive pas.</span></p>
-      <p class="fragment"><span>Alors elle ne part jamais seule.</span></p>
-      <p class="fragment"><span>Deux Sentinelles devant, une corvette au-dessus.</span></p>
-      <p class="fragment"><span>Ce qu'on transporte n'a de valeur que livré.</span></p>
+      <p class="fragment"><span>Le Portefaix rentre de mission, cales pleines.</span></p>
+      <p class="fragment"><span>Le Seuil lui ouvre un pont et allume le cercle.</span></p>
+      <p class="fragment"><span>Rétrofusées. Le pont se couvre de poussière.</span></p>
+      <p class="fragment"><span>Posé. On décharge, et on repart.</span></p>
     </div>
   </div>
 </section>
 
-<section class="travail" id="extraction" aria-label="Acte IV, l'Extraction">
+<section class="travail" id="vitesse" aria-label="Acte IV, le Départ">
+  <div class="travail__collant">
+    <div class="travail__scene" id="vitesse-scene"></div>
+    <div class="travail__voile" aria-hidden="true"></div>
+
+    <p class="approche__num" aria-hidden="true">Acte IV</p>
+
+    <div class="travail__fiche" aria-hidden="true">
+      <p class="travail__titre">Le Passeur <strong>en route</strong></p>
+      <dl class="travail__lignes">
+        <div><dt>Moteur</dt><dd>Quantique, engagé</dd></div>
+        <div><dt>Cap</dt><dd>Ceinture extérieure</dd></div>
+        <div><dt>Trajet</dt><dd>Quatre minutes</dd></div>
+      </dl>
+    </div>
+
+    <div class="approche__textes">
+      <p class="fragment"><span>Entre deux points de travail, il y a des milliards de kilomètres de rien.</span></p>
+      <p class="fragment"><span>Moteur quantique engagé.</span></p>
+      <p class="fragment"><span>À cette vitesse, ce n'est plus le vaisseau qui bouge. C'est tout le reste.</span></p>
+      <p class="fragment"><span>Quatre minutes pour traverser un système.</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="travail" id="extraction" aria-label="Acte V, l'Extraction">
   <div class="travail__collant">
     <div class="travail__scene" id="extraction-scene"></div>
     <div class="travail__voile" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte IV</p>
+    <p class="approche__num" aria-hidden="true">Acte V</p>
 
     <div class="travail__fiche" aria-hidden="true">
       <p class="travail__titre">Gisement <strong>ODN-3</strong></p>
@@ -168,20 +195,20 @@
     </div>
 
     <div class="approche__textes">
-      <p class="fragment"><span>Le minerai ne se ramasse pas.</span></p>
-      <p class="fragment"><span>Il s'arrache.</span></p>
-      <p class="fragment"><span>La roche tient, puis elle cède d'un coup.</span></p>
-      <p class="fragment"><span>Ce qui reste tient dans une soute.</span></p>
+      <p class="fragment"><span>Le minerai ne se ramasse pas au sol. Il faut aller l'arracher à la roche.</span></p>
+      <p class="fragment"><span>Le Gisement cale sa tête de forage sur l'astéroïde.</span></p>
+      <p class="fragment"><span>Le faisceau chauffe la pierre jusqu'à ce qu'elle cède d'un coup.</span></p>
+      <p class="fragment"><span>Ce qui cède part en morceaux, et les morceaux partent en soute.</span></p>
     </div>
   </div>
 </section>
 
-<section class="travail" id="recuperation" aria-label="Acte V, la Récupération">
+<section class="travail" id="recuperation" aria-label="Acte VI, la Récupération">
   <div class="travail__collant">
     <div class="travail__scene" id="recuperation-scene"></div>
     <div class="travail__voile" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte V</p>
+    <p class="approche__num" aria-hidden="true">Acte VI</p>
 
     <div class="travail__fiche" aria-hidden="true">
       <p class="travail__titre">Épave <strong>sans matricule</strong></p>
@@ -193,20 +220,45 @@
     </div>
 
     <div class="approche__textes">
-      <p class="fragment"><span>Quelqu'un est mort ici. Longtemps avant nous.</span></p>
-      <p class="fragment"><span>Le bras mord la coque.</span></p>
-      <p class="fragment"><span>La tôle rend ce qu'elle a.</span></p>
-      <p class="fragment"><span>Rien ne se perd. Tout change de mains.</span></p>
+      <p class="fragment"><span>Une épave, quelque part. Personne n'est jamais venu la chercher.</span></p>
+      <p class="fragment"><span>La Carrière descend son bras de découpe le long de la coque.</span></p>
+      <p class="fragment"><span>La tôle se détache plaque par plaque.</span></p>
+      <p class="fragment"><span>L'Ironclad charge ce qui vaut encore. Rien ne se perd, tout change de mains.</span></p>
     </div>
   </div>
 </section>
 
-<section class="travail" id="ligne" aria-label="Acte VI, la Ligne de feu">
+<section class="travail" id="convoi" aria-label="Acte VII, le Convoi">
+  <div class="travail__collant">
+    <div class="travail__scene" id="convoi-scene"></div>
+    <div class="travail__voile" aria-hidden="true"></div>
+
+    <p class="approche__num" aria-hidden="true">Acte VII</p>
+
+    <div class="travail__fiche" aria-hidden="true">
+      <p class="travail__titre">Convoi <strong>ODN-14</strong></p>
+      <dl class="travail__lignes">
+        <div><dt>Charge</dt><dd>Le Portefaix</dd></div>
+        <div><dt>Escorte</dt><dd>Le Passeur, deux Sentinelles</dd></div>
+        <div><dt>Cap</dt><dd>Secteur extérieur</dd></div>
+      </dl>
+    </div>
+
+    <div class="approche__textes">
+      <p class="fragment"><span>Ce qu'on a extrait doit encore rentrer.</span></p>
+      <p class="fragment"><span>Le Portefaix ne part jamais seul : deux Sentinelles en avant.</span></p>
+      <p class="fragment"><span>Le Passeur tient la hauteur et surveille le vide.</span></p>
+      <p class="fragment"><span>Une cargaison n'a de valeur qu'une fois arrivée.</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="travail" id="ligne" aria-label="Acte VIII, la Ligne de feu">
   <div class="travail__collant">
     <div class="travail__scene" id="ligne-scene"></div>
     <div class="travail__voile" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte VI</p>
+    <p class="approche__num" aria-hidden="true">Acte VIII</p>
 
     <div class="travail__fiche" aria-hidden="true">
       <p class="travail__titre">Porte-Néant <strong>Le Silence</strong></p>
@@ -218,22 +270,22 @@
     </div>
 
     <div class="approche__textes">
-      <p class="fragment"><span>On ne cherche pas le combat.</span></p>
-      <p class="fragment"><span>Mais on ne recule pas devant un convoi.</span></p>
-      <p class="fragment"><span>Batteries en action.</span></p>
+      <p class="fragment"><span>Quelqu'un a suivi le convoi.</span></p>
+      <p class="fragment"><span>Le Silence se met en travers de la route.</span></p>
+      <p class="fragment"><span>Batteries en action sur toute la longueur de la coque.</span></p>
       <p class="fragment"><span>Ce qui approche apprend le prix.</span></p>
       <p class="fragment"><span>On rentre. Tous.</span></p>
     </div>
   </div>
 </section>
 
-<section class="saut" id="saut" aria-label="Acte VII, le Saut">
+<section class="saut" id="saut" aria-label="Acte IX, le Saut">
   <div class="saut__collant">
     <div class="saut__scene" id="saut-scene"></div>
     <div class="saut__voile" aria-hidden="true"></div>
     <div class="saut__eclat" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte VII</p>
+    <p class="approche__num" aria-hidden="true">Acte IX</p>
 
     <div class="saut__tableau" aria-hidden="true">
       <p class="saut__repere">Point de saut <strong>ODN-7</strong></p>
@@ -255,13 +307,13 @@
   </div>
 </section>
 
-<section class="plongee" id="plongee" aria-label="Acte VIII, le Passage">
+<section class="plongee" id="plongee" aria-label="Acte X, le Passage">
   <div class="plongee__collant">
     <div class="plongee__scene" id="plongee-scene"></div>
     <div class="plongee__voile" aria-hidden="true"></div>
     <div class="plongee__noir" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte VIII</p>
+    <p class="approche__num" aria-hidden="true">Acte X</p>
 
     <div class="approche__textes">
       <p class="fragment"><span>Rien ne dure.</span></p>
@@ -321,9 +373,11 @@
 <script src="/travaux.js" defer></script>
 <script src="/scene.js" defer></script>
 <script src="/approche.js" defer></script>
-<script src="/convoi.js" defer></script>
+<script src="/appontage.js" defer></script>
+<script src="/vitesse.js" defer></script>
 <script src="/extraction.js" defer></script>
 <script src="/recuperation.js" defer></script>
+<script src="/convoi.js" defer></script>
 <script src="/ligne.js" defer></script>
 <script src="/saut.js" defer></script>
 <script src="/plongee.js" defer></script>

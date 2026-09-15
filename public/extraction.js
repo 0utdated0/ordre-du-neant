@@ -113,10 +113,11 @@
       c.foreuse = T.coque('orion', 120, T.ARGENT, 0.42);
       c.foreuse.position.set(6, -6, 96);
       c.scene.add(c.foreuse);
-      c.feux = T.tuyeres(c, c.foreuse, [[-11, 5.5, -56], [11, -5.5, -56],
-                                        [-11, -5.5, -56], [11, 5.5, -56]], 3.0);
-      /* La tête de forage est en proue, donc en +Z. */
-      c.tete = new THREE.Vector3(6, -6, 96 + 58);
+      /* La tête de forage est relevée sur le maillage, pas posée
+         à l'estime : c'est l'extrémité avant-basse de la coque. */
+      c.foreuse.userData.quandPret = function (n) {
+        c.tete = n.userData.bras.clone().add(n.position);
+      };
     },
 
     jouer: function (c, avance, dt, t) {
@@ -184,10 +185,9 @@
 
       c.lampe.intensity = 1.0 + morsure * 0.85;
 
-      if (c.feux) {
-        var puls = 0.55 + 0.2 * Math.sin(t * 2.6);
-        c.feux.forEach(function (s) { s.material.opacity = puls; });
-      }
+      /* Une plateforme de forage tient sa position : la poussée
+         reste basse, elle ne file pas. */
+      T.pousser(c.foreuse, 0.3 + morsure * 0.25, t);
 
       /* caméra : de loin, puis elle longe le faisceau, puis elle
          se glisse dans la poussière de roche */

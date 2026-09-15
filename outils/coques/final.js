@@ -2,6 +2,7 @@ const fs=require('fs'), zlib=require('zlib');
 const lire=require('./lire.js');
 const {MeshoptSimplifier}=require('meshoptimizer');
 const {aretesBudget,tuyeres}=require('./extra.js');
+const {postes,proue,bras}=require('./points.js');
 
 const SRC='/mnt/user-data/uploads/Documents/modeles-sc/';
 const SRC_STATION='/home/claude/wtest/outils/station/';
@@ -132,6 +133,12 @@ function poupeEnZplus(pos){
        les moteurs. */
     const {aretes,seuil}=aretesBudget(pos,ni,fi.aretes);
     const moteurs=fi.station ? [] : tuyeres(pos,nSom,0.055);
+    /* Points d'accroche relevés sur la coque : les scènes en ont
+       besoin pour savoir d'où partent les traits et les
+       faisceaux. Posés à la main, ils tombaient à côté. */
+    const tirs = fi.station ? [] : postes(pos,nSom,fi.tourelles||8);
+    const nez = fi.station ? [0,0,0] : proue(pos,nSom);
+    const outil = fi.station ? [0,0,0] : bras(pos,nSom);
 
     ({mn,mx}=boite(pos));
     const ext=[mx[0]-mn[0]||1, mx[1]-mn[1]||1, mx[2]-mn[2]||1];
@@ -159,13 +166,14 @@ function poupeEnZplus(pos){
     fs.writeFileSync(OUT+fi.nom+'.odnm', buf);
     const br=zlib.brotliCompressSync(buf).length;
     tot+=buf.length; totBr+=br;
-    fiches.push({nom:fi.nom, longueur:fi.longueur, tri:ni.length/3, som:nSom,
-      aretes:aretes.length/2, moteurs:moteurs});
+    fiches.push({nom:fi.nom, longueur:fi.longueur||0, tri:ni.length/3, som:nSom,
+      aretes:aretes.length/2, moteurs:moteurs,
+      tourelles:tirs, proue:nez, bras:outil});
     console.log(fi.nom.padEnd(12), String(ni.length/3).padStart(6)+' tri',
       String(nSom).padStart(6)+' som', String(fi.longueur||0).padStart(4)+' m',
       (buf.length/1024).toFixed(0).padStart(4)+' Ko', ' brotli '+(br/1024).toFixed(0).padStart(3)+' Ko',
       String(aretes.length/2).padStart(5)+' ar '+seuil.toFixed(0)+'deg',
-      ' '+moteurs.length+' tuyeres', retourner?' retourne':'');
+      ' '+moteurs.length+' tuy', tirs.length+' tour', retourner?' retourne':'');
   }
   console.log('TOTAL', (tot/1024).toFixed(0)+' Ko, brotli', (totBr/1024).toFixed(0)+' Ko');
   fs.writeFileSync(OUT+'fiches.json', JSON.stringify(fiches,null,1));

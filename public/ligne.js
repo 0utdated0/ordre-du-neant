@@ -83,24 +83,24 @@
       c.amiral.position.set(0, 0, 0);
       c.amiral.rotation.y = 0.1;
       c.scene.add(c.amiral);
-      c.feuxA = T.tuyeres(c, c.amiral, [[-28, 12, -142], [-28, -14, -142],
-                                        [26, 18, -142], [26, -12, -142]], 3.4);
 
-      /* Les postes de tir, répartis sur la longueur de la coque.
-         Relevés sur le maillage, pas posés au hasard : un trait
-         qui sort du vide à côté du bâtiment ne trompe personne. */
-      c.postes = [
-        new THREE.Vector3(-16, 15, 96), new THREE.Vector3(16, 15, 52),
-        new THREE.Vector3(-18, 16, 6), new THREE.Vector3(18, 14, -40),
-        new THREE.Vector3(-16, -13, 70), new THREE.Vector3(15, -14, 20),
-        new THREE.Vector3(-14, -12, -26), new THREE.Vector3(12, 17, -84)
-      ];
-      c.caps = c.postes.map(function (p, i) {
-        return new THREE.Vector3(
-          p.x > 0 ? 1 : -1, 0.1 + ((i * 3) % 5) / 14 - 0.15,
-          0.35 - ((i * 5) % 7) / 9
-        ).normalize();
-      });
+      /* Les postes de tir sont relevés sur la peau de la coque, en
+         crête dorsale et ventrale, répartis sur sa longueur. Posés
+         à la main ils tombaient à côté du bâtiment, et un trait qui
+         part du vide ne se lit pas comme un tir. */
+      c.amiral.userData.quandPret = function (n) {
+        c.postes = n.userData.tourelles.map(function (v) { return v.clone(); });
+        c.caps = c.postes.map(function (p, i) {
+          /* Chaque poste tire vers l'extérieur, du côté où il est,
+             et vers le haut ou le bas selon sa position sur la
+             coque : une bordée n'est pas un peigne parallèle. */
+          return new THREE.Vector3(
+            (i % 2 ? 1 : -1) * (0.7 + ((i * 3) % 4) / 10),
+            (p.y > 0 ? 0.32 : -0.32) + ((i * 5) % 5) / 18 - 0.11,
+            0.42 - ((i * 7) % 8) / 9
+          ).normalize();
+        });
+      };
 
       c.chasseurs = [];
       for (var i = 0; i < (c.petit ? 3 : 5); i++) {
@@ -109,7 +109,6 @@
           -120 + i * 62, -40 + ((i * 37) % 90), 120 - i * 58);
         g.userData.phase = i * 1.37;
         c.scene.add(g);
-        T.tuyeres(c, g, [[-2.6, 0.6, -9.6], [2.6, 0.6, -9.6]], 2.4);
         c.chasseurs.push(g);
       }
     },
@@ -123,7 +122,7 @@
       var feu = Math.max(0, engage * (1 - retrait * 0.85));
       var intensite = (0.35 + plein * 0.65) * feu;
 
-      if (c.postes) {
+      if (c.postes && c.postes.length) {
         /* les traits */
         c.traits.forEach(function (m) {
           var u = m.userData;
@@ -143,17 +142,21 @@
           /* Un trait qui frôle l'objectif devient une barre qui
              barre l'écran : on l'efface quand il passe trop près. */
           var pres = m.position.distanceTo(c.camera.position);
-          if (pres < 70) { voile *= Math.max(0, (pres - 22) / 48); }
+          if (pres < 170) { voile *= Math.max(0, (pres - 40) / 130); }
           m.material.opacity = voile * intensite * (ami ? 0.95 : 0.7);
           m.visible = m.material.opacity > 0.02;
         });
 
         /* départs de coup, calés sur le passage des traits */
+        /* Le départ de coup est ce qui rattache le trait à la
+           coque : sans lui, on voit des traits passer, pas un
+           bâtiment qui tire. */
         c.bouches.forEach(function (s, i) {
+          if (i >= c.postes.length) { s.material.opacity = 0; return; }
           s.position.copy(c.postes[i]);
-          var bat = Math.pow(Math.max(0, Math.sin(t * (5 + i * 0.7))), 12);
-          s.material.opacity = bat * intensite * 0.9;
-          s.scale.setScalar(9 + bat * 9);
+          var bat = Math.pow(Math.max(0, Math.sin(t * (5 + i * 0.7))), 6);
+          s.material.opacity = Math.min(1, bat * intensite * 1.6);
+          s.scale.setScalar(16 + bat * 26);
         });
 
         /* impacts sur la coque : ce qui arrive touche */
@@ -183,9 +186,11 @@
         });
       }
 
-      if (c.feuxA) {
-        var puls = 0.45 + 0.25 * Math.sin(t * 1.8) + plein * 0.3;
-        c.feuxA.forEach(function (s) { s.material.opacity = puls; });
+      T.pousser(c.amiral, 0.45 + plein * 0.4, t);
+      if (c.chasseurs) {
+        c.chasseurs.forEach(function (g, i) {
+          T.pousser(g, 1.0 + 0.35 * Math.sin(t * 1.9 + i), t);
+        });
       }
 
       /* caméra : elle remonte le flanc du bâtiment, passe sous la
@@ -195,12 +200,16 @@
       var m3 = P(avance, 0.74, 1.0);
       /* Elle longe le flanc sans jamais y entrer : le bâtiment
          fait 300 de long et 40 de large, on reste au large. */
+      /* Assez loin pour voir le bâtiment entier ET les traits qui
+         en partent. Trop près, on ne voyait que ceux qui frôlaient
+         l'objectif, et un bâtiment de trois cents unités remplit
+         vite le cadre. */
       c.camera.position.set(
-        -250 + m1 * 74 - m2 * 26 + m3 * 150,
-        -44 + m1 * 34 - m2 * 30 + m3 * 150,
-        300 - m1 * 190 - m2 * 210 + m3 * 300
+        -430 + m1 * 110 - m2 * 40 + m3 * 220,
+        -90 + m1 * 60 - m2 * 40 + m3 * 240,
+        400 - m1 * 150 - m2 * 220 + m3 * 360
       );
-      c.camera.lookAt(new THREE.Vector3(0, m2 * 10, 40 - m1 * 70 - m2 * 90));
+      c.camera.lookAt(new THREE.Vector3(0, m2 * 14, 20 - m1 * 40 - m2 * 60));
       /* secousse : elle vient des batteries, donc elle suit le feu */
       var choc = intensite * 0.006;
       c.camera.rotation.x += Math.sin(t * 43) * choc;

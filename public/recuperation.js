@@ -105,18 +105,17 @@
       c.recuperateur.position.set(-14, 62, -16);
       c.recuperateur.rotation.set(-0.16, 0.34, 0.06);
       c.scene.add(c.recuperateur);
-      c.feuxR = T.tuyeres(c, c.recuperateur, [[-13, 6, -54], [13, 6, -54],
-                                              [-13, -6, -54], [13, -6, -54]], 2.8);
+      /* Le bras de découpe est relevé sur le maillage : extrémité
+         avant-basse, là où le Reclaimer porte réellement sa pince. */
+      c.recuperateur.userData.quandPret = function (n) {
+        c.bras = n.userData.bras.clone().add(n.position);
+      };
 
       /* L'Ironclad rangé à côté : c'est lui qui emporte. */
       c.porteur = T.coque('ironclad', 110, T.ARGENT, 0.36);
       c.porteur.position.set(96, -26, 34);
       c.porteur.rotation.set(0.05, -0.62, -0.04);
       c.scene.add(c.porteur);
-      c.feuxP = T.tuyeres(c, c.porteur, [[-12, 3, -52], [12, 3, -52],
-                                         [-12, -5, -52], [12, -5, -52]], 2.6);
-
-      c.bras = new THREE.Vector3(-14, 62 - 26, -16 + 30);
     },
 
     jouer: function (c, avance, dt, t) {
@@ -179,9 +178,10 @@
       c.grain.geometry.attributes.position.needsUpdate = true;
       c.grain.material.opacity = coupe * Math.pow(1 - emport * 0.75, 1.5) * 0.75;
 
-      var puls = 0.4 + 0.2 * Math.sin(t * 2.2);
-      if (c.feuxR) { c.feuxR.forEach(function (s) { s.material.opacity = puls; }); }
-      if (c.feuxP) { c.feuxP.forEach(function (s) { s.material.opacity = puls * 0.8; }); }
+      /* Les deux bâtiments tiennent le poste : poussée d'appoint
+         seulement, juste de quoi ne pas dériver. */
+      T.pousser(c.recuperateur, 0.32, t);
+      T.pousser(c.porteur, 0.26, t);
 
       /* caméra : elle arrive par le travers, descend le long de
          l'épave pendant la découpe, puis recule sur les deux
