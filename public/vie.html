@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     Page assemblée par outils/pages/batir.js.
+     Ne rien modifier ici : tout se perd au prochain assemblage.
+     Le contenu est dans outils/pages/sections, la coquille dans
+     outils/pages/gabarit.html, la répartition dans batir.js.
+     ============================================================ -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>La vie de l'Ordre - effectif, opérations, galerie | L'Ordre du Néant</title>
+<meta name="description" content="L'effectif en direct depuis le Discord, les opérations planifiées et la galerie des sorties de l'Ordre du Néant.">
+<link rel="canonical" href="https://ordre-du-neant.fr/vie">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="L'Ordre du Néant">
+<meta property="og:title" content="La vie de l'Ordre - effectif, opérations, galerie | L'Ordre du Néant">
+<meta property="og:description" content="L'effectif en direct depuis le Discord, les opérations planifiées et la galerie des sorties de l'Ordre du Néant.">
+<meta property="og:url" content="https://ordre-du-neant.fr/vie">
+<meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="/assets/embleme-512.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+
+</head>
+
+<body class="page-vie">
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<canvas id="neant" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignettage" aria-hidden="true"></div>
+
+<div class="barre" id="barre">
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
+  <span class="barre__nom">L'Ordre du Néant</span>
+
+  <button class="barre__bouton" type="button" id="menu-bouton"
+          aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Sections du site">
+        <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie" aria-current="page">La vie de l’Ordre</a>
+    <a href="/rejoindre">Rejoindre</a>
+  </nav>
+
+  <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
+       d'admission. Ce bouton-ci ouvre le Discord : deux destinations
+       différentes ne peuvent pas porter le même mot. -->
+  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+</div>
+<nav class="rail" id="rail" aria-label="Sections">
+  <a href="#vigie" data-cible="vigie"><span>I</span><em>Vigie</em></a>
+  <a href="#operations" data-cible="operations"><span>II</span><em>Opérations</em></a>
+  <a href="#galerie" data-cible="galerie"><span>III</span><em>Galerie</em></a>
+  <a href="#appel" data-cible="appel"><span>IV</span><em>Entrer</em></a>
+</nav>
+<main id="contenu">
+<section class="acte acte--donnees" id="vigie">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">Acte I</p>
+      <h2 class="balaye">La Vigie</h2>
+      <p class="intro">
+        Ce que le serveur de l'Ordre dit de lui-même, relevé à l'instant.
+        Rien n'est saisi à la main : tout vient des rôles portés sur le Discord.
+      </p>
+    </div>
+
+    <p class="avis" id="avis-vigie" hidden></p>
+
+    <ul class="compteurs revele" role="list">
+      <li class="compteur">
+        <span class="compteur__val" data-chiffre="recus">—</span>
+        <span class="compteur__lib">Membres reçus</span>
+      </li>
+      <li class="compteur">
+        <span class="compteur__val" data-chiffre="enLigne">—</span>
+        <span class="compteur__lib">En ligne</span>
+      </li>
+      <li class="compteur compteur--vocal">
+        <span class="compteur__val" data-chiffre="enVocal">—</span>
+        <span class="compteur__lib">En vocal</span>
+      </li>
+      <li class="compteur">
+        <span class="compteur__val" data-chiffre="divisions">—</span>
+        <span class="compteur__lib">Divisions pourvues</span>
+      </li>
+    </ul>
+
+    <div class="vocaux revele" id="vocaux" hidden>
+      <h3><span class="pouls" aria-hidden="true"></span>Salons occupés</h3>
+      <ul class="vocaux__liste" role="list"></ul>
+    </div>
+
+    <div class="registre revele" id="registre">
+      <div class="registre__tete">
+        <h3>Registre de l'Ordre</h3>
+        <div class="filtres" id="filtres" role="group" aria-label="Filtrer le registre"></div>
+      </div>
+      <ul class="registre__liste" role="list"></ul>
+      <p class="registre__pied" id="registre-pied"></p>
+    </div>
+  </div>
+</section>
+
+<section class="acte acte--donnees acte--operations" id="operations">
+  <div class="contenu contenu--large">
+    <div class="entete revele">
+      <p class="acte__num">Acte II</p>
+      <h2 class="balaye">Les opérations</h2>
+      <p class="intro">
+        Annoncées à l'avance, avec ordre de mission et inscription d'équipage.
+        Le partage des gains est écrit avant le départ.
+      </p>
+    </div>
+
+    <p class="avis" id="avis-operations" hidden></p>
+    <ol class="operations__liste" id="operations-liste" role="list"></ol>
+  </div>
+</section>
+
+<section class="acte acte--galerie" id="galerie">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">Acte III</p>
+      <h2 class="balaye">La galerie</h2>
+      <p class="intro">
+        Captures d'opérations, de convois et d'expéditions. Le verse tel que
+        l'Ordre le traverse.
+      </p>
+    </div>
+
+    <div class="galerie__grille" id="galerie-grille"></div>
+    <p class="avis" id="avis-galerie" hidden></p>
+  </div>
+</section>
+
+<section class="acte acte--appel" id="appel">
+  <div class="contenu contenu--centre">
+    <p class="appel__devise revele">Tout n'est que passage</p>
+    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
+    <p class="chapeau revele">
+      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
+      parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
+      le moment est maintenant.
+    </p>
+    <div class="portes portes--bas revele">
+      <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
+      <a class="porte" href="/rejoindre">Comment entrer</a>
+    </div>
+  </div>
+</section>
+</main>
+  <button class="visionneuse__fermer" type="button" aria-label="Fermer">&times;</button>
+  <figure>
+    <img src="" alt="">
+    <figcaption></figcaption>
+  </figure>
+</div>
+
+<footer>
+<footer>
+  <div class="pied">
+    <p class="devise-pied">Tout n'est que passage</p>
+    <nav class="pied__plan" aria-label="Plan du site">
+          <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie" aria-current="page">La vie de l’Ordre</a>
+    <a href="/rejoindre">Rejoindre</a>
+    </nav>
+    <nav aria-label="Liens de l'Ordre">
+      <a href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+      <a href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">RSI</a>
+      <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
+    </nav>
+    <p class="mention">
+      Site non officiel, sans but lucratif, sans affiliation avec Cloud Imperium
+      Games. Star Citizen, Roberts Space Industries et les noms de vaisseaux sont
+      des marques de Cloud Imperium Rights LLC. Les modèles 3D présentés ici
+      proviennent du holoviewer de Roberts Space Industries et restent la
+      propriété de leur éditeur. La station Le Seuil est une conception propre à
+      l'Ordre. Fait par la communauté.
+    </p>
+  </div>
+</footer>
+
+<script src="/vendor/three.min.js" defer></script>
+<script src="/scene.js" defer></script>
+<script src="/site.js" defer></script>
+<script src="/vigie.js" defer></script>
+</body>
+</html>

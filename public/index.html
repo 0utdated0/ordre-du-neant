@@ -1,29 +1,34 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     Page assemblée par outils/pages/batir.js.
+     Ne rien modifier ici : tout se perd au prochain assemblage.
+     Le contenu est dans outils/pages/sections, la coquille dans
+     outils/pages/gabarit.html, la répartition dans batir.js.
+     ============================================================ -->
 <html lang="fr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <title>L'Ordre du Néant - organisation Star Citizen francophone</title>
-<meta name="description" content="L'Ordre du Néant est une organisation Star Citizen francophone structurée : huit divisions, opérations planifiées, partage des gains écrit. Recrutement ouvert aux pilotes majeurs parlant français.">
+<meta name="description" content="Organisation Star Citizen francophone structurée : huit divisions, opérations planifiées, partage des gains écrit. Recrutement ouvert aux pilotes majeurs parlant français.">
 <link rel="canonical" href="https://ordre-du-neant.fr/">
 
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:site_name" content="L'Ordre du Néant">
 <meta property="og:title" content="L'Ordre du Néant - organisation Star Citizen francophone">
-<meta property="og:description" content="Huit divisions, opérations planifiées, partage des gains écrit à l'avance. Recrutement ouvert.">
+<meta property="og:description" content="Organisation Star Citizen francophone structurée : huit divisions, opérations planifiées, partage des gains écrit. Recrutement ouvert aux pilotes majeurs parlant français.">
 <meta property="og:url" content="https://ordre-du-neant.fr/">
 <meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#000000">
 
-<link rel="icon" href="assets/embleme-512.png" type="image/png">
-<link rel="apple-touch-icon" href="assets/embleme-512.png">
-<link rel="preload" href="polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="preload" href="polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="styles.css">
-
+<link rel="icon" href="/assets/embleme-512.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -39,37 +44,44 @@
 </script>
 </head>
 
-<body>
+<body class="page-accueil">
 
-<a class="evitement" href="#approche">Aller au contenu</a>
+<a class="evitement" href="#contenu">Aller au contenu</a>
 
 <canvas id="neant" aria-hidden="true"></canvas>
 <div class="grain" aria-hidden="true"></div>
 <div class="vignettage" aria-hidden="true"></div>
 
-<div class="barre" id="barre" aria-hidden="true">
-  <a class="barre__sceau" href="#seuil"><img src="assets/embleme.webp" alt="" width="900" height="1251"></a>
+<div class="barre" id="barre">
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
   <span class="barre__nom">L'Ordre du Néant</span>
-  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre</a>
-</div>
 
-<nav class="rail" id="rail" aria-label="Actes">
+  <button class="barre__bouton" type="button" id="menu-bouton"
+          aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Sections du site">
+        <a href="/" aria-current="page">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie de l’Ordre</a>
+    <a href="/rejoindre">Rejoindre</a>
+  </nav>
+
+  <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
+       d'admission. Ce bouton-ci ouvre le Discord : deux destinations
+       différentes ne peuvent pas porter le même mot. -->
+  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+</div>
+<nav class="rail" id="rail" aria-label="Sections">
   <a href="#seuil" data-cible="seuil"><span>I</span><em>Seuil</em></a>
   <a href="#approche" data-cible="approche"><span>II</span><em>Approche</em></a>
-  <a href="#divisions" data-cible="divisions"><span>III</span><em>Divisions</em></a>
-  <a href="#flotte" data-cible="flotte"><span>IV</span><em>Flotte</em></a>
-  <a href="#saut" data-cible="saut"><span>V</span><em>Saut</em></a>
-  <a href="#ascension" data-cible="ascension"><span>VI</span><em>Ascension</em></a>
-  <a href="#vigie" data-cible="vigie"><span>VII</span><em>Vigie</em></a>
-  <a href="#operations" data-cible="operations"><span>VIII</span><em>Opérations</em></a>
-  <a href="#galerie" data-cible="galerie"><span>IX</span><em>Galerie</em></a>
-  <a href="#regle" data-cible="regle"><span>X</span><em>Règle</em></a>
-  <a href="#plongee" data-cible="plongee"><span>XI</span><em>Passage</em></a>
+  <a href="#saut" data-cible="saut"><span>III</span><em>Saut</em></a>
+  <a href="#plongee" data-cible="plongee"><span>IV</span><em>Passage</em></a>
+  <a href="#appel" data-cible="appel"><span>V</span><em>Entrer</em></a>
 </nav>
-
-<!-- =========================================================
-     ACTE I - LE SEUIL
-     ========================================================= -->
+<main id="contenu">
 <header class="acte acte--seuil" id="seuil">
   <div class="seuil__coeur">
     <div class="sceau__cadre">
@@ -92,11 +104,6 @@
   <div class="descente" aria-hidden="true"><span></span><i>Descendre</i></div>
 </header>
 
-<main>
-
-<!-- =========================================================
-     ACTE II - L'APPROCHE  (défilement piloté)
-     ========================================================= -->
 <section class="approche" id="approche" aria-label="Acte II, l'Approche">
   <div class="approche__collant">
     <div class="approche__scene" id="approche-scene"></div>
@@ -115,136 +122,13 @@
   </div>
 </section>
 
-<section class="acte acte--manifeste" id="manifeste">
-  <div class="contenu contenu--centre">
-    <h2 class="revele balaye">Rien ne dure, et c'est très bien ainsi</h2>
-    <p class="chapeau revele">
-      L'Ordre du Néant ne court pas après le nombre. Nous recrutons lentement,
-      nous structurons soigneusement, et nous attendons des gens qu'ils soient
-      réellement présents.
-    </p>
-    <p class="revele">
-      Une corpo de quatre cents membres dont douze se connectent ne vaut pas vingt
-      pilotes qui répondent quand on les appelle. Nous jouons en français, entre
-      adultes, sans exiger d'exclusivité. Vous pouvez garder vos autres
-      organisations. Nous ne sommes pas possessifs, nous sommes exigeants.
-    </p>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE III - LES DIVISIONS
-     ========================================================= -->
-<section class="acte acte--divisions" id="divisions">
-  <div class="contenu contenu--large">
-    <div class="entete revele">
-      <p class="acte__num">Acte III</p>
-      <h2 class="balaye">Huit divisions</h2>
-      <p class="intro">
-        Chaque division a ses salons, ses référents et ses opérations. Vous en choisissez
-        librement, la plupart des membres en suivent deux ou trois.
-      </p>
-    </div>
-
-    <ul class="grille" role="list" id="grille">
-      <li class="carte revele" data-code="LOG">
-        <span class="carte__index">01</span>
-        <h3>Logistique</h3>
-        <p>Convois, fret, chaînes d'approvisionnement, escorte de cargo.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="EXT">
-        <span class="carte__index">02</span>
-        <h3>Extraction</h3>
-        <p>Minage de surface et d'astéroïdes, prospection, cycles de raffinage.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="CBT">
-        <span class="carte__index">03</span>
-        <h3>Combat</h3>
-        <p>Contrats de primes, escadres ERT, défense des intérêts de l'Ordre.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="SEC">
-        <span class="carte__index">04</span>
-        <h3>Sécurité</h3>
-        <p>Escorte de convois, protection de sites, patrouilles et dissuasion.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="EXP">
-        <span class="carte__index">05</span>
-        <h3>Exploration</h3>
-        <p>Reconnaissance, relevés, expéditions longues hors des routes connues.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="MED">
-        <span class="carte__index">06</span>
-        <h3>Médical et sauvetage</h3>
-        <p>Médecine de terrain, récupération d'équipages, appui aux opérations.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="ING">
-        <span class="carte__index">07</span>
-        <h3>Ingénierie</h3>
-        <p>Postes multi-équipage, récupération d'épaves, réparation en vol.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-      <li class="carte revele" data-code="IND">
-        <span class="carte__index">08</span>
-        <h3>Industrie</h3>
-        <p>Négoce, production, marché interne entre membres.</p>
-        <span class="carte__faille" aria-hidden="true"></span>
-      </li>
-    </ul>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE IV - LA FLOTTE  (hologrammes)
-     ========================================================= -->
-<section class="acte acte--flotte" id="flotte">
-  <div class="contenu contenu--large">
-    <div class="entete entete--centre revele">
-      <p class="acte__num">Acte IV</p>
-      <h2 class="balaye">La flotte</h2>
-      <p class="intro">
-        Neuf appareils de la classification interne de l&rsquo;Ordre, projetés en hologramme.
-        Faites-les tourner, approchez la souris.
-      </p>
-    </div>
-
-    <div class="holo revele">
-      <div class="holo__onglets" id="flotte-onglets" role="tablist" aria-label="Appareils"></div>
-
-      <div class="holo__table">
-        <div class="holo__scene" id="flotte-scene"></div>
-        <span class="holo__coin holo__coin--hg" aria-hidden="true"></span>
-        <span class="holo__coin holo__coin--hd" aria-hidden="true"></span>
-        <span class="holo__coin holo__coin--bg" aria-hidden="true"></span>
-        <span class="holo__coin holo__coin--bd" aria-hidden="true"></span>
-        <p class="holo__mention" aria-hidden="true">Projection · classification interne</p>
-      </div>
-
-      <div class="holo__fiche" aria-live="polite">
-        <h3 id="flotte-nom">—</h3>
-        <p class="holo__classe" id="flotte-classe"></p>
-        <p class="holo__texte" id="flotte-texte"></p>
-        <dl class="holo__donnees" id="flotte-fiche"></dl>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE V - LE SAUT  (séquence pilotée)
-     ========================================================= -->
-<section class="saut" id="saut" aria-label="Acte V, le Saut">
+<section class="saut" id="saut" aria-label="Acte III, le Saut">
   <div class="saut__collant">
     <div class="saut__scene" id="saut-scene"></div>
     <div class="saut__voile" aria-hidden="true"></div>
     <div class="saut__eclat" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte V</p>
+    <p class="approche__num" aria-hidden="true">Acte III</p>
 
     <div class="saut__tableau" aria-hidden="true">
       <p class="saut__repere">Point de saut <strong>ODN-7</strong></p>
@@ -266,211 +150,13 @@
   </div>
 </section>
 
-<!-- =========================================================
-     ACTE VI - L'ASCENSION  (montée pilotée)
-     ========================================================= -->
-<section class="ascension" id="ascension" aria-label="Acte VI, l'Ascension">
-  <div class="ascension__collant">
-    <div class="ascension__scene" id="ascension-scene"></div>
-    <div class="ascension__voile" aria-hidden="true"></div>
-
-    <p class="ascension__num" aria-hidden="true">Acte VI</p>
-    <h2 class="ascension__titre balaye">L'ascension</h2>
-
-    <ol class="echelle-verticale" aria-hidden="true">
-        <li class="cran"><span>0</span><em>Adepte</em></li>
-        <li class="cran"><span>1</span><em>Paladin</em></li>
-        <li class="cran"><span>2</span><em>Sentinelle</em></li>
-        <li class="cran"><span>3</span><em>Ange</em></li>
-        <li class="cran cran--confere"><span>4</span><em>Archange</em></li>
-        <li class="cran cran--confere"><span>5</span><em>Séraphin</em></li>
-    </ol>
-
-    <div class="ascension__cartes">
-        <article class="echelon">
-          <span class="echelon__rang" aria-hidden="true">0</span>
-          <h3>Adepte</h3>
-          <p>Dossier validé, entrée prononcée. Accès à l'ensemble des salons opérationnels.</p>
-          <span class="echelon__voie">présence</span>
-        </article>
-        <article class="echelon">
-          <span class="echelon__rang" aria-hidden="true">1</span>
-          <h3>Paladin</h3>
-          <p>Ouverture de fils de discussion. Franchi par l'activité.</p>
-          <span class="echelon__voie">présence</span>
-        </article>
-        <article class="echelon">
-          <span class="echelon__rang" aria-hidden="true">2</span>
-          <h3>Sentinelle</h3>
-          <p>Fils privés et table de sons en vocal. Franchi par l'activité.</p>
-          <span class="echelon__voie">présence</span>
-        </article>
-        <article class="echelon">
-          <span class="echelon__rang" aria-hidden="true">3</span>
-          <h3>Ange</h3>
-          <p>Droit d'inviter au nom de l'Ordre. Franchi par l'activité.</p>
-          <span class="echelon__voie">présence</span>
-        </article>
-        <article class="echelon echelon--confere">
-          <span class="echelon__rang" aria-hidden="true">4</span>
-          <h3>Archange</h3>
-          <p>Organisation d'événements, pseudonyme libre.</p>
-          <span class="echelon__voie">conféré</span>
-        </article>
-        <article class="echelon echelon--confere">
-          <span class="echelon__rang" aria-hidden="true">5</span>
-          <h3>Séraphin</h3>
-          <p>Parole prioritaire, droits maximaux.</p>
-          <span class="echelon__voie">conféré</span>
-        </article>
-    </div>
-
-    <p class="ascension__pied">
-      Six échelons. Les trois premiers s'obtiennent par la présence, les suivants
-      sont conférés par le commandement. Rien ne s'achète, rien ne se demande.
-    </p>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE VII - LA VIGIE
-     ========================================================= -->
-<section class="acte acte--donnees" id="vigie">
-  <div class="contenu contenu--large">
-    <div class="entete entete--centre revele">
-      <p class="acte__num">Acte VII</p>
-      <h2 class="balaye">La Vigie</h2>
-      <p class="intro">
-        Ce que le serveur de l'Ordre dit de lui-même, relevé à l'instant.
-        Rien n'est saisi à la main : tout vient des rôles portés sur le Discord.
-      </p>
-    </div>
-
-    <p class="avis" id="avis-vigie" hidden></p>
-
-    <ul class="compteurs revele" role="list">
-      <li class="compteur">
-        <span class="compteur__val" data-chiffre="recus">—</span>
-        <span class="compteur__lib">Membres reçus</span>
-      </li>
-      <li class="compteur">
-        <span class="compteur__val" data-chiffre="enLigne">—</span>
-        <span class="compteur__lib">En ligne</span>
-      </li>
-      <li class="compteur compteur--vocal">
-        <span class="compteur__val" data-chiffre="enVocal">—</span>
-        <span class="compteur__lib">En vocal</span>
-      </li>
-      <li class="compteur">
-        <span class="compteur__val" data-chiffre="divisions">—</span>
-        <span class="compteur__lib">Divisions pourvues</span>
-      </li>
-    </ul>
-
-    <div class="vocaux revele" id="vocaux" hidden>
-      <h3><span class="pouls" aria-hidden="true"></span>Salons occupés</h3>
-      <ul class="vocaux__liste" role="list"></ul>
-    </div>
-
-    <div class="registre revele" id="registre">
-      <div class="registre__tete">
-        <h3>Registre de l'Ordre</h3>
-        <div class="filtres" id="filtres" role="group" aria-label="Filtrer le registre"></div>
-      </div>
-      <ul class="registre__liste" role="list"></ul>
-      <p class="registre__pied" id="registre-pied"></p>
-    </div>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE VIII - LES OPÉRATIONS
-     ========================================================= -->
-<section class="acte acte--donnees acte--operations" id="operations">
-  <div class="contenu contenu--large">
-    <div class="entete revele">
-      <p class="acte__num">Acte VIII</p>
-      <h2 class="balaye">Les opérations</h2>
-      <p class="intro">
-        Annoncées à l'avance, avec ordre de mission et inscription d'équipage.
-        Le partage des gains est écrit avant le départ.
-      </p>
-    </div>
-
-    <p class="avis" id="avis-operations" hidden></p>
-    <ol class="operations__liste" id="operations-liste" role="list"></ol>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE IX - LA GALERIE
-     ========================================================= -->
-<section class="acte acte--galerie" id="galerie">
-  <div class="contenu contenu--large">
-    <div class="entete entete--centre revele">
-      <p class="acte__num">Acte IX</p>
-      <h2 class="balaye">La galerie</h2>
-      <p class="intro">
-        Captures d'opérations, de convois et d'expéditions. Le verse tel que
-        l'Ordre le traverse.
-      </p>
-    </div>
-
-    <div class="galerie__grille" id="galerie-grille"></div>
-    <p class="avis" id="avis-galerie" hidden></p>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE X - LA RÈGLE
-     ========================================================= -->
-<section class="acte acte--regle" id="regle">
-  <div class="duo">
-    <div class="duo__visuel">
-      <div class="attente attente--grand revele">
-        <span class="attente__cadre" aria-hidden="true"></span>
-        <span class="attente__mot">Emplacement libre</span>
-        <span class="attente__note">Une capture de l'Ordre viendra ici</span>
-      </div>
-    </div>
-
-    <div class="duo__texte">
-      <p class="acte__num revele">Acte X</p>
-      <h2 class="revele balaye">La Règle</h2>
-
-      <div class="volet revele">
-        <h3><span class="volet__puce" aria-hidden="true"></span>Ce que nous demandons</h3>
-        <ul class="liste" role="list">
-          <li>Dix-huit ans révolus.</li>
-          <li>Parler français. Les opérations se mènent en français.</li>
-          <li>Se montrer de temps en temps. Un membre qui n'apparaît jamais n'est pas un membre.</li>
-          <li>Lire la Règle avant d'entrer. Vingt-neuf articles, aucune surprise.</li>
-        </ul>
-      </div>
-
-      <div class="volet revele">
-        <h3><span class="volet__puce volet__puce--clair" aria-hidden="true"></span>Ce que vous trouverez</h3>
-        <ul class="liste" role="list">
-          <li>Des opérations annoncées à l'avance, avec ordre de mission et inscription d'équipage.</li>
-          <li>Un partage des gains écrit avant le départ, pas négocié après.</li>
-          <li>Des salons vocaux et textuels personnels pour vos propres équipages.</li>
-          <li>Un commandement qui répond.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- =========================================================
-     ACTE XI - LE PASSAGE  (plongée pilotée, puis l'appel)
-     ========================================================= -->
-<section class="plongee" id="plongee" aria-label="Acte XI, le Passage">
+<section class="plongee" id="plongee" aria-label="Acte IV, le Passage">
   <div class="plongee__collant">
     <div class="plongee__scene" id="plongee-scene"></div>
     <div class="plongee__voile" aria-hidden="true"></div>
     <div class="plongee__noir" aria-hidden="true"></div>
 
-    <p class="approche__num" aria-hidden="true">Acte XI</p>
+    <p class="approche__num" aria-hidden="true">Acte IV</p>
 
     <div class="approche__textes">
       <p class="fragment"><span>Rien ne dure.</span></p>
@@ -480,53 +166,33 @@
   </div>
 </section>
 
-<section class="acte acte--passage" id="passage">
+<section class="acte acte--appel" id="appel">
   <div class="contenu contenu--centre">
+    <p class="appel__devise revele">Tout n'est que passage</p>
     <h2 class="revele balaye">Entrer dans l'Ordre</h2>
     <p class="chapeau revele">
       Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
       parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
       le moment est maintenant.
     </p>
-
     <div class="portes portes--bas revele">
       <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
-      <a class="porte" href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">Page RSI de l'Ordre</a>
-    </div>
-
-    <ol class="marches revele" role="list">
-      <li><span>01</span>Le sas d'admission vous accueille</li>
-      <li><span>02</span>Vous déposez un dossier</li>
-      <li><span>03</span>Un officier l'instruit et prononce votre entrée</li>
-    </ol>
-
-    <div class="parrainage revele">
-      <h3>Pas encore le jeu ?</h3>
-      <p>
-        Star Citizen s'achète sur le site officiel. En créant votre compte par notre lien,
-        vous recevez <strong>5 000 UEC</strong> de bonus au démarrage et l'Ordre marque un point.
-        Cela ne vous coûte rien de plus.
-      </p>
-      <a class="lien-clair" href="https://www.robertsspaceindustries.com/enlist?referral=STAR-2LQG-ZMRJ" rel="noopener">
-        Créer un compte Star Citizen
-      </a>
+      <a class="porte" href="/rejoindre">Comment entrer</a>
     </div>
   </div>
 </section>
-
 </main>
-
-<div class="visionneuse" id="visionneuse" hidden>
-  <button class="visionneuse__fermer" type="button" aria-label="Fermer">&times;</button>
-  <figure>
-    <img src="" alt="">
-    <figcaption></figcaption>
-  </figure>
-</div>
 
 <footer>
   <div class="pied">
     <p class="devise-pied">Tout n'est que passage</p>
+    <nav class="pied__plan" aria-label="Plan du site">
+          <a href="/" aria-current="page">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie de l’Ordre</a>
+    <a href="/rejoindre">Rejoindre</a>
+    </nav>
     <nav aria-label="Liens de l'Ordre">
       <a href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
       <a href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">RSI</a>
@@ -543,16 +209,13 @@
   </div>
 </footer>
 
-<script src="vendor/three.min.js" defer></script>
-<script src="coques.js" defer></script>
-<script src="vaisseaux.js" defer></script>
-<script src="scene.js" defer></script>
-<script src="approche.js" defer></script>
-<script src="flotte.js" defer></script>
-<script src="saut.js" defer></script>
-<script src="ascension.js" defer></script>
-<script src="plongee.js" defer></script>
-<script src="site.js" defer></script>
-<script src="vigie.js" defer></script>
+<script src="/vendor/three.min.js" defer></script>
+<script src="/coques.js" defer></script>
+<script src="/vaisseaux.js" defer></script>
+<script src="/scene.js" defer></script>
+<script src="/approche.js" defer></script>
+<script src="/saut.js" defer></script>
+<script src="/plongee.js" defer></script>
+<script src="/site.js" defer></script>
 </body>
 </html>

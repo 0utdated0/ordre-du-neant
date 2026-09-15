@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     Page assemblée par outils/pages/batir.js.
+     Ne rien modifier ici : tout se perd au prochain assemblage.
+     Le contenu est dans outils/pages/sections, la coquille dans
+     outils/pages/gabarit.html, la répartition dans batir.js.
+     ============================================================ -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Rejoindre l'Ordre du Néant - recrutement Star Citizen francophone</title>
+<meta name="description" content="Comment entrer dans l'Ordre du Néant : conditions, sas d'admission, instruction du dossier. Recrutement ouvert aux pilotes majeurs parlant français.">
+<link rel="canonical" href="https://ordre-du-neant.fr/rejoindre">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="L'Ordre du Néant">
+<meta property="og:title" content="Rejoindre l'Ordre du Néant - recrutement Star Citizen francophone">
+<meta property="og:description" content="Comment entrer dans l'Ordre du Néant : conditions, sas d'admission, instruction du dossier. Recrutement ouvert aux pilotes majeurs parlant français.">
+<meta property="og:url" content="https://ordre-du-neant.fr/rejoindre">
+<meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="/assets/embleme-512.png" type="image/png">
+<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css">
+
+</head>
+
+<body class="page-rejoindre">
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<canvas id="neant" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignettage" aria-hidden="true"></div>
+
+<div class="barre" id="barre">
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
+  <span class="barre__nom">L'Ordre du Néant</span>
+
+  <button class="barre__bouton" type="button" id="menu-bouton"
+          aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Sections du site">
+        <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie de l’Ordre</a>
+    <a href="/rejoindre" aria-current="page">Rejoindre</a>
+  </nav>
+
+  <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
+       d'admission. Ce bouton-ci ouvre le Discord : deux destinations
+       différentes ne peuvent pas porter le même mot. -->
+  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+</div>
+
+<main id="contenu">
+<section class="acte acte--passage" id="passage">
+  <div class="contenu contenu--centre">
+    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
+    <p class="chapeau revele">
+      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
+      parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
+      le moment est maintenant.
+    </p>
+
+    <div class="portes portes--bas revele">
+      <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
+      <a class="porte" href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">Page RSI de l'Ordre</a>
+    </div>
+
+    <ol class="marches revele" role="list">
+      <li><span>01</span>Le sas d'admission vous accueille</li>
+      <li><span>02</span>Vous déposez un dossier</li>
+      <li><span>03</span>Un officier l'instruit et prononce votre entrée</li>
+    </ol>
+
+    <div class="parrainage revele">
+      <h3>Pas encore le jeu ?</h3>
+      <p>
+        Star Citizen s'achète sur le site officiel. En créant votre compte par notre lien,
+        vous recevez <strong>5 000 UEC</strong> de bonus au démarrage et l'Ordre marque un point.
+        Cela ne vous coûte rien de plus.
+      </p>
+      <a class="lien-clair" href="https://www.robertsspaceindustries.com/enlist?referral=STAR-2LQG-ZMRJ" rel="noopener">
+        Créer un compte Star Citizen
+      </a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="pied">
+    <p class="devise-pied">Tout n'est que passage</p>
+    <nav class="pied__plan" aria-label="Plan du site">
+          <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/vie">La vie de l’Ordre</a>
+    <a href="/rejoindre" aria-current="page">Rejoindre</a>
+    </nav>
+    <nav aria-label="Liens de l'Ordre">
+      <a href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+      <a href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">RSI</a>
+      <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
+    </nav>
+    <p class="mention">
+      Site non officiel, sans but lucratif, sans affiliation avec Cloud Imperium
+      Games. Star Citizen, Roberts Space Industries et les noms de vaisseaux sont
+      des marques de Cloud Imperium Rights LLC. Les modèles 3D présentés ici
+      proviennent du holoviewer de Roberts Space Industries et restent la
+      propriété de leur éditeur. La station Le Seuil est une conception propre à
+      l'Ordre. Fait par la communauté.
+    </p>
+  </div>
+</footer>
+
+<script src="/vendor/three.min.js" defer></script>
+<script src="/scene.js" defer></script>
+<script src="/site.js" defer></script>
+</body>
+</html>

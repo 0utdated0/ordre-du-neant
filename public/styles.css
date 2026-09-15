@@ -176,7 +176,10 @@ a{color:inherit}
   text-transform:uppercase;color:var(--argent);
 }
 .barre__cta{
-  margin-left:auto;
+  /* Le menu prend la marge automatique : deux « auto » dans la
+     même ligne flex se partageraient l'espace et le menu
+     flotterait au milieu. */
+  margin-left:clamp(.8rem,2vw,1.8rem);
   font-family:var(--titre);font-size:.6rem;letter-spacing:.2em;text-transform:uppercase;
   text-decoration:none;
   padding:.6rem 1.15rem;
@@ -186,6 +189,119 @@ a{color:inherit}
   transition:background .3s ease, box-shadow .3s ease;
 }
 .barre__cta:hover{background:var(--rouge);box-shadow:0 0 24px rgba(224,16,32,.6)}
+
+/* =========================================================
+   LE MENU
+   ---------------------------------------------------------
+   Le rail des actes dit I, II, III : il situe dans le récit,
+   il ne dit pas ce qu'on trouve où. Le menu, lui, nomme.
+   ========================================================= */
+.menu{
+  display:flex;align-items:center;gap:clamp(.9rem,2vw,1.9rem);
+  margin-left:auto;
+}
+.menu a{
+  position:relative;
+  font-family:var(--titre);
+  font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(238,240,244,.66);
+  padding:.45rem 0;
+  transition:color .3s ease;
+  white-space:nowrap;
+}
+.menu a::after{
+  content:'';position:absolute;left:0;right:100%;bottom:.1rem;
+  height:1px;background:var(--rouge);
+  transition:right .35s var(--sortie);
+}
+.menu a:hover{color:#fff}
+.menu a:hover::after{right:0}
+.menu a[aria-current="page"]{color:#fff}
+.menu a[aria-current="page"]::after{right:0;background:var(--braise)}
+
+.barre__bouton{
+  display:none;
+  margin-left:auto;
+  width:38px;height:30px;
+  padding:6px 4px;
+  background:none;border:0;cursor:pointer;
+  flex-direction:column;justify-content:space-between;
+}
+.barre__bouton span{
+  display:block;height:1px;width:100%;
+  background:var(--argent);
+  transition:transform .35s var(--sortie), opacity .2s ease;
+}
+.barre__bouton[aria-expanded="true"] span:nth-child(1){transform:translateY(8.5px) rotate(45deg)}
+.barre__bouton[aria-expanded="true"] span:nth-child(2){opacity:0}
+.barre__bouton[aria-expanded="true"] span:nth-child(3){transform:translateY(-8.5px) rotate(-45deg)}
+
+/* Sous la barre, le contenu des pages intérieures ne doit pas
+   passer dessous : seul l'accueil a un héros plein écran. */
+body:not(.page-accueil) main{padding-top:clamp(4.2rem,7vh,5.4rem)}
+
+@media (max-width:900px){
+  .barre__nom{display:none}
+  .barre__bouton{display:flex}
+  .menu{
+    position:absolute;left:0;right:0;top:100%;
+    flex-direction:column;align-items:stretch;gap:0;
+    margin:0;
+    padding:.4rem var(--marge) 1rem;
+    /* Fond plein et pas de flou d'arrière-plan : la barre en a
+       déjà un, et deux backdrop-filter imbriqués laissent passer
+       la page sous le panneau. Un menu qu'on lit par-dessus le
+       texte de la page n'est pas un menu. */
+    background:#040406;
+    border-bottom:1px solid rgba(238,240,244,.09);
+    box-shadow:0 18px 40px rgba(0,0,0,.6);
+    transform:translateY(-8px);
+    opacity:0;visibility:hidden;
+    transition:transform .3s var(--sortie), opacity .25s ease, visibility .25s;
+  }
+  .menu.ouvert{transform:translateY(0);opacity:1;visibility:visible}
+  .menu a{
+    padding:.85rem .2rem;
+    font-size:.66rem;
+    border-bottom:1px solid rgba(238,240,244,.06);
+  }
+  .menu a::after{display:none}
+  /* Sur un bandeau étroit : l'emblème, puis l'appel au Discord
+     poussé à droite, puis le bouton du menu. Le menu déplié passe
+     en dessous, il ne concourt pas pour la place. */
+  .barre__cta{order:1;margin-left:auto;padding:.5rem .85rem;font-size:.55rem}
+  .barre__bouton{order:2;margin-left:.7rem}
+  .menu{order:3}
+}
+
+/* plan du site, en pied */
+.pied__plan{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:.6rem clamp(1rem,2.4vw,2rem);
+  margin-bottom:.4rem;
+}
+.pied__plan a{
+  font-family:var(--titre);
+  font-size:.52rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(238,240,244,.7);
+}
+.pied__plan a:hover{color:#fff}
+.pied__plan a[aria-current="page"]{color:var(--braise)}
+
+/* =========================================================
+   L'APPEL, EN BAS DE CHAQUE PAGE
+   ========================================================= */
+.acte--appel{
+  min-height:auto;
+  padding-block:clamp(4rem,9vh,7rem);
+  background:radial-gradient(ellipse at 50% 120%, rgba(224,16,32,.14), transparent 62%);
+}
+.appel__devise{
+  margin:0 0 .9rem;
+  font-family:var(--titre);
+  font-size:.56rem;letter-spacing:.34em;text-transform:uppercase;
+  color:rgba(134,139,149,.75);
+}
 
 /* =========================================================
    RAIL DE NAVIGATION

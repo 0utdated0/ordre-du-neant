@@ -1,0 +1,47 @@
+<section class="acte acte--donnees" id="vigie">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">{{ACTE}}</p>
+      <h2 class="balaye">La Vigie</h2>
+      <p class="intro">
+        Ce que le serveur de l'Ordre dit de lui-même, relevé à l'instant.
+        Rien n'est saisi à la main : tout vient des rôles portés sur le Discord.
+      </p>
+    </div>
+
+    <p class="avis" id="avis-vigie" hidden></p>
+
+    <ul class="compteurs revele" role="list">
+      <li class="compteur">
+        <span class="compteur__val" data-chiffre="recus">—</span>
+        <span class="compteur__lib">Membres reçus</span>
+      </li>
+      <li class="compteur">
+        <span class="compteur__val" data-chiffre="enLigne">—</span>
+        <span class="compteur__lib">En ligne</span>
+      </li>
+      <li class="compteur compteur--vocal">
+        <span class="compteur__val" data-chiffre="enVocal">—</span>
+        <span class="compteur__lib">En vocal</span>
+      </li>
+      <li class="compteur">
+        <span class="compteur__val" data-chiffre="divisions">—</span>
+        <span class="compteur__lib">Divisions pourvues</span>
+      </li>
+    </ul>
+
+    <div class="vocaux revele" id="vocaux" hidden>
+      <h3><span class="pouls" aria-hidden="true"></span>Salons occupés</h3>
+      <ul class="vocaux__liste" role="list"></ul>
+    </div>
+
+    <div class="registre revele" id="registre">
+      <div class="registre__tete">
+        <h3>Registre de l'Ordre</h3>
+        <div class="filtres" id="filtres" role="group" aria-label="Filtrer le registre"></div>
+      </div>
+      <ul class="registre__liste" role="list"></ul>
+      <p class="registre__pied" id="registre-pied"></p>
+    </div>
+  </div>
+</section>

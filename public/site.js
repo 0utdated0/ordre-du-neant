@@ -62,6 +62,11 @@
      --------------------------------------------------------- */
   var rail = document.getElementById('rail');
   var barre = document.getElementById('barre');
+
+  /* Seul l'accueil a un héros plein écran devant lequel la barre
+     doit s'effacer. Ailleurs, le menu doit être là dès le premier
+     pixel : c'est le seul moyen de naviguer. */
+  var surAccueil = document.body.classList.contains('page-accueil');
   var liens = rail ? rail.querySelectorAll('a') : [];
   var actes = Array.prototype.map.call(liens, function (a) {
     return document.getElementById(a.dataset.cible);
@@ -80,9 +85,12 @@
     for (var j = 0; j < liens.length; j++) {
       liens[j].classList.toggle('actif', j === courant);
     }
-    var passe = window.scrollY > window.innerHeight * 0.75;
+    var passe = surAccueil ? window.scrollY > window.innerHeight * 0.75 : true;
     if (barre) { barre.classList.toggle('visible', passe); }
-    if (rail) { rail.classList.toggle('visible', passe); }
+    if (rail) {
+      rail.classList.toggle('visible',
+        surAccueil ? passe : window.scrollY > window.innerHeight * 0.25);
+    }
   }
 
   /* ---------------------------------------------------------
@@ -158,6 +166,57 @@
   /* ---------------------------------------------------------
      Défilement doux vers les ancres
      --------------------------------------------------------- */
+  /* ---------------------------------------------------------
+     Les anciennes ancres
+     ---------------------------------------------------------
+     Le site a longtemps tenu sur une seule page : les liens
+     partagés pointent vers /#flotte, /#regle et les autres. Ils
+     arriveraient maintenant sur une page qui n'a pas cette
+     section. On les renvoie là où le contenu a déménagé.
+     --------------------------------------------------------- */
+  (function () {
+    var OU = {
+      manifeste: '/ordre', divisions: '/ordre', ascension: '/ordre', regle: '/ordre',
+      flotte: '/flotte',
+      vigie: '/vie', operations: '/vie', galerie: '/vie',
+      passage: '/rejoindre'
+    };
+    var ancre = window.location.hash.slice(1);
+    if (!ancre || document.getElementById(ancre) || !OU[ancre]) { return; }
+    window.location.replace(OU[ancre] + '#' + ancre);
+  })();
+
+  /* ---------------------------------------------------------
+     Le menu replié, sur écran étroit
+     --------------------------------------------------------- */
+  (function () {
+    var bouton = document.getElementById('menu-bouton');
+    var menu = document.getElementById('menu');
+    if (!bouton || !menu) { return; }
+
+    function fermer() {
+      menu.classList.remove('ouvert');
+      bouton.setAttribute('aria-expanded', 'false');
+      bouton.setAttribute('aria-label', 'Ouvrir le menu');
+    }
+    bouton.addEventListener('click', function () {
+      var ouvert = menu.classList.toggle('ouvert');
+      bouton.setAttribute('aria-expanded', ouvert ? 'true' : 'false');
+      bouton.setAttribute('aria-label', ouvert ? 'Fermer le menu' : 'Ouvrir le menu');
+    });
+    /* Un menu qui reste ouvert derrière la page qu'on vient
+       d'ouvrir donne l'impression que le clic n'a rien fait. */
+    menu.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') { fermer(); }
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') { fermer(); }
+    });
+    document.addEventListener('click', function (e) {
+      if (!menu.contains(e.target) && !bouton.contains(e.target)) { fermer(); }
+    });
+  })();
+
   document.querySelectorAll('a[href^="#"]').forEach(function (a) {
     a.addEventListener('click', function (ev) {
       var cible = document.querySelector(a.getAttribute('href'));
