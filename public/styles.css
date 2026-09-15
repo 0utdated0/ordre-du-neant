@@ -1156,6 +1156,7 @@ footer{position:relative;z-index:10;overflow:hidden;
   text-align:center;
 }
 .compteur--vocal .compteur__val{color:var(--braise)}
+.compteur__val.compteur__val--vide{color:rgba(134,139,149,.45)}
 
 /* ---------- salons vocaux ---------- */
 .vocaux{margin-bottom:clamp(2.5rem,5vw,4rem)}

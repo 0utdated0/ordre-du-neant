@@ -173,12 +173,40 @@ async function lireOperations(jeton, guilde) {
    Le widget doit être activé dans les paramètres du serveur.
    S'il ne l'est pas, on le dit au lieu d'échouer.
    -------------------------------------------------------- */
-async function lirePresence(guilde) {
-  const r = await fetch(API + '/guilds/' + guilde + '/widget.json');
-  if (!r.ok) {
-    return { disponible: false, raison: r.status === 403 ? 'widget-desactive' : 'indisponible' };
+async function lirePresence(guilde, jeton) {
+  /* Deux sources. Le widget public donne les salons vocaux occupés,
+     mais il s'appelle sans jeton, depuis les adresses partagées de
+     Cloudflare, et Discord le refuse souvent (limitation de débit) :
+     la présence tombait alors entièrement, et la Vigie affichait des
+     cases vides. Le nombre de membres en ligne, lui, se lit aussi
+     avec le jeton du bot, par une route qui ne dépend pas du widget.
+     On garde donc toujours au moins ce chiffre. */
+  const [rw, rc] = await Promise.allSettled([
+    fetch(API + '/guilds/' + guilde + '/widget.json', {
+      headers: { 'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)' },
+    }),
+    discord('/guilds/' + guilde + '?with_counts=true', jeton),
+  ]);
+
+  const compte = rc.status === 'fulfilled' &&
+    typeof rc.value.approximate_presence_count === 'number'
+    ? rc.value.approximate_presence_count : null;
+
+  const widget = rw.status === 'fulfilled' ? rw.value : null;
+  if (!widget || !widget.ok) {
+    /* Le statut est renvoyé tel quel : c'est ce qui permet de savoir,
+       depuis la page, si le widget est désactivé (403) ou limité (429). */
+    const statut = widget ? widget.status : 0;
+    const raison = statut === 403 ? 'widget-desactive' : 'widget-indisponible';
+    if (compte === null) {
+      return { disponible: false, raison: raison, statutWidget: statut };
+    }
+    return {
+      disponible: true, partiel: true, raison: raison, statutWidget: statut,
+      enLigne: compte, enVocal: null, salons: [],
+    };
   }
-  const w = await r.json();
+  const w = await widget.json();
 
   const salons = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
   const parId = new Map(salons.map((s) => [s.id, s]));
@@ -203,7 +231,8 @@ async function lirePresence(guilde) {
 
   return {
     disponible: true,
-    enLigne: typeof w.presence_count === 'number' ? w.presence_count : (w.members || []).length,
+    enLigne: typeof w.presence_count === 'number' ? w.presence_count
+      : (compte !== null ? compte : (w.members || []).length),
     enVocal: (w.members || []).filter((m) => m.channel_id).length,
     salons: occupes.slice(0, 6),
   };
@@ -337,7 +366,7 @@ async function servirOrdre(request, env, ctx) {
   const resultats = await Promise.allSettled([
     lireEffectif(jeton, guilde, avecNoms),
     lireOperations(jeton, guilde),
-    lirePresence(guilde),
+    lirePresence(guilde, jeton),
   ]);
 
   const [eff, ope, pre] = resultats;

@@ -61,7 +61,15 @@
      --------------------------------------------------------- */
   function poserChiffre(cle, valeur) {
     var n = document.querySelector('[data-chiffre="' + cle + '"]');
-    if (n) { n.textContent = valeur === null || valeur === undefined ? '·' : valeur; }
+    if (!n) { return; }
+    /* Une valeur inconnue s'affichait comme un point isolé au milieu
+       de la case : on croyait à un défaut d'affichage. Elle porte
+       maintenant un tiret atténué, et la case le dit en clair. */
+    var vide = valeur === null || valeur === undefined;
+    n.textContent = vide ? '-' : valeur;
+    n.classList.toggle('compteur__val--vide', vide);
+    if (vide) { n.setAttribute('title', 'Relevé indisponible pour le moment'); }
+    else { n.removeAttribute('title'); }
   }
 
   function rendreVigie(d, exemple) {
@@ -70,7 +78,7 @@
 
     poserChiffre('recus', typeof eff.recus === 'number' ? eff.recus : null);
     poserChiffre('enLigne', pre.disponible ? pre.enLigne : null);
-    poserChiffre('enVocal', pre.disponible ? pre.enVocal : null);
+    poserChiffre('enVocal', pre.disponible && !pre.partiel ? pre.enVocal : null);
 
     var pourvues = null;
     if (eff.parDivision) {
@@ -111,6 +119,14 @@
       avis('avis-vigie',
         "Données d'exemple. Le site n'est pas encore relié au Discord de l'Ordre.",
         'exemple');
+    } else if (pre.partiel && pre.raison === 'widget-desactive') {
+      avis('avis-vigie',
+        "Effectif et membres en ligne à jour. Le détail vocal demande d'activer le widget dans les paramètres du serveur Discord.",
+        'tiede');
+    } else if (pre.partiel) {
+      avis('avis-vigie',
+        "Effectif et membres en ligne à jour. Le détail des salons vocaux est momentanément indisponible.",
+        'discret');
     } else if (!pre.disponible && pre.raison === 'widget-desactive') {
       avis('avis-vigie',
         "L'effectif est à jour. La présence en direct demande d'activer le widget dans les paramètres du serveur Discord.",
