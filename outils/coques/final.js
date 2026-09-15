@@ -15,11 +15,13 @@ const FLOTTE = {
   'polaris':     {nom:'polaris',     longueur:155, cible:12000, aretes:8000},
   'reclaimer':   {nom:'reclaimer',   longueur:155, cible:12000, aretes:8000},
   'caterpillar': {nom:'caterpillar', longueur:111, cible:11000, aretes:7500},
-  /* La simplification approximative met la canonniere en pieces :
-     ses six tourelles sont des coques separees, sans arete
-     commune. On lui laisse son budget et on s'en tient a
-     l'effondrement d'aretes. */
-  'hammerhead':  {nom:'hammerhead',  longueur:110, cible:16000, aretes:9000, sansApprox:true},
+  /* Le Hammerhead a ete retire. Son maillage est fait de coques
+     ouvertes et disjointes : l'effondrement d'aretes n'a aucune
+     arete partagee a effondrer, il mange les surfaces, et la
+     simplification approximative met le batiment en morceaux. En
+     dessous de 100 000 triangles il n'en reste qu'un squelette.
+     Si un modele se comporte ainsi, changer de vaisseau coute
+     moins cher que de le rafistoler. */
   'gladius':     {nom:'gladius',     longueur: 20, cible: 7000, aretes:6000}
 };
 

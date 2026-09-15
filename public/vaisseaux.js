@@ -133,47 +133,187 @@
     return n;
   }
 
-  /* --- Station -------------------------------------------- */
-  function station(peindre) {
+  /* --- Station d'attache ----------------------------------
+     Redessinée d'après les stations orbitales de Star Citizen
+     (Everus Harbor, Port Tressler) : un fût incliné, un moyeu
+     d'anneaux empilés, deux plateaux elliptiques, de longs bras
+     d'amarrage terminés en croix, une grappe de réservoirs et de
+     grands panneaux plats.
+
+     Le niveau de détail compte autant que la forme : à côté de
+     coques à onze mille triangles, une station faite de six
+     volumes faisait tache. Celle-ci en aligne près de cent, pour
+     que le fil de fer ait la même densité que le reste. */
+  function station(peindre, force) {
     var n = new THREE.Group();
+    var A = ARGENT, R = ROUGE;
+    var i, c, a, b;
 
-    n.add(poser(peindre(new THREE.TorusGeometry(3.1, 0.34, 10, 48), ARGENT, 0.8),
-      0, 0, 0, Math.PI / 2, 0, 0));
-    n.add(poser(peindre(new THREE.TorusGeometry(2.1, 0.13, 8, 36), ARGENT, 0.6),
-      0, 0, 0, Math.PI / 2, 0, 0));
-    n.add(peindre(new THREE.CylinderGeometry(0.55, 0.55, 5.2, 12), ARGENT, 0.85));
-    n.add(peindre(new THREE.SphereGeometry(0.95, 16, 12), ROUGE, 1.0));
+    /* La table d'hologrammes peint en additif : quatre-vingts
+       volumes aux intensités écrites pour une coque pleine y
+       saturent en blanc. L'appelant peut tout atténuer d'un coup
+       plutôt que de doubler les réglages pièce par pièce. */
+    if (force !== undefined) {
+      var brut = peindre;
+      peindre = function (geo, teinte, intensite, aretes) {
+        return brut(geo, teinte,
+          (intensite === undefined ? 0.6 : intensite) * force,
+          (aretes === undefined ? 0.5 : aretes) * force);
+      };
+    }
 
-    for (var i = 0; i < 6; i++) {
-      var a = (i / 6) * Math.PI * 2;
-      var r = peindre(new THREE.BoxGeometry(0.16, 0.16, 2.2), ARGENT, 0.6, 0.45);
-      r.position.set(Math.cos(a) * 1.55, 0, Math.sin(a) * 1.55);
-      r.rotation.y = -a;
-      n.add(r);
+    /* ---- fût central, en tronçons avec colliers ---- */
+    for (i = 0; i < 8; i++) {
+      n.add(poser(peindre(new THREE.CylinderGeometry(0.4, 0.4, 0.78, 12), A, 0.78),
+        0, -3.1 + i * 0.86, 0));
+      n.add(poser(peindre(new THREE.CylinderGeometry(0.49, 0.49, 0.1, 12), A, 0.62, 0.5),
+        0, -2.7 + i * 0.86, 0));
+    }
+    /* coiffe et embase */
+    n.add(poser(peindre(new THREE.ConeGeometry(0.4, 0.8, 12), A, 0.85), 0, 3.85, 0));
+    n.add(poser(peindre(new THREE.CylinderGeometry(0.62, 0.4, 0.5, 12), A, 0.8), 0, -3.6, 0));
 
+    /* ---- moyeu : trois anneaux empilés, comme sur Tressler ---- */
+    [[1.05, 0.085, -0.5], [1.38, 0.1, -0.08], [1.0, 0.07, 0.34]].forEach(function (o) {
+      n.add(poser(peindre(new THREE.TorusGeometry(o[0], o[1], 8, 26), A, 0.72),
+        0, o[2], 0, Math.PI / 2, 0, 0));
+    });
+    /* contreforts du moyeu */
+    for (i = 0; i < 8; i++) {
+      a = (i / 8) * Math.PI * 2;
+      n.add(poser(peindre(new THREE.BoxGeometry(0.11, 0.9, 0.11), A, 0.6, 0.45),
+        Math.cos(a) * 1.2, -0.08, Math.sin(a) * 1.2, 0, -a, 0));
+    }
+
+    /* ---- deux plateaux elliptiques, légèrement décalés ---- */
+    [[2.85, 0.13, 0.12, 0.0], [2.25, 0.11, -0.46, 0.4]].forEach(function (p, k) {
+      var pl = poser(peindre(new THREE.CylinderGeometry(p[0], p[0] * 0.94, p[1], 22, 1), A, 0.66, 0.45),
+        0, p[2], 0, 0, p[3], 0);
+      n.add(pl);
+      /* nervures radiales : ce sont elles qui donnent la lecture */
+      for (i = 0; i < 12; i++) {
+        a = (i / 12) * Math.PI * 2 + p[3];
+        n.add(poser(peindre(new THREE.BoxGeometry(p[0] * 0.8, 0.055, 0.14), A, 0.5, 0.38),
+          Math.cos(a) * p[0] * 0.5, p[2] + p[1] * 0.6, Math.sin(a) * p[0] * 0.5, 0, -a, 0));
+      }
+      /* jante */
+      n.add(poser(peindre(new THREE.TorusGeometry(p[0] * 0.99, 0.045, 6, 34),
+        k === 0 ? A : A, 0.55), 0, p[2], 0, Math.PI / 2, 0, 0));
+    });
+
+    /* ---- anneau d'habitation en rotation, avec ses modules ----
+       Il est rassemblé dans son propre groupe et signalé dans
+       userData : l'Approche le fait tourner, et elle ne doit pas
+       avoir à deviner lequel des quatre-vingts volumes c'est. */
+    var couronne = new THREE.Group();
+    n.add(couronne);
+    couronne.add(poser(peindre(new THREE.TorusGeometry(3.35, 0.16, 8, 44), A, 0.7),
+      0, 0.95, 0, Math.PI / 2, 0, 0));
+    for (i = 0; i < 14; i++) {
+      a = (i / 14) * Math.PI * 2;
+      couronne.add(poser(peindre(new THREE.BoxGeometry(0.42, 0.3, 0.26), A, 0.62),
+        Math.cos(a) * 3.35, 0.95, Math.sin(a) * 3.35, 0, -a, 0));
       if (i % 2 === 0) {
-        var mo = peindre(new THREE.BoxGeometry(0.75, 0.75, 1.1), ARGENT, 0.7);
-        mo.position.set(Math.cos(a) * 3.1, 0, Math.sin(a) * 3.1);
-        mo.rotation.y = -a;
-        n.add(mo);
-
-        var fe = peindre(new THREE.SphereGeometry(0.11, 8, 6), ROUGE, 2.0, 0);
-        fe.position.set(Math.cos(a) * 3.55, 0, Math.sin(a) * 3.55);
-        n.add(fe);
+        couronne.add(poser(peindre(new THREE.BoxGeometry(0.06, 0.06, 1.9), A, 0.42, 0.3),
+          Math.cos(a) * 2.5, 0.6, Math.sin(a) * 2.5, 0, -a + Math.PI / 2, 0.42));
       }
     }
 
-    for (var c = -1; c <= 1; c += 2) {
-      n.add(poser(peindre(new THREE.ConeGeometry(0.55, 1.1, 12), ARGENT, 0.8),
-        0, c * 3.0, 0, c > 0 ? 0 : Math.PI, 0, 0));
-      n.add(poser(peindre(new THREE.CylinderGeometry(0.03, 0.03, 1.5, 6), ARGENT, 0.7),
-        0, c * 4.1, 0));
+    /* ---- quatre bras d'amarrage, terminés en croix ---- */
+    for (i = 0; i < 4; i++) {
+      a = (i / 4) * Math.PI * 2 + Math.PI / 8;
+      var dx = Math.cos(a), dz = Math.sin(a);
+      var yb = i % 2 ? 0.3 : -0.55;
+      /* poutre principale */
+      n.add(poser(peindre(new THREE.BoxGeometry(0.15, 0.15, 3.4), A, 0.6),
+        dx * 3.3, yb, dz * 3.3, 0, -a + Math.PI / 2, 0));
+      /* entretoises */
+      for (c = -1; c <= 1; c += 2) {
+        n.add(poser(peindre(new THREE.BoxGeometry(0.055, 0.055, 1.7), A, 0.42, 0.32),
+          dx * 2.9 + -dz * c * 0.18, yb + 0.1, dz * 2.9 + dx * c * 0.18,
+          0, -a + Math.PI / 2, c * 0.1));
+      }
+      /* noeud d'amarrage : trois barres croisées */
+      var bx = dx * 5.1, bz = dz * 5.1;
+      n.add(poser(peindre(new THREE.BoxGeometry(0.22, 0.22, 0.75), A, 0.8),
+        bx, yb, bz, 0, -a + Math.PI / 2, 0));
+      n.add(poser(peindre(new THREE.BoxGeometry(1.25, 0.09, 0.14), A, 0.62),
+        bx, yb, bz, 0, -a + Math.PI / 2, 0));
+      n.add(poser(peindre(new THREE.BoxGeometry(0.14, 0.09, 1.25), A, 0.62),
+        bx, yb, bz, 0, -a + Math.PI / 2, 0));
+      n.add(poser(peindre(new THREE.BoxGeometry(0.1, 0.9, 0.1), A, 0.55, 0.4), bx, yb, bz));
+      /* feu de position */
+      n.add(poser(peindre(new THREE.SphereGeometry(0.075, 8, 6), R, 2.2, 0),
+        dx * 5.55, yb, dz * 5.55));
     }
 
+    /* ---- bloc d'habitation : la longue nacelle de Tressler ---- */
+    var nacelle = new THREE.Group();
+    /* Capsule fermée : elle empile ses deux faces à chaque pixel,
+       donc elle se peint bas, sinon elle vire au bloc blanc. */
+    nacelle.add(poser(peindre(new THREE.CylinderGeometry(0.34, 0.34, 2.9, 14), A, 0.3, 0.55),
+      0, 0, 0, Math.PI / 2, 0, 0));
+    for (c = -1; c <= 1; c += 2) {
+      nacelle.add(poser(peindre(new THREE.SphereGeometry(0.34, 14, 8), A, 0.28, 0.5), 0, 0, c * 1.45));
+    }
+    for (i = 0; i < 5; i++) {
+      nacelle.add(poser(peindre(new THREE.BoxGeometry(0.52, 0.07, 0.16), R, 1.3, 0.2),
+        0, 0.3, -1.05 + i * 0.52));
+      nacelle.add(poser(peindre(new THREE.TorusGeometry(0.36, 0.035, 6, 16), A, 0.55),
+        0, 0, -1.05 + i * 0.52));
+    }
+    poser(nacelle, 1.35, 1.9, 0, 0, 0, -0.55);
+    n.add(nacelle);
+    n.add(poser(peindre(new THREE.BoxGeometry(0.12, 1.3, 0.12), A, 0.6), 0.72, 1.2, 0, 0, 0, -0.55));
+
+    /* ---- grappe de réservoirs, sous le moyeu ---- */
+    for (i = 0; i < 4; i++) {
+      n.add(poser(peindre(new THREE.SphereGeometry(0.26, 12, 9), A, 0.72),
+        -0.05, -1.5 - i * 0.52, 0.55));
+      n.add(poser(peindre(new THREE.TorusGeometry(0.27, 0.03, 6, 14), A, 0.5),
+        -0.05, -1.5 - i * 0.52, 0.55, Math.PI / 2, 0, 0));
+    }
+    n.add(poser(peindre(new THREE.BoxGeometry(0.08, 2.3, 0.08), A, 0.55), -0.05, -2.28, 0.55));
+
+    /* ---- panneaux plats : radiateurs et capteurs ---- */
+    for (c = -1; c <= 1; c += 2) {
+      /* Une plaque plate vue de biais renvoie toute sa surface
+         d'un coup : elle se peint bien plus bas que le reste. */
+      n.add(poser(peindre(new THREE.BoxGeometry(2.6, 0.04, 1.0), A, 0.2, 0.42),
+        c * 1.9, 2.5, c * 0.7, c * 0.3, 0, c * 0.22));
+      for (i = 0; i < 4; i++) {
+        n.add(poser(peindre(new THREE.BoxGeometry(2.6, 0.05, 0.05), A, 0.38, 0.3),
+          c * 1.9, 2.52, c * 0.7 - 0.4 + i * 0.27, c * 0.3, 0, c * 0.22));
+      }
+      n.add(poser(peindre(new THREE.BoxGeometry(0.09, 0.09, 1.1), A, 0.55),
+        c * 0.75, 2.35, c * 0.28, 0, -c * 1.2, 0));
+    }
+
+    /* ---- antennes et parabole ---- */
+    n.add(poser(peindre(new THREE.CylinderGeometry(0.025, 0.025, 1.7, 6), A, 0.6), 0.18, 4.6, 0.1));
+    n.add(poser(peindre(new THREE.CylinderGeometry(0.02, 0.02, 1.1, 6), A, 0.5), -0.2, 4.3, -0.14));
+    n.add(poser(peindre(new THREE.SphereGeometry(0.1, 10, 7), R, 1.8, 0), 0.18, 5.45, 0.1));
+    var dish = poser(peindre(new THREE.SphereGeometry(0.5, 16, 8, 0, 6.2832, 0, 1.0), A, 0.6),
+      -1.15, -1.1, -0.65, 2.1, 0, 0.5);
+    n.add(dish);
+    n.add(poser(peindre(new THREE.BoxGeometry(0.07, 0.07, 0.8), A, 0.5), -0.75, -1.0, -0.4, 0, 0.9, 0.6));
+
+    /* ---- feux de balisage le long du fût ---- */
+    for (i = 0; i < 5; i++) {
+      n.add(poser(peindre(new THREE.SphereGeometry(0.055, 8, 6), R, 2.0, 0),
+        0.42, -2.6 + i * 1.3, 0.16));
+    }
+
+    /* Recentrée : le fût monte plus haut que la grappe ne descend,
+       et sans ce rattrapage elle sort du cadre par le haut. */
+    n.children.forEach(function (o) { o.position.y -= 1.05; });
+
+    n.userData.anneau = couronne;
     n.userData.moteurs = [];
     n.userData.longueur = 8;
     return n;
   }
+
 
   /* --- Porte-Néant : le bâtiment de ligne ----------------- */
   /* Trois fois la longueur du cargo. Ce qui fait lire « gros »,
@@ -391,7 +531,6 @@
   var cargoReel        = fabrique('caterpillar', 9.6);
   var foreuseReelle    = fabrique('reclaimer',   6.4);
   var porteNeantReel   = fabrique('javelin',    28.0);
-  var canonniereReelle = fabrique('hammerhead',  7.2);
   var chasseurReel     = fabrique('gladius',     2.4);
   var fregateReelle    = fabrique('idris',      18.0);
 
@@ -431,17 +570,6 @@
       texte: "Rapide pour sa masse, conçu pour tenir la distance autour d'un convoi plutôt que pour engager seul. Il escorte, il dissuade, il rentre."
     },
     {
-      cle: 'canonniere', nom: 'Le Rempart', classe: 'Canonnière',
-      division: 'Combat et Sécurité', construire: pourLaTable('hammerhead'), echelle: 1,
-      fiche: [
-        ['Modèle', 'Aegis Hammerhead'],
-        ['Rôle', 'Défense de convoi, saturation'],
-        ['Équipage', '6 à 8'],
-        ['Longueur', '110 m']
-      ],
-      texte: "Six tourelles habitées et rien d'autre. Elle ne poursuit personne : elle se place entre le convoi et ce qui arrive, et elle attend."
-    },
-    {
       cle: 'cargo', nom: 'Le Portefaix', classe: 'Cargo modulaire',
       division: 'Logistique et Industrie', construire: pourLaTable('caterpillar'), echelle: 1,
       fiche: [
@@ -476,14 +604,14 @@
     },
     {
       cle: 'station', nom: 'Le Seuil', classe: "Station d'attache",
-      division: 'Commandement', construire: station, echelle: 0.92,
+      division: 'Commandement', construire: function (p) { return station(p, 0.12); }, echelle: 0.5,
       fiche: [
         ['Modèle', "Conception propre à l'Ordre"],
         ['Rôle', 'Amarrage, réunion, dépôt'],
         ['Équipage', 'Variable'],
-        ['Envergure', '210 m']
+        ['Envergure', '268 m']
       ],
-      texte: "Le point de ralliement. Anneau d'habitation en rotation, fût central, trois bras d'amarrage. On y entre, on y repart : tout n'est que passage."
+      texte: "Le point de ralliement. Fût incliné, moyeu d'anneaux empilés, anneau d'habitation en rotation, quatre bras d'amarrage. On y entre, on y repart : tout n'est que passage."
     }
   ];
 
@@ -496,7 +624,6 @@
     cargo: cargoReel,
     foreuse: foreuseReelle,
     porteNeant: porteNeantReel,
-    canonniere: canonniereReelle,
     chasseur: chasseurReel,
     fregate: fregateReelle,
     station: station,

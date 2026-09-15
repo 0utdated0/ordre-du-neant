@@ -114,6 +114,8 @@
   /* ---------------------------------------------------------
      La station, au bout du couloir
      --------------------------------------------------------- */
+  var CATALOGUE = (window.ODN && window.ODN.vaisseaux) || null;
+
   var station = new THREE.Group();
   /* décalée en haut à droite : le bas de l'écran reste libre
      pour le texte, qui n'a pas à lutter contre la silhouette */
@@ -143,24 +145,32 @@
     return g;
   }
 
-  var anneauG = new THREE.TorusGeometry(120, 11, 10, 64);
-  var anneau = bloc(anneauG, 0xeef0f4, 0.55);
-  anneau.rotation.x = Math.PI / 2;
-  station.add(anneau);
+  /* La même station que la table d'hologrammes de l'acte IV,
+     peinte en coque pleine. Elle y était faite d'un tore, d'un
+     fût et de six rayons : à côté de coques à onze mille
+     triangles, ça se voyait. */
+  function peindreStation(geo, teinte, intensite, opaciteAretes) {
+    var g = new THREE.Group();
+    g.add(sombre(geo));
+    g.add(ligne(geo, teinte, Math.min(0.7, (opaciteAretes === undefined ? 0.5 : opaciteAretes) * 1.05)));
+    return g;
+  }
 
-  var futG = new THREE.CylinderGeometry(22, 22, 210, 16);
-  station.add(bloc(futG, 0xeef0f4, 0.5));
-
-  var moyeuG = new THREE.SphereGeometry(38, 20, 14);
-  station.add(bloc(moyeuG, 0xe01020, 0.7));
-
-  for (var i = 0; i < 6; i++) {
-    var ang = (i / 6) * Math.PI * 2;
-    var rayonG = new THREE.BoxGeometry(6, 6, 100);
-    var ry = bloc(rayonG, 0xeef0f4, 0.4);
-    ry.position.set(Math.cos(ang) * 62, 0, Math.sin(ang) * 62);
-    ry.rotation.y = -ang;
-    station.add(ry);
+  var anneau = null;
+  if (CATALOGUE && CATALOGUE.station) {
+    var corps = CATALOGUE.station(peindreStation);
+    corps.scale.setScalar(24);
+    station.add(corps);
+    /* L'anneau d'habitation tourne : c'est lui, et pas le reste,
+       qui dit que la station est habitée. Il est le seul enfant
+       du groupe à porter ce rôle, on le retient par son rang. */
+    anneau = corps.userData.anneau || null;
+  } else {
+    var anneauG = new THREE.TorusGeometry(120, 11, 10, 64);
+    anneau = bloc(anneauG, 0xeef0f4, 0.55);
+    anneau.rotation.x = Math.PI / 2;
+    station.add(anneau);
+    station.add(bloc(new THREE.CylinderGeometry(22, 22, 210, 16), 0xeef0f4, 0.5));
   }
 
   /* feux de position : c'est ce qui fait qu'une silhouette
@@ -168,7 +178,7 @@
   var feuxPos = [];
   for (var fp = 0; fp < 18; fp++) {
     var af = (fp / 18) * Math.PI * 2;
-    feuxPos.push(Math.cos(af) * 131, Math.sin(af) * 0.0 + (fp % 2 ? 9 : -9), Math.sin(af) * 131);
+    feuxPos.push(Math.cos(af) * 80.4, 22.8 + (fp % 2 ? 3 : -3), Math.sin(af) * 80.4);
   }
   var geoFeux = new THREE.BufferGeometry();
   geoFeux.setAttribute('position', new THREE.BufferAttribute(new Float32Array(feuxPos), 3));
@@ -211,7 +221,6 @@
      un vaisseau.
      --------------------------------------------------------- */
 
-  var CATALOGUE = (window.ODN && window.ODN.vaisseaux) || null;
 
   /* halo de tuyère : un disque additif, pas une lumière */
   var HALO = (function () {
@@ -468,7 +477,7 @@
     camera.lookAt(0, 0, station.position.z);
     camera.rotation.z = Math.sin(avance * 2.6) * 0.08;
 
-    anneau.rotation.z += dt * 0.11;
+    if (anneau) { anneau.rotation.z += dt * 0.11; }
     feux.material.opacity = 0.55 + 0.45 * Math.abs(Math.sin(t * 1.4));
     halo.material.opacity = 0.5 + 0.3 * Math.sin(t * 0.6);
 

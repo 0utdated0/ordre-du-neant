@@ -1396,6 +1396,12 @@ h2.balaye{
   position:relative;
   aspect-ratio:16/10;
   min-height:clamp(320px,44vh,520px);
+  /* Sur une fenetre haute, min-height et aspect-ratio se liguent :
+     le navigateur en deduit une largeur de 1,6 fois la hauteur
+     imposee, la table deborde de sa colonne et recouvre la fiche.
+     La largeur de la colonne doit primer, le rapport cede. */
+  min-width:0;
+  max-width:100%;
   overflow:hidden;
   border:1px solid rgba(238,240,244,.12);
   background:
