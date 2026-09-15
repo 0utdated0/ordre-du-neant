@@ -118,7 +118,12 @@
 
     approcher: function (c) {
       c.foreuse = T.coque('orion', 120, T.ARGENT, 0.42);
-      c.foreuse.position.set(6, -6, 96);
+      /* Face à la roche. La proue est en +Z sur toutes les coques
+         du site et la roche est en -Z : sans ce demi-tour, le
+         Gisement tournait le dos à son gisement et le faisceau
+         partait de la poupe en traversant tout le bâtiment. */
+      c.foreuse.position.set(-40, 14, 70);
+      c.foreuse.rotation.y = Math.PI;
       c.scene.add(c.foreuse);
       /* La tête de forage est relevée sur le maillage, pas posée
          à l'estime : c'est l'extrémité avant-basse de la coque. */
@@ -211,13 +216,18 @@
       /* À la fin elle reprend du champ au lieu de s'enfoncer dans
          les gravats : le dernier plan doit montrer la plateforme
          qui encaisse, pas un écran de cailloux. */
+      /* De côté, pour tenir les deux bouts du faisceau dans le
+         même cadre. L'ancien trajet regardait l'axe de face : le
+         Gisement restait au bord de l'image, souvent dehors, et
+         l'acte montrait un caillou et un trait venu de nulle
+         part. Vérifié aux deux extrémités du défilement. */
       c.camera.position.set(
-        -210 + m1 * 92 + m2 * 40 + m3 * 96,
-        66 - m1 * 40 + m2 * 10 + m3 * 34,
-        170 - m1 * 96 - m2 * 76 + m3 * 190
+        -330 + m1 * 40 + m2 * 24 + m3 * 60,
+        70 - m1 * 22 + m2 * 24 + m3 * 44,
+        -30 + m1 * 16 + m2 * 30 + m3 * 90
       );
       c.camera.lookAt(new THREE.Vector3(
-        m3 * 8, m3 * -4, -150 + m2 * 40 + m3 * 150));
+        -14, 6, -34 + m2 * 10 + m3 * 24));
       c.camera.rotation.z += Math.sin(t * 0.3) * 0.015 + morsure * Math.sin(t * 31) * 0.004;
     }
   });

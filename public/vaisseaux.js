@@ -548,10 +548,11 @@
      s'additionnaient ; les coques réelles en empilent bien
      davantage, et à la même force la projection vire au blanc
      plein. Réglé à l'œil sur la coque la plus dense, le Silence. */
-  function pourLaTable(nomCoque, repli, repliEnvergure, intensite) {
+  function pourLaTable(nomCoque, repli, repliEnvergure, intensite, aretes) {
     var L = COQUES[nomCoque].longueur;
     return fabrique(nomCoque, 9.2 * Math.pow(L / 345, 0.22),
-      { intensite: intensite === undefined ? 0.016 : intensite, aretes: 0.09,
+      { intensite: intensite === undefined ? 0.004 : intensite,
+        aretes: aretes === undefined ? 0.13 : aretes,
         repli: repli, repliEnvergure: repliEnvergure });
   }
 
@@ -641,7 +642,14 @@
     },
     {
       cle: 'foreuse-lourde', nom: 'Le Gisement', classe: 'Plateforme de forage',
-      division: 'Extraction', construire: pourLaTable('orion'), echelle: 1,
+      /* Le Gisement est le cas extrême de la table : un million de
+         triangles dans un volume compact, avec des batteries de
+         cuves emboîtées. Vu de trois quarts, tout se superpose et
+         la projection additive vire à la masse blanche. Il lui
+         faut sa propre mesure. */
+      division: 'Extraction',
+      construire: pourLaTable('orion', undefined, undefined, 0.0022, 0.055),
+      echelle: 1,
       fiche: [
         ['Modèle', 'RSI Orion'],
         ['Rôle', 'Forage, raffinage embarqué'],

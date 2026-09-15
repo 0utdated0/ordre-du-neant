@@ -65,15 +65,25 @@
         'void main(){',
         '  vec3 v = normalize(-vP);',
         '  vec3 n = normalize(cross(dFdx(vP), dFdy(vP)));',
+        /* la même normale, mais dans le repère du monde : elle sert
+           à savoir si une face est couchée dans le plan de la bande
+           de balayage */
+        '  vec3 nM = normalize(cross(dFdx(vM), dFdy(vM)));',
         '  float f = pow(1.0 - abs(dot(v, n)), 2.2);',
         /* lignes de balayage horizontales, fines */
         '  float lignes = 0.55 + 0.45 * sin(vM.y * 26.0 - temps * 1.6);',
-        /* bande claire qui remonte le long du modèle */
-        '  float bande = smoothstep(0.16, 0.0, abs(vM.y - balayage));',
+        /* Bande claire qui remonte le long du modèle. Elle doit se
+           lire comme un trait qui traverse la coque : sur une face
+           couchée à plat dans son plan, toute la tôle entre dans la
+           bande d'un coup et s'allume entière. C'est ce qui
+           transformait les grands radiateurs du Gisement en dalle
+           blanche. On l'éteint donc sur les faces horizontales. */
+        '  float bande = smoothstep(0.16, 0.0, abs(vM.y - balayage))',
+        '               * (1.0 - abs(nM.y));',
         /* scintillement lent, jamais franc : un hologramme vacille */
         '  float vacille = 0.9 + 0.1 * sin(temps * 7.3) * sin(temps * 2.1);',
-        '  float i = (0.1 + f * 0.85) * lignes * vacille * force + bande * 0.5;',
-        '  gl_FragColor = vec4(teinte * (1.0 + bande * 1.6), i);',
+        '  float i = (0.1 + f * 0.85) * lignes * vacille * force + bande * 0.22;',
+        '  gl_FragColor = vec4(teinte * (1.0 + bande * 0.8), i);',
         '}'
       ].join('\n'),
       transparent: true,
