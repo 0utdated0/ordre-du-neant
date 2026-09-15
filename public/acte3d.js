@@ -50,6 +50,39 @@
     return new THREE.CanvasTexture(t);
   }
 
+  /* Fondu d'un acte à l'autre. Les actes se succédaient par
+     coupe franche : onze démonstrations posées bout à bout. Le
+     canevas monte sur les 8 % du début de la course et s'éteint
+     sur les 8 % de la fin, et c'est le ciel de la page qui fait
+     la liaison. Fonction du défilement, comme le reste : si on
+     remonte, le fondu se rejoue à l'envers. */
+  var FONDU = 0.08;
+  function fondu(avance) {
+    return palier(avance, 0, FONDU) * (1 - palier(avance, 1 - FONDU, 1));
+  }
+
+  /* Pose l'opacité sur le canevas, et dit s'il vaut la peine de
+     rendre l'image : un canevas éteint ne se peint pas. */
+  function fondre(toile, avance) {
+    /* « avance » est lissé et n'atteint jamais tout à fait zéro :
+       sous un pour cent, on tient le canevas pour éteint. */
+    var o = Math.round(fondu(avance) * 100) / 100;
+    if (toile.__fondu !== o) { toile.__fondu = o; toile.style.opacity = String(o); }
+    return o > 0;
+  }
+
+  /* Lance « lancer » quand la section arrive à un écran et demi
+     de la vue. Une fois, puis on ne regarde plus. */
+  function differer(section, lancer) {
+    if (!('IntersectionObserver' in window)) { lancer(); return; }
+    var o = new IntersectionObserver(function (es) {
+      for (var i = 0; i < es.length; i++) {
+        if (es[i].isIntersecting) { o.disconnect(); lancer(); return; }
+      }
+    }, { rootMargin: '150% 0px' });
+    o.observe(section);
+  }
+
   var ROND = null;
   function rond() {
     if (!ROND) {
@@ -64,162 +97,171 @@
     var hote = document.getElementById(def.id + '-scene');
     if (!section || !hote) { return null; }
 
-    var doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var petit = window.innerWidth < 860;
+    /* Le contexte WebGL n'est créé qu'à l'approche de la section.
+       Il y en avait dix au chargement, un par acte, y compris pour
+       ceux qu'un visiteur ne verra jamais. */
+    differer(section, function () {
 
-    var moteur;
-    try {
-      moteur = new THREE.WebGLRenderer({
-        antialias: !petit, alpha: true, powerPreference: 'high-performance'
-      });
-    } catch (e) { return null; }
+      var doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var petit = window.innerWidth < 860;
 
-    moteur.setPixelRatio(Math.min(window.devicePixelRatio || 1, petit ? 1.25 : 1.6));
-    moteur.setClearColor(0x000000, 0);
-    moteur.domElement.setAttribute('aria-hidden', 'true');
-    hote.appendChild(moteur.domElement);
-
-    var scene = new THREE.Scene();
-    var camera = new THREE.PerspectiveCamera(def.champ || 55, 1, 0.5, 6000);
-
-    var c = {
-      section: section, hote: hote, scene: scene, camera: camera, moteur: moteur,
-      petit: petit, doux: doux,
-      palier: palier, lisser: lisser, rond: rond, pastille: pastille,
-      fragments: Array.prototype.slice.call(section.querySelectorAll('.fragment')),
-      avance: 0
-    };
-
-    if (def.brouillard) {
-      scene.fog = new THREE.FogExp2(0x000000, def.brouillard);
-    }
-
-    if (def.monter) { def.monter(c); }
-
-    /* ---- défilement ---- */
-    var avance = 0, cible = 0;
-
-    function mesurer() {
-      var r = section.getBoundingClientRect();
-      var course = r.height - window.innerHeight;
-      cible = course <= 0 ? 0 : Math.min(Math.max(-r.top / course, 0), 1);
-    }
-
-    var actifCourant = -1;
-    function marquer() {
-      var n = c.fragments.length;
-      if (!n) { return; }
-      /* Un fragment par tranche égale de la course. Le texte
-         appartient à un moment du trajet, il ne flotte pas
-         au-dessus d'une boucle. */
-      var brut = avance * n;
-      var actif = Math.min(n - 1, Math.floor(brut));
-      /* Hystérésis. Sans elle, un défilement arrêté pile sur une
-         frontière fait basculer l'indice à chaque image, parce que
-         « avance » n'atteint jamais tout à fait sa cible : les deux
-         fragments restaient alors figés à mi-fondu, l'un par-dessus
-         l'autre. Vu sur l'appontage et la récupération. */
-      if (actifCourant >= 0 && actif !== actifCourant) {
-        var ecart = brut - actifCourant;
-        if (ecart > -0.12 && ecart < 1.12) { actif = actifCourant; }
-      }
-      if (actif !== actifCourant) {
-        actifCourant = actif;
-        for (var i = 0; i < n; i++) {
-          c.fragments[i].classList.toggle('fragment--vu', i === actif);
-        }
-      }
-      if (def.marquer) { def.marquer(c, avance); }
-    }
-
-    var enAttente = false;
-    window.addEventListener('scroll', function () {
-      if (enAttente) { return; }
-      enAttente = true;
-      requestAnimationFrame(function () { mesurer(); enAttente = false; });
-    }, { passive: true });
-    window.addEventListener('resize', mesurer, { passive: true });
-
-    function dimensionner() {
-      var l = hote.clientWidth, h = hote.clientHeight;
-      if (!l || !h) { return; }
-      camera.aspect = l / h;
-      camera.updateProjectionMatrix();
-      moteur.setSize(l, h, false);
-      moteur.domElement.style.width = '100%';
-      moteur.domElement.style.height = '100%';
-      if (def.cadrer) { def.cadrer(c, l, h); }
-    }
-    var minuteur;
-    window.addEventListener('resize', function () {
-      clearTimeout(minuteur);
-      minuteur = setTimeout(dimensionner, 140);
-    }, { passive: true });
-
-    /* ---- veille ---- */
-    var aLecran = false;
-    var vu = false;
-    if ('IntersectionObserver' in window) {
-      new IntersectionObserver(function (es) {
-        es.forEach(function (x) {
-          aLecran = x.isIntersecting;
-          /* Les coques pèsent : on ne les demande qu'à l'approche
-             de la section, jamais au chargement de la page. */
-          if (aLecran && !vu) { vu = true; if (def.approcher) { def.approcher(c); } }
+      var moteur;
+      try {
+        moteur = new THREE.WebGLRenderer({
+          antialias: !petit, alpha: true, powerPreference: 'high-performance'
         });
-      }, { rootMargin: def.marge || '700px' }).observe(section);
-    } else { aLecran = true; if (def.approcher) { def.approcher(c); } }
+      } catch (e) { return null; }
 
-    var visible = true;
-    document.addEventListener('visibilitychange', function () {
-      visible = !document.hidden;
+      moteur.setPixelRatio(Math.min(window.devicePixelRatio || 1, petit ? 1.25 : 1.6));
+      moteur.setClearColor(0x000000, 0);
+      moteur.domElement.setAttribute('aria-hidden', 'true');
+      hote.appendChild(moteur.domElement);
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(def.champ || 55, 1, 0.5, 6000);
+
+      var c = {
+        section: section, hote: hote, scene: scene, camera: camera, moteur: moteur,
+        petit: petit, doux: doux,
+        palier: palier, lisser: lisser, rond: rond, pastille: pastille,
+        fragments: Array.prototype.slice.call(section.querySelectorAll('.fragment')),
+        avance: 0
+      };
+
+      if (def.brouillard) {
+        scene.fog = new THREE.FogExp2(0x000000, def.brouillard);
+      }
+
+      if (def.monter) { def.monter(c); }
+
+      /* ---- défilement ---- */
+      var avance = 0, cible = 0;
+
+      function mesurer() {
+        var r = section.getBoundingClientRect();
+        var course = r.height - window.innerHeight;
+        cible = course <= 0 ? 0 : Math.min(Math.max(-r.top / course, 0), 1);
+      }
+
+      var actifCourant = -1;
+      function marquer() {
+        var n = c.fragments.length;
+        if (!n) { return; }
+        /* Un fragment par tranche égale de la course. Le texte
+           appartient à un moment du trajet, il ne flotte pas
+           au-dessus d'une boucle. */
+        var brut = avance * n;
+        var actif = Math.min(n - 1, Math.floor(brut));
+        /* Hystérésis. Sans elle, un défilement arrêté pile sur une
+           frontière fait basculer l'indice à chaque image, parce que
+           « avance » n'atteint jamais tout à fait sa cible : les deux
+           fragments restaient alors figés à mi-fondu, l'un par-dessus
+           l'autre. Vu sur l'appontage et la récupération. */
+        if (actifCourant >= 0 && actif !== actifCourant) {
+          var ecart = brut - actifCourant;
+          if (ecart > -0.12 && ecart < 1.12) { actif = actifCourant; }
+        }
+        if (actif !== actifCourant) {
+          actifCourant = actif;
+          for (var i = 0; i < n; i++) {
+            c.fragments[i].classList.toggle('fragment--vu', i === actif);
+          }
+        }
+        if (def.marquer) { def.marquer(c, avance); }
+      }
+
+      var enAttente = false;
+      window.addEventListener('scroll', function () {
+        if (enAttente) { return; }
+        enAttente = true;
+        requestAnimationFrame(function () { mesurer(); enAttente = false; });
+      }, { passive: true });
+      window.addEventListener('resize', mesurer, { passive: true });
+
+      function dimensionner() {
+        var l = hote.clientWidth, h = hote.clientHeight;
+        if (!l || !h) { return; }
+        camera.aspect = l / h;
+        camera.updateProjectionMatrix();
+        moteur.setSize(l, h, false);
+        moteur.domElement.style.width = '100%';
+        moteur.domElement.style.height = '100%';
+        if (def.cadrer) { def.cadrer(c, l, h); }
+      }
+      var minuteur;
+      window.addEventListener('resize', function () {
+        clearTimeout(minuteur);
+        minuteur = setTimeout(dimensionner, 140);
+      }, { passive: true });
+
+      /* ---- veille ---- */
+      var aLecran = false;
+      var vu = false;
+      if ('IntersectionObserver' in window) {
+        new IntersectionObserver(function (es) {
+          es.forEach(function (x) {
+            aLecran = x.isIntersecting;
+            /* Les coques pèsent : on ne les demande qu'à l'approche
+               de la section, jamais au chargement de la page. */
+            if (aLecran && !vu) { vu = true; if (def.approcher) { def.approcher(c); } }
+          });
+        }, { rootMargin: def.marge || '700px' }).observe(section);
+      } else { aLecran = true; if (def.approcher) { def.approcher(c); } }
+
+      var visible = true;
+      document.addEventListener('visibilitychange', function () {
+        visible = !document.hidden;
+      });
+
+      /* ---- boucle ---- */
+      var horloge = new THREE.Clock();
+
+      function boucle() {
+        requestAnimationFrame(boucle);
+        if (!aLecran || !visible) { return; }
+        var dt = Math.min(horloge.getDelta(), 0.05);
+        var t = horloge.getElapsedTime();
+        avance = lisser(avance, cible, def.souplesse || 8, dt);
+        c.avance = avance;
+        if (def.jouer) { def.jouer(c, avance, dt, t); }
+        marquer();
+        if (fondre(moteur.domElement, avance)) { moteur.render(scene, camera); }
+      }
+
+      dimensionner();
+      mesurer();
+      avance = cible;
+      c.avance = avance;
+
+      if (doux) {
+        /* Sans animation, la scène est rendue une fois et tous les
+           fragments restent lisibles. */
+        c.fragments.forEach(function (f) { f.classList.add('fragment--vu'); });
+        if (def.approcher) { def.approcher(c); }
+        if (def.jouer) { def.jouer(c, avance, 0.016, 0); }
+        moteur.render(scene, camera);
+      } else {
+        boucle();
+      }
+
+      window.addEventListener('load', dimensionner);
+      setTimeout(dimensionner, 300);
+
+      /* Le contexte reste accessible : c'est ce qui permet de
+         mesurer, depuis l'extérieur, qu'aucune caméra ne traverse
+         une coque, plutôt que de l'espérer. */
+      global.ODN.actes = global.ODN.actes || {};
+      global.ODN.actes[def.id] = c;
     });
 
-    /* ---- boucle ---- */
-    var horloge = new THREE.Clock();
-
-    function boucle() {
-      requestAnimationFrame(boucle);
-      if (!aLecran || !visible) { return; }
-      var dt = Math.min(horloge.getDelta(), 0.05);
-      var t = horloge.getElapsedTime();
-      avance = lisser(avance, cible, def.souplesse || 8, dt);
-      c.avance = avance;
-      if (def.jouer) { def.jouer(c, avance, dt, t); }
-      marquer();
-      moteur.render(scene, camera);
-    }
-
-    dimensionner();
-    mesurer();
-    avance = cible;
-    c.avance = avance;
-
-    if (doux) {
-      /* Sans animation, la scène est rendue une fois et tous les
-         fragments restent lisibles. */
-      c.fragments.forEach(function (f) { f.classList.add('fragment--vu'); });
-      if (def.approcher) { def.approcher(c); }
-      if (def.jouer) { def.jouer(c, avance, 0.016, 0); }
-      moteur.render(scene, camera);
-    } else {
-      boucle();
-    }
-
-    window.addEventListener('load', dimensionner);
-    setTimeout(dimensionner, 300);
-
-    /* Le contexte reste accessible : c'est ce qui permet de
-       mesurer, depuis l'extérieur, qu'aucune caméra ne traverse
-       une coque, plutôt que de l'espérer. */
-    global.ODN.actes = global.ODN.actes || {};
-    global.ODN.actes[def.id] = c;
-
-    return c;
+    return section;
   }
 
   global.ODN = global.ODN || {};
   global.ODN.acte = acte;
   global.ODN.palier = palier;
   global.ODN.lisser = lisser;
+  global.ODN.fondu = fondu;
+  global.ODN.fondre = fondre;
+  global.ODN.differer = differer;
 })(window);
