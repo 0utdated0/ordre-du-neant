@@ -36,12 +36,19 @@
         balayage:{ value: 0 },
         force:   { value: intensite }
       },
+      /* Pas d'attribut « normal » : les coques du catalogue n'en
+         portent plus. Elles sont peintes partout ailleurs avec un
+         MeshBasicMaterial, qui ne les regarde jamais, et les
+         calculer coûtait deux cents millisecondes et sept
+         mégaoctets par coque à pleine géométrie. La normale est
+         donc reprise ici de la dérivée écran : elle est plate, ce
+         qui est exactement ce qu'on veut sur une coque à
+         panneaux. */
+      extensions: { derivatives: true },
       vertexShader: [
-        'varying vec3 vN;',
         'varying vec3 vP;',
         'varying vec3 vM;',
         'void main(){',
-        '  vN = normalize(normalMatrix * normal);',
         '  vM = (modelMatrix * vec4(position,1.0)).xyz;',
         '  vec4 mv = modelViewMatrix * vec4(position,1.0);',
         '  vP = mv.xyz;',
@@ -53,12 +60,12 @@
         'uniform float temps;',
         'uniform float balayage;',
         'uniform float force;',
-        'varying vec3 vN;',
         'varying vec3 vP;',
         'varying vec3 vM;',
         'void main(){',
         '  vec3 v = normalize(-vP);',
-        '  float f = pow(1.0 - abs(dot(v, normalize(vN))), 2.2);',
+        '  vec3 n = normalize(cross(dFdx(vP), dFdy(vP)));',
+        '  float f = pow(1.0 - abs(dot(v, n)), 2.2);',
         /* lignes de balayage horizontales, fines */
         '  float lignes = 0.55 + 0.45 * sin(vM.y * 26.0 - temps * 1.6);',
         /* bande claire qui remonte le long du modèle */
@@ -72,7 +79,13 @@
       transparent: true,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      side: THREE.DoubleSide
+      /* Face avant seulement. En double face, chaque paroi
+         interieure de la coque reelle ajoute sa lueur a celles
+         qui sont devant elle : au milieu du Silence, la ou les
+         ponts s'empilent, la projection virait a la tache
+         blanche. Les silhouettes primitives d'origine n'avaient
+         pas d'interieur, d'ou le reglage d'alors. */
+      side: THREE.FrontSide
     });
   }
 
@@ -144,6 +157,11 @@
   hote.appendChild(moteur.domElement);
 
   var scene = new THREE.Scene();
+  /* La scène reste accessible : c'est ce qui permet de régler la
+     saturation de la projection à la mesure, en balayant les
+     valeurs sur une seule page, plutôt qu'au jugé. */
+  window.ODN = window.ODN || {};
+  window.ODN.table = { scene: scene };
   var camera = new THREE.PerspectiveCamera(42, 1, 0.1, 100);
   camera.position.set(0, 1.75, 7.8);
   camera.lookAt(0, 0.1, 0);

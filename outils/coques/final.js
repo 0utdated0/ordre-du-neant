@@ -11,23 +11,17 @@ const OUT=process.argv[2] || '/home/claude/wtest/public/coques/';
 /* Longueur reelle en metres d'apres la fiche technique RSI, et
    budget de triangles. Les modeles du holoviewer font de 240 000 a
    995 000 triangles : inexploitables tels quels sur une page web. */
+/* Les stations, et seulement elles.
+
+   Les vaisseaux sont passes a draco.js : ils gardent leur
+   geometrie entiere, compressee, au lieu d'etre decimes au
+   centieme. Les stations, elles, sortent de Blender aux polygones
+   comptes et n'ont rien a gagner a un decodeur.
+
+   Ce fichier ne reecrit plus fiches.json de zero : il fusionne,
+   sinon relancer l'un des deux outils effacerait les releves de
+   l'autre. */
 const FLOTTE = {
-  'javelin':     {nom:'javelin',     longueur:345, cible:14000, aretes:9000},
-  'idris-p':     {nom:'idris',       longueur:239, cible:12000, aretes:8000},
-  'perseus':     {nom:'perseus',     longueur:180, cible:13000, aretes:9000},
-  'ironclad':    {nom:'ironclad',    longueur:135, cible:12000, aretes:9000},
-  'polaris':     {nom:'polaris',     longueur:155, cible:12000, aretes:8000},
-  'orion':       {nom:'orion',       longueur:170, cible:13000, aretes:9000},
-  'reclaimer':   {nom:'reclaimer',   longueur:155, cible:12000, aretes:8000},
-  'caterpillar': {nom:'caterpillar', longueur:111, cible:11000, aretes:7500},
-  /* Le Hammerhead a ete retire. Son maillage est fait de coques
-     ouvertes et disjointes : l'effondrement d'aretes n'a aucune
-     arete partagee a effondrer, il mange les surfaces, et la
-     simplification approximative met le batiment en morceaux. En
-     dessous de 100 000 triangles il n'en reste qu'un squelette.
-     Si un modele se comporte ainsi, changer de vaisseau coute
-     moins cher que de le rafistoler. */
-  'gladius':     {nom:'gladius',     longueur: 20, cible: 7000, aretes:6000},
   /* La station n'est pas un vaisseau : elle vient de Blender, son
      axe est déjà le bon, et l'échelle se prend sur l'envergure et
      non sur la longueur. */
@@ -42,6 +36,7 @@ const FLOTTE = {
   'ascension-palier': {nom:'ascension-palier', cible: 9000, aretes: 7000,
                        ply:true, station:true, brut:true}
 };
+
 
 function souder(pos, idx, eps){
   const cle=new Map(), remap=new Int32Array(pos.length/3);
@@ -87,7 +82,13 @@ function poupeEnZplus(pos){
   await MeshoptSimplifier.ready;
   fs.mkdirSync(OUT,{recursive:true});
   const forcer = JSON.parse(process.env.RETOURNER || '{}');
-  const fiches=[]; let tot=0, totBr=0;
+  /* On repart des fiches existantes : draco.js ecrit les siennes
+     dans le meme fichier, et relancer l'un ne doit pas effacer le
+     releve de l'autre. */
+  let anciennes=[];
+  try { anciennes=JSON.parse(fs.readFileSync(OUT+'fiches.json','utf8')); } catch(e){}
+  const parNom={}; anciennes.forEach(f=>{ parNom[f.nom]=f; });
+  let tot=0, totBr=0;
   for(const [base,fi] of Object.entries(FLOTTE)){
     const m=lire(fi.ply ? SRC_STATION+base+'.ply' : SRC+base+'.ctm');
     let {mn,mx}=boite(m.sommets);
@@ -166,9 +167,9 @@ function poupeEnZplus(pos){
     fs.writeFileSync(OUT+fi.nom+'.odnm', buf);
     const br=zlib.brotliCompressSync(buf).length;
     tot+=buf.length; totBr+=br;
-    fiches.push({nom:fi.nom, longueur:fi.longueur||0, tri:ni.length/3, som:nSom,
+    parNom[fi.nom]={nom:fi.nom, longueur:fi.longueur||0, tri:ni.length/3, som:nSom,
       aretes:aretes.length/2, moteurs:moteurs,
-      tourelles:tirs, proue:nez, bras:outil});
+      tourelles:tirs, proue:nez, bras:outil};
     console.log(fi.nom.padEnd(12), String(ni.length/3).padStart(6)+' tri',
       String(nSom).padStart(6)+' som', String(fi.longueur||0).padStart(4)+' m',
       (buf.length/1024).toFixed(0).padStart(4)+' Ko', ' brotli '+(br/1024).toFixed(0).padStart(3)+' Ko',
@@ -176,5 +177,6 @@ function poupeEnZplus(pos){
       ' '+moteurs.length+' tuy', tirs.length+' tour', retourner?' retourne':'');
   }
   console.log('TOTAL', (tot/1024).toFixed(0)+' Ko, brotli', (totBr/1024).toFixed(0)+' Ko');
-  fs.writeFileSync(OUT+'fiches.json', JSON.stringify(fiches,null,1));
+  const liste=Object.values(parNom).sort((a,b)=>a.nom<b.nom?-1:1);
+  fs.writeFileSync(OUT+'fiches.json', JSON.stringify(liste,null,1));
 })();

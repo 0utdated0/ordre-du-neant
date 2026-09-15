@@ -545,12 +545,13 @@
      le rapport, et la fiche donne la longueur exacte. */
   /* L'hologramme peint un volume additif double face. Sur les
      silhouettes primitives d'origine, une vingtaine de pièces
-     s'additionnaient ; ici ce sont onze mille triangles, et à la
-     même force la projection vire au blanc plein. */
+     s'additionnaient ; les coques réelles en empilent bien
+     davantage, et à la même force la projection vire au blanc
+     plein. Réglé à l'œil sur la coque la plus dense, le Silence. */
   function pourLaTable(nomCoque, repli, repliEnvergure, intensite) {
     var L = COQUES[nomCoque].longueur;
     return fabrique(nomCoque, 9.2 * Math.pow(L / 345, 0.22),
-      { intensite: intensite === undefined ? 0.028 : intensite, aretes: 0.075,
+      { intensite: intensite === undefined ? 0.008 : intensite, aretes: 0.05,
         repli: repli, repliEnvergure: repliEnvergure });
   }
 
@@ -651,7 +652,10 @@
     },
     {
       cle: 'chasseur', nom: 'La Sentinelle', classe: 'Chasseur léger',
-      division: 'Combat et Sécurité', construire: pourLaTable('gladius'), echelle: 1,
+      division: 'Combat et Sécurité', /* La Sentinelle est une coque mince : le long d'un rayon, elle
+         empile bien moins de parois que le Silence, et la même force
+         la laissait dans le noir. */
+      construire: pourLaTable('gladius', undefined, undefined, 0.022), echelle: 1,
       fiche: [
         ['Modèle', 'Aegis Gladius'],
         ['Rôle', 'Interception, reconnaissance'],
@@ -664,7 +668,7 @@
       cle: 'station', nom: 'Le Seuil', classe: "Station d'attache",
       division: 'Commandement', /* Ses ponts sont de grandes surfaces planes : vues de biais,
          elles saturent bien avant une coque de vaisseau. */
-      construire: pourLaTable('seuil', stationPrimitive, 11.2, 0.006), echelle: 0.8,
+      construire: pourLaTable('seuil', stationPrimitive, 11.2, 0.03), echelle: 0.8,
       fiche: [
         ['Modèle', "Conception propre à l'Ordre"],
         ['Rôle', 'Amarrage, réunion, dépôt'],

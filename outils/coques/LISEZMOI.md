@@ -1,50 +1,100 @@
 # Conversion des coques
 
 Transforme un maillage `.ctm` du holoviewer de Roberts Space
-Industries en fichier `.odnm`, le format compact que lit
+Industries en fichier `.odnm`, le format que lit
 `public/coques.js`.
 
-Les `.ctm` d'origine font de 240 000 à 995 000 triangles. Tels
-quels ils sont inutilisables sur une page web : il faut les
-décimer, les recentrer, les remettre à l'échelle de leur longueur
-réelle et les orienter proue en +Z, comme tout le reste du site.
+Deux chaînes cohabitent, parce que deux besoins cohabitent.
 
-## Ce que fait la chaîne
+| outil       | pour quoi                  | sortie         |
+|-------------|----------------------------|----------------|
+| `draco.js`  | les vaisseaux              | `.odnm` v3     |
+| `final.js`  | les stations, sorties de Blender | `.odnm` v2 |
+
+## Pourquoi deux
+
+La première version du site décimait tout : les `.ctm` font de
+240 000 à 1 105 000 triangles, et ils descendaient à 7 000 -
+16 000 par effondrement d'arêtes. À ce taux-là, la simplification
+ne simplifie plus, elle détruit. Les panneaux fondent, les
+tourelles se décrochent, et le Hammerhead, fait de coques ouvertes
+et disjointes, partait carrément en morceaux : il a fallu le
+retirer de la flotte.
+
+Mesure faite ensuite, avant d'écrire la moindre ligne : à pleine
+géométrie, compressée par Draco à 14 bits de quantification, la
+plus lourde des neuf coques pèse **1,8 Mo**, et les neuf ensemble
+**8,5 Mo**. Le décodeur ajoute 69 Ko une fois pour toutes. Il n'y
+avait donc jamais eu de raison de décimer : le problème n'était
+pas le poids, c'était le format.
+
+Les stations, elles, sortent de Blender aux polygones comptés.
+Elles n'ont rien à gagner à un décodeur et restent en v2.
+
+## Ce que fait `draco.js`
 
 1. `lire.js` décode le `.ctm` (lecteur OpenCTM de three.js r100,
    vendu ici avec son LZMA, ni l'un ni l'autre n'étant sur npm).
-2. `final.js` soude les sommets, simplifie avec meshoptimizer,
-   recentre, met à l'échelle, oriente et quantifie les positions
-   sur 16 bits.
-3. `extra.js` calcule les arêtes vives et repère les tuyères en
-   regroupant les sommets de l'extrême arrière. Les deux sont
-   écrits dans le fichier : le navigateur n'a plus qu'à tracer.
+2. Soudure des sommets, orientation proue en +Z, recentrage,
+   mise à l'échelle sur la longueur réelle.
+3. Encodage Draco, puis **décodage** immédiat. Ce n'est pas une
+   vérification : Draco renumérote les sommets, et des indices
+   d'arêtes calculés avant l'encodage ne montreraient plus les
+   mêmes arêtes. On relève donc sur ce qui sortira réellement du
+   navigateur.
+4. `extra.js` relève les arêtes vives sur le maillage décodé, et
+   `points.js` les points d'accroche : tuyères, postes de tir,
+   proue, bras de travail.
+5. Écriture de deux niveaux : `nom.odnm` à pleine géométrie et
+   `nom-p.odnm` décimé à un dixième, pour les écrans de moins de
+   860 px. Un téléphone ne peut ni télécharger huit mégaoctets et
+   demi ni tracer un million de triangles par coque ; à un
+   dixième des triangles la silhouette tient encore, ce qui
+   n'était pas le cas à un centième.
 
 ## Ajouter un vaisseau
 
 1. Télécharger son `.ctm` dans `~/Documents/modeles-sc/`.
-2. Ajouter une entrée dans la table `FLOTTE` de `final.js` :
+2. Ajouter une entrée dans la table `FLOTTE` de `draco.js` :
    nom de sortie, longueur réelle en mètres d'après la fiche RSI,
-   budget de triangles, budget d'arêtes.
-3. `npm i meshoptimizer` puis
-   `node final.js ../../public/coques/`.
-4. Reporter la longueur et les tuyères de `fiches.json` dans la
+   budget d'arêtes, cible de triangles pour le niveau téléphone,
+   nombre de tourelles.
+3. Ajouter le nom dans `VAISSEAUX`, en tête de
+   `public/coques.js` : c'est cette liste qui décide qui a droit
+   à une variante `-p`.
+4. `npm i meshoptimizer draco3d` puis
+   `node draco.js ../../public/coques/`.
+5. Reporter la longueur et les tuyères de `fiches.json` dans la
    table `COQUES` de `public/vaisseaux.js`, puis ajouter la fiche
    dans `FICHES`.
-5. Regarder le résultat. L'orientation est devinée par une
+6. Regarder le résultat. L'orientation est devinée par une
    heuristique : elle se trompera un jour.
 
 ## Réglages qui ont demandé plusieurs essais
 
-- La canonnière se disloque si on la passe en simplification
-  approximative : ses tourelles sont des coques séparées. Elle
-  garde donc un budget de triangles plus large.
-- Le cargo n'a presque que des bords francs, que le seuil d'angle
-  ne peut pas écarter. Au-delà du budget, on ne garde que les
-  arêtes les plus longues.
-- Sur la table d'hologrammes, la peinture additive sature : dix
-  mille triangles ne se peignent pas comme les vingt volumes
-  primitifs d'origine. Voir `pourLaTable` dans `vaisseaux.js`.
+- **Budget d'arêtes.** Sur un maillage décimé, chaque grand
+  triangle portait ses trois bords et le fil de fer couvrait
+  toute la coque. Sur le maillage réel, les arêtes vives se
+  concentrent là où il y a du détail et laissent les panneaux
+  lisses vides. Il en faut le triple pour retrouver la même
+  lecture, ce qui coûte 200 Ko par coque sur un budget de cinq
+  mégaoctets.
+- **Pas de normales.** Toutes les coques sont peintes avec un
+  `MeshBasicMaterial`, qui ne les regarde jamais ; les calculer
+  coûtait deux cents millisecondes et sept mégaoctets par coque.
+  Le seul nuanceur qui en voulait, celui de la table
+  d'hologrammes, reprend désormais la normale de la dérivée
+  écran. Elle est plate, ce qui est exactement ce qu'on veut sur
+  une coque à panneaux.
+- **Le module emscripten est une promesse.** Un module Draco
+  porte une méthode `then` : une promesse résolue avec lui le
+  prend pour une promesse et le redemande indéfiniment. Le worker
+  restait muet, sans la moindre erreur. Il faut l'envelopper.
+- **Le cargo n'a presque que des bords francs**, que le seuil
+  d'angle ne peut pas écarter. Au-delà du budget, on ne garde que
+  les arêtes les plus longues.
+- **Sur la table d'hologrammes, la peinture additive sature.**
+  Voir `pourLaTable` dans `vaisseaux.js`.
 
 Ces modèles appartiennent à Cloud Imperium Rights LLC. Site non
 officiel, sans but lucratif.

@@ -88,4 +88,84 @@ function tuyeres(pos, nSom, marge){
     .map(function(a){return [ +(a.x/a.n).toFixed(3), +(a.y/a.n).toFixed(3),
                               +(a.z/a.n).toFixed(3), +Math.max(a.r, L*0.012).toFixed(3) ];});
 }
-module.exports={aretesVives,aretesBudget,tuyeres};
+/* Aretes vives sur un maillage a pleine resolution.
+
+   aretesVives() construit une Map dont chaque valeur est un petit
+   tableau : sur un million de triangles ca fait trois millions de
+   tableaux, et aretesBudget l'appelle neuf fois pour sa dichotomie.
+   Injouable. Ici la table des demi-aretes est construite une seule
+   fois, en tableaux types, et le seuil se lit dans un histogramme
+   au lieu de se chercher par dichotomie. */
+function aretesRapides(pos, idx, budget){
+  var nf=idx.length/3, nh=nf*3;
+  var nx=new Float32Array(nf), ny=new Float32Array(nf), nz=new Float32Array(nf);
+  for(var f=0;f<nf;f++){
+    var a=idx[f*3]*3,b=idx[f*3+1]*3,c=idx[f*3+2]*3;
+    var ux=pos[b]-pos[a],uy=pos[b+1]-pos[a+1],uz=pos[b+2]-pos[a+2];
+    var vx=pos[c]-pos[a],vy=pos[c+1]-pos[a+1],vz=pos[c+2]-pos[a+2];
+    var x=uy*vz-uz*vy, y=uz*vx-ux*vz, z=ux*vy-uy*vx;
+    var l=Math.hypot(x,y,z)||1; nx[f]=x/l; ny[f]=y/l; nz[f]=z/l;
+  }
+
+  /* Appariement. La cle tient sur un flottant : deux indices de
+     moins de deux millions, l'un decale de 2^32, restent exacts
+     dans la mantisse de 53 bits. */
+  var jumeau=new Int32Array(nh).fill(-1);
+  var table=new Map();
+  for(var f2=0;f2<nf;f2++){
+    for(var e=0;e<3;e++){
+      var h=f2*3+e;
+      var p=idx[h], q=idx[f2*3+(e+1)%3];
+      var lo=p<q?p:q, hi=p<q?q:p;
+      var k=lo*4294967296+hi;
+      var v=table.get(k);
+      if(v===undefined){ table.set(k,h); }
+      else if(jumeau[v]<0){ jumeau[v]=h; jumeau[h]=v; }
+    }
+  }
+  table.clear();
+
+  /* Candidats : bords francs (angle porte a 180) et plis. */
+  var ca=new Uint32Array(nh), cb=new Uint32Array(nh);
+  var ang=new Float32Array(nh), lon=new Float32Array(nh);
+  var n=0;
+  for(var h2=0;h2<nh;h2++){
+    var j=jumeau[h2];
+    if(j>=0 && j<h2) continue;              /* deja vue par sa jumelle */
+    var fa=(h2/3)|0, ea=h2%3;
+    var pa=idx[h2], pb=idx[fa*3+(ea+1)%3];
+    var d;
+    if(j<0){ d=180; }
+    else {
+      var fb=(j/3)|0;
+      var pt=nx[fa]*nx[fb]+ny[fa]*ny[fb]+nz[fa]*nz[fb];
+      if(pt>1)pt=1; if(pt<-1)pt=-1;
+      d=Math.acos(pt)*180/Math.PI;
+    }
+    if(d<8) continue;                        /* surface lisse */
+    var i1=pa*3, i2=pb*3;
+    ca[n]=pa; cb[n]=pb; ang[n]=d;
+    lon[n]=Math.hypot(pos[i1]-pos[i2], pos[i1+1]-pos[i2+1], pos[i1+2]-pos[i2+2]);
+    n++;
+  }
+
+  /* Seuil d'angle par histogramme : on descend depuis 180 jusqu'a
+     tenir environ trois fois le budget, puis on garde les plus
+     longues. Ce sont elles qui dessinent la structure ; le grenu
+     court ne fait que blanchir l'image. */
+  var bac=new Uint32Array(181);
+  for(var i3=0;i3<n;i3++) bac[Math.min(180, ang[i3]|0)]++;
+  var vise=Math.min(n, budget*3), cum=0, seuil=180;
+  for(var s=180;s>=8;s--){ cum+=bac[s]; if(cum>=vise){ seuil=s; break; } seuil=s; }
+
+  var garde=[];
+  for(var i4=0;i4<n;i4++) if(ang[i4]>=seuil) garde.push(i4);
+  garde.sort(function(u,v){ return lon[v]-lon[u]; });
+  if(garde.length>budget) garde.length=budget;
+
+  var out=new Uint32Array(garde.length*2);
+  for(var i5=0;i5<garde.length;i5++){ out[i5*2]=ca[garde[i5]]; out[i5*2+1]=cb[garde[i5]]; }
+  return {aretes:out, seuil:seuil, candidats:n};
+}
+
+module.exports={aretesVives,aretesBudget,aretesRapides,tuyeres};

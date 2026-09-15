@@ -1,26 +1,46 @@
 /* =========================================================
    Chargement des coques
    ---------------------------------------------------------
-   Format .odnm, ecrit par l'outil de conversion : positions
-   quantifiees sur 16 bits dans la boite englobante, indices
-   16 ou 32 bits. Pas de bibliotheque a embarquer, Cloudflare
-   se charge de la compression sur le fil.
+   Deux formats cohabitent dans le même conteneur .odnm.
+
+   Version 2, les stations. Positions quantifiées sur 16 bits
+   dans la boîte englobante, indices de faces, arêtes vives.
+   Elles viennent de Blender, elles sont déjà légères, et elles
+   n'ont aucune raison de passer par un décodeur.
 
      0  'ODNM'
-     4  version  uint16   = 2
+     4  version  uint16 = 2
      6  drapeaux uint16   bit 0 : indices sur 16 bits
      8  nbSom    uint32
     12  nbInd    uint32
     16  minimum  float32 x3
     28  pas      float32 x3
-    40  nbAretes uint32   (nombre d'indices, soit deux par arête)
+    40  nbAretes uint32
     44  positions uint16 x3 x nbSom
     ..  indices des faces, alignés sur 4 octets
     ..  indices des arêtes vives
 
-   Les arêtes vives sont calculées à la conversion. Les faire
-   dériver ici avec EdgesGeometry coûtait une saccade par coque,
-   pour un résultat qu'on ne pouvait pas doser.
+   Version 3, les vaisseaux à pleine géométrie. La première
+   version du site les ramenait de 240 000 - 1 100 000 triangles
+   à 7 000 - 16 000 par effondrement d'arêtes : à ce taux-là, la
+   simplification ne simplifie plus, elle détruit. On garde donc
+   la géométrie telle quelle et on la compresse avec Draco. La
+   plus lourde des neuf coques pèse 1,7 Mo, le décodeur 69 Ko une
+   fois pour toutes.
+
+     0  'ODNM'
+     4  version  uint16 = 3
+     6  drapeaux uint16   bit 0 : indices d'arêtes sur 16 bits
+     8  nbSom    uint32
+    12  nbAretes uint32
+    16  octetsDraco uint32
+    20  réservé  uint32
+    24  indices des arêtes vives
+    ..  charge utile Draco, alignée sur 4 octets
+
+   Le décodage part dans un worker : quelques centaines de
+   millisecondes sur le fil principal, c'est l'acte qui se fige
+   au moment où il entre à l'écran.
    ========================================================= */
 (function () {
   'use strict';
@@ -28,15 +48,26 @@
 
   var cache = {};
 
-  function decoder(tampon) {
+  /* Les vaisseaux ont une variante décimée pour les petits
+     écrans : ni le réseau ni le processeur graphique d'un
+     téléphone ne suivent un million de triangles par coque. Les
+     stations, elles, n'existent qu'en un exemplaire. */
+  var VAISSEAUX = {
+    javelin: 1, idris: 1, perseus: 1, ironclad: 1, polaris: 1,
+    orion: 1, reclaimer: 1, caterpillar: 1, gladius: 1
+  };
+  var PETIT = window.innerWidth < 860;
+
+  /* ---------------------------------------------------------
+     Version 2 : tout se lit sur place
+     --------------------------------------------------------- */
+  function decoderV2(tampon) {
     var vue = new DataView(tampon);
-    if (vue.getUint32(0, false) !== 0x4f444e4d) { throw new Error('coque illisible'); }
     var court  = (vue.getUint16(6, true) & 1) === 1;
     var nbSom  = vue.getUint32(8, true);
     var nbInd  = vue.getUint32(12, true);
     var mini = [vue.getFloat32(16, true), vue.getFloat32(20, true), vue.getFloat32(24, true)];
     var pas  = [vue.getFloat32(28, true), vue.getFloat32(32, true), vue.getFloat32(36, true)];
-
     var nbAr = vue.getUint32(40, true);
 
     var brut = new Uint16Array(tampon, 44, nbSom * 3);
@@ -53,20 +84,73 @@
     var debutAr = debut + nbInd * octets;
     var iar = court ? new Uint16Array(tampon, debutAr, nbAr)
                     : new Uint32Array(tampon, debutAr, nbAr);
+    return batir(pos, idx.slice(), iar.slice());
+  }
 
+  /* ---------------------------------------------------------
+     Version 3 : le worker fait le gros du travail
+     --------------------------------------------------------- */
+  var ouvriere = null, attentes = {}, numero = 0;
+
+  function equipe() {
+    if (ouvriere === undefined) { return null; }
+    if (!ouvriere) {
+      try {
+        ouvriere = new Worker('/coque-ouvriere.js');
+      } catch (e) {
+        /* Pas de worker : les vaisseaux ne se chargeront pas, mais
+           le reste de la scène (étoiles, traits, poussière) tient
+           debout tout seul. Mieux vaut une scène amputée qu'une
+           page figée trois secondes par coque. */
+        ouvriere = undefined;
+        return null;
+      }
+      ouvriere.onmessage = function (e) {
+        var a = attentes[e.data.id];
+        if (!a) { return; }
+        delete attentes[e.data.id];
+        if (e.data.erreur) { a.rater(new Error(e.data.erreur)); return; }
+        a.tenir(batir(e.data.pos, e.data.idx, e.data.aretes));
+      };
+      ouvriere.onerror = function () {
+        Object.keys(attentes).forEach(function (k) {
+          attentes[k].rater(new Error('ouvrière perdue'));
+          delete attentes[k];
+        });
+      };
+    }
+    return ouvriere;
+  }
+
+  function decoderV3(tampon) {
+    var o = equipe();
+    if (!o) { return Promise.reject(new Error('worker indisponible')); }
+    var id = ++numero;
+    return new Promise(function (tenir, rater) {
+      attentes[id] = { tenir: tenir, rater: rater };
+      o.postMessage({ id: id, tampon: tampon }, [tampon]);
+    });
+  }
+
+  /* ---------------------------------------------------------
+     Montage commun
+     --------------------------------------------------------- */
+  function batir(pos, idx, iar) {
     var geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    geo.setIndex(new THREE.BufferAttribute(idx.slice(), 1));
-    geo.computeVertexNormals();
+    geo.setIndex(new THREE.BufferAttribute(idx, 1));
+    /* Pas de normales : toutes les coques du site sont peintes
+       avec un MeshBasicMaterial, qui ne les regarde jamais. Les
+       calculer coûtait deux cents millisecondes par coque pour
+       rien. */
     geo.computeBoundingSphere();
 
     /* Les arêtes partagent les sommets de la coque, mais three
        veut sa propre géométrie indexée pour un LineSegments. */
     var gAr = new THREE.BufferGeometry();
     gAr.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    gAr.setIndex(new THREE.BufferAttribute(iar.slice(), 1));
+    gAr.setIndex(new THREE.BufferAttribute(iar, 1));
     geo.userData.aretes = gAr;
-
     return geo;
   }
 
@@ -90,24 +174,30 @@
   };
 
   /* Les silhouettes dessinées à la main n'ont pas d'arêtes toutes
-     prêtes : on les calcule comme avant. Les coques réelles, si,
-     et il ne faut surtout pas les recalculer ici. */
+     prêtes : on les calcule comme avant. Les coques du catalogue,
+     si, et il ne faut surtout pas les recalculer ici. */
   window.ODN.aretesDe = function (geo, seuil) {
     return (geo.userData && geo.userData.aretes) ||
            new THREE.EdgesGeometry(geo, seuil === undefined ? 20 : seuil);
   };
 
-  /* Une coque n'est chargee qu'une fois, meme si trois actes la
-     demandent en meme temps : on memorise la promesse, pas le
-     resultat. */
+  /* Une coque n'est chargée qu'une fois, même si trois actes la
+     demandent en même temps : on mémorise la promesse, pas le
+     résultat. */
   window.ODN.coque = function (nom) {
     if (!cache[nom]) {
-      cache[nom] = fetch('/coques/' + nom + '.odnm')
+      var suffixe = (PETIT && VAISSEAUX[nom]) ? '-p' : '';
+      cache[nom] = fetch('/coques/' + nom + suffixe + '.odnm')
         .then(function (r) {
           if (!r.ok) { throw new Error('coque ' + nom + ' : ' + r.status); }
           return r.arrayBuffer();
         })
-        .then(decoder);
+        .then(function (tampon) {
+          var vue = new DataView(tampon);
+          if (vue.getUint32(0, false) !== 0x4f444e4d) { throw new Error('coque illisible'); }
+          var version = vue.getUint16(4, true);
+          return version === 3 ? decoderV3(tampon) : decoderV2(tampon);
+        });
     }
     return cache[nom];
   };
