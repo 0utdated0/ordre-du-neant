@@ -117,8 +117,18 @@
     if (!window.ODN.coque) { return n; }
 
     var k = 1;
-    window.ODN.coque(nom, menu).then(function (geo) {
+    /* Aperçu d'abord, pleine géométrie ensuite (voir coques.js).
+       La pleine peut en principe arriver avant que l'aperçu soit
+       peint : on la garde alors de côté. */
+    var peint = null, apercu = null, enAttente = null;
+    function remplacer(pleine) {
+      if (!peint) { enAttente = pleine; return; }
+      window.ODN.echangerCoque(peint, apercu, pleine);
+    }
+    window.ODN.coqueProgressive(nom, menu, remplacer).then(function (geo) {
       var g = peintre(teinte || ARGENT, opaciteAretes === undefined ? 0.4 : opaciteAretes)(geo);
+      peint = g; apercu = geo;
+      if (enAttente) { remplacer(enAttente); }
       geo.computeBoundingBox();
       var b = geo.boundingBox;
       k = longueur / Math.max(b.max.z - b.min.z, 0.001);

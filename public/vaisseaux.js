@@ -495,8 +495,15 @@
       return [m[0] * k, m[1] * k, m[2] * k, m[3] * k];
     });
 
-    var charger = (global.ODN && global.ODN.coque)
-      ? global.ODN.coque(nomCoque)
+    /* Aperçu d'abord, pleine géométrie glissée ensuite dans le
+       même groupe peint (voir coques.js). */
+    var peint = null, apercu = null, enAttente = null;
+    function remplacer(pleine) {
+      if (!peint) { enAttente = pleine; return; }
+      global.ODN.echangerCoque(peint, apercu, pleine);
+    }
+    var charger = (global.ODN && global.ODN.coqueProgressive)
+      ? global.ODN.coqueProgressive(nomCoque, undefined, remplacer)
       : Promise.reject(new Error('chargeur de coques absent'));
 
     n.userData.quandPret = charger.then(function (geo) {
@@ -509,6 +516,8 @@
                       opaciteAretes === undefined ? 0.26 : opaciteAretes);
       g.scale.setScalar(k);
       n.add(g);
+      peint = g; apercu = geo;
+      if (enAttente) { remplacer(enAttente); }
       /* On rend le groupe peint, pas le porteur : l'appelant veut
          relever les matières de la coque seule, sans ramasser les
          halos qu'il a posés entre-temps. */

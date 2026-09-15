@@ -208,7 +208,11 @@
      voit de loin : dans la ligne de feu, une Sentinelle occupe cent
      pixels de haut et coûtait 416 000 triangles, soit quarante
      triangles par pixel. Mesuré acte par acte. */
-  window.ODN.coque = function (nom, menu) {
+  /* « apres » retarde le décodage, pas le téléchargement : le
+     fichier arrive en parallèle, mais il ne passe dans l'ouvrière
+     qu'une fois cette promesse tenue. C'est ce qui laisse les
+     aperçus des autres actes passer devant une pleine géométrie. */
+  window.ODN.coque = function (nom, menu, apres) {
     var petit = menu === 'petit' || (menu !== 'plein' && PETIT);
     var suffixe = (petit && VAISSEAUX[nom]) ? '-p' : '';
     /* La clé est le nom du fichier : une station n'a pas de
@@ -220,6 +224,11 @@
         .then(function (r) {
           if (!r.ok) { throw new Error('coque ' + nom + ' : ' + r.status); }
           return r.arrayBuffer();
+        })
+        .then(function (tampon) {
+          if (!apres) { return tampon; }
+          return Promise.resolve(apres).catch(function () {})
+            .then(function () { return tampon; });
         })
         .then(function (tampon) {
           var vue = new DataView(tampon);
@@ -242,5 +251,52 @@
         });
     }
     return cache[cle];
+  };
+
+  /* ---------------------------------------------------------
+     Chargement progressif
+     ---------------------------------------------------------
+     Le décodage est sériel, dans une seule ouvrière : cinq
+     mégaoctets de coques prennent plusieurs secondes, pendant
+     lesquelles les scènes étaient vides. On pose donc d'abord la
+     variante décimée, qui arrive environ quatre fois plus vite,
+     puis on glisse la pleine géométrie à sa place dans les
+     mêmes objets, sans rien repeindre.
+
+     La promesse rendue est celle de l'aperçu : l'acte peint et
+     cadre avec lui. « remplacer » reçoit la pleine géométrie
+     quand elle arrive. Si l'aperçu échoue, la promesse retombe
+     sur la pleine, et « remplacer » ne sert plus à rien. */
+  window.ODN.coqueProgressive = function (nom, menu, remplacer) {
+    var petit = menu === 'petit' || (menu !== 'plein' && PETIT);
+    /* Déjà décodée pour un autre acte : inutile de passer par
+       l'aperçu. */
+    if (petit || !VAISSEAUX[nom] || window.ODN.coques[nom]) {
+      return window.ODN.coque(nom, menu);
+    }
+    var apercu = window.ODN.coque(nom, 'petit');
+    var pleine = window.ODN.coque(nom, 'plein', apercu);
+    var repli = false;
+    pleine.then(function (geo) { if (!repli && remplacer) { remplacer(geo); } })
+      .catch(function () {});
+    return apercu.catch(function () { repli = true; return pleine; });
+  };
+
+  /* Glisse une géométrie à la place d'une autre dans un groupe
+     déjà peint : le corps prend la nouvelle, le fil de fer prend
+     ses arêtes. Les matières, l'échelle et les points d'accroche
+     ne bougent pas. L'aperçu n'est pas libéré : il est en cache,
+     un autre acte peut s'en servir. */
+  window.ODN.echangerCoque = function (groupe, ancienne, neuve) {
+    if (!groupe || !ancienne || !neuve || ancienne === neuve) { return; }
+    /* Les actes relisent la boîte englobante de la coque posée
+       pour se cadrer : la pleine doit l'avoir aussi. */
+    if (ancienne.boundingBox && !neuve.boundingBox) { neuve.computeBoundingBox(); }
+    var aretesAvant = ancienne.userData && ancienne.userData.aretes;
+    var aretesApres = window.ODN.aretesDe(neuve, 20);
+    groupe.traverse(function (o) {
+      if (o.geometry === ancienne) { o.geometry = neuve; }
+      else if (aretesAvant && o.geometry === aretesAvant) { o.geometry = aretesApres; }
+    });
   };
 })();
