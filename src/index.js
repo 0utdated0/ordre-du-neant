@@ -134,7 +134,15 @@ async function lireEffectif(jeton, guilde, avecNoms) {
     return String(a.depuis).localeCompare(String(b.depuis));
   });
 
+  /* Identifiants gardés pour la présence, retirés avant publication
+     (voir servirOrdre) : ils ne sortent jamais du Worker. */
+  const interne = {
+    humains: membres.filter((m) => m.user && !m.user.bot).map((m) => m.user.id),
+    bots: membres.filter((m) => m.user && m.user.bot).map((m) => m.user.id),
+  };
+
   return {
+    interne: interne,
     total: membres.filter((m) => !(m.user && m.user.bot)).length,
     recus: recus,
     parEchelon: parEchelon,
@@ -173,68 +181,95 @@ async function lireOperations(jeton, guilde) {
    Le widget doit être activé dans les paramètres du serveur.
    S'il ne l'est pas, on le dit au lieu d'échouer.
    -------------------------------------------------------- */
-async function lirePresence(guilde, jeton) {
-  /* Deux sources. Le widget public donne les salons vocaux occupés,
-     mais il s'appelle sans jeton, depuis les adresses partagées de
-     Cloudflare, et Discord le refuse souvent (limitation de débit) :
-     la présence tombait alors entièrement, et la Vigie affichait des
-     cases vides. Le nombre de membres en ligne, lui, se lit aussi
-     avec le jeton du bot, par une route qui ne dépend pas du widget.
-     On garde donc toujours au moins ce chiffre. */
-  const [rw, rc] = await Promise.allSettled([
+async function lirePresence(guilde, jeton, interne) {
+  /* Mesuré en ligne : « 7 en ligne » pour 6 membres réellement
+     connectés, et « en vocal » vide. Deux causes.
+
+     1. approximate_presence_count compte tous les comptes en ligne,
+        bots compris. Notre propre bot ne se connecte jamais (le Worker
+        ne parle à Discord qu'en HTTP), mais les autres bots du serveur
+        restent connectés en permanence. On les retire du compte.
+     2. Le widget public, seule source du vocal, est refusé depuis
+        Cloudflare. Le vocal se relève maintenant avec le jeton du bot,
+        membre par membre (GET /guilds/:id/voice-states/:membre : 404
+        quand il n'est pas en vocal). Ni noms ni salons : seulement le
+        nombre, qui ne révèle rien d'un salon fermé. */
+  const [rw, rc, rmoi] = await Promise.allSettled([
     fetch(API + '/guilds/' + guilde + '/widget.json', {
       headers: { 'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)' },
     }),
     discord('/guilds/' + guilde + '?with_counts=true', jeton),
+    discord('/users/@me', jeton),
   ]);
 
-  const compte = rc.status === 'fulfilled' &&
-    typeof rc.value.approximate_presence_count === 'number'
-    ? rc.value.approximate_presence_count : null;
+  const humains = (interne && interne.humains) || [];
+  const bots = (interne && interne.bots) || [];
+  const moi = rmoi.status === 'fulfilled' ? rmoi.value.id : null;
+  const autresBots = bots.filter((id) => id !== moi).length;
+
+  let enLigne = null;
+  if (rc.status === 'fulfilled' && typeof rc.value.approximate_presence_count === 'number') {
+    enLigne = Math.max(0, rc.value.approximate_presence_count - autresBots);
+  }
+
+  /* Le vocal, relevé par le bot. Plafonné pour rester sous la limite
+     de sous-requêtes d'un Worker ; au-delà, on s'en remet au widget. */
+  let enVocal = null;
+  if (humains.length && humains.length <= 40) {
+    const etats = await Promise.all(humains.map((id) =>
+      fetch(API + '/guilds/' + guilde + '/voice-states/' + id, {
+        headers: {
+          Authorization: 'Bot ' + jeton,
+          'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)',
+        },
+      }).then((r) => r.status === 200 ? r.json().then((v) => (v && v.channel_id ? 1 : 0))
+        : (r.status === 404 ? 0 : null))
+        .catch(() => null)));
+    /* Un seul relevé en échec (limite de débit) et le chiffre serait
+       faux : on préfère alors ne rien afficher. */
+    if (etats.every((e) => e !== null)) {
+      enVocal = etats.reduce((x, y) => x + y, 0);
+    }
+  }
 
   const widget = rw.status === 'fulfilled' ? rw.value : null;
-  if (!widget || !widget.ok) {
-    /* Le statut est renvoyé tel quel : c'est ce qui permet de savoir,
-       depuis la page, si le widget est désactivé (403) ou limité (429). */
-    const statut = widget ? widget.status : 0;
-    const raison = statut === 403 ? 'widget-desactive' : 'widget-indisponible';
-    if (compte === null) {
-      return { disponible: false, raison: raison, statutWidget: statut };
+  let salons = [];
+  let statutWidget = widget ? widget.status : 0;
+  if (widget && widget.ok) {
+    const w = await widget.json();
+    const liste = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
+    const parId = new Map(liste.map((x) => [x.id, x]));
+    const reserve = { id: null, nom: 'Salon réservé', occupants: [] };
+    for (const m of w.members || []) {
+      if (!m.channel_id) continue;
+      if (parId.has(m.channel_id)) parId.get(m.channel_id).occupants.push(m.username);
+      else reserve.occupants.push(m.username);
     }
+    salons = liste.filter((x) => x.occupants.length);
+    if (reserve.occupants.length) salons.push(reserve);
+    salons = salons.slice(0, 6);
+    if (enVocal === null) enVocal = (w.members || []).filter((m) => m.channel_id).length;
+    if (enLigne === null && typeof w.presence_count === 'number') {
+      enLigne = Math.max(0, w.presence_count - autresBots);
+    }
+  }
+
+  if (enLigne === null && enVocal === null) {
     return {
-      disponible: true, partiel: true, raison: raison, statutWidget: statut,
-      enLigne: compte, enVocal: null, salons: [],
+      disponible: false,
+      raison: statutWidget === 403 ? 'widget-desactive' : 'indisponible',
+      statutWidget: statutWidget,
     };
   }
-  const w = await widget.json();
-
-  const salons = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
-  const parId = new Map(salons.map((s) => [s.id, s]));
-
-  /* Les salons vocaux de l'Ordre sont réservés aux Adeptes : le widget
-     ne les nomme donc pas, il signale seulement qu'un membre s'y trouve.
-     On regroupe ces occupants sous une entrée sans nom plutôt que de
-     les perdre, et sans révéler l'intitulé d'un salon fermé. */
-  const reserve = { id: null, nom: 'Salon réservé', occupants: [] };
-
-  for (const m of w.members || []) {
-    if (!m.channel_id) continue;
-    if (parId.has(m.channel_id)) {
-      parId.get(m.channel_id).occupants.push(m.username);
-    } else {
-      reserve.occupants.push(m.username);
-    }
-  }
-
-  const occupes = salons.filter((s) => s.occupants.length);
-  if (reserve.occupants.length) occupes.push(reserve);
-
   return {
     disponible: true,
-    enLigne: typeof w.presence_count === 'number' ? w.presence_count
-      : (compte !== null ? compte : (w.members || []).length),
-    enVocal: (w.members || []).filter((m) => m.channel_id).length,
-    salons: occupes.slice(0, 6),
+    partiel: enVocal === null,
+    raison: statutWidget === 403 ? 'widget-desactive' : (widget && widget.ok ? null : 'widget-indisponible'),
+    statutWidget: statutWidget,
+    enLigne: enLigne,
+    enVocal: enVocal,
+    salons: salons,
+    botsRetires: autresBots,
   };
 }
 
@@ -363,13 +398,15 @@ async function servirOrdre(request, env, ctx) {
   const garde = await cache.match(cle);
   if (garde) return garde;
 
-  const resultats = await Promise.allSettled([
+  /* L'effectif d'abord : la présence a besoin de la liste des
+     membres pour relever le vocal et retirer les bots. */
+  const [eff, ope] = await Promise.allSettled([
     lireEffectif(jeton, guilde, avecNoms),
     lireOperations(jeton, guilde),
-    lirePresence(guilde, jeton),
   ]);
-
-  const [eff, ope, pre] = resultats;
+  const interne = eff.status === 'fulfilled' ? eff.value.interne : null;
+  if (eff.status === 'fulfilled') delete eff.value.interne;
+  const [pre] = await Promise.allSettled([lirePresence(guilde, jeton, interne)]);
 
   const corps = {
     maj: new Date().toISOString(),
