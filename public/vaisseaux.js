@@ -144,7 +144,7 @@
      coques à onze mille triangles, une station faite de six
      volumes faisait tache. Celle-ci en aligne près de cent, pour
      que le fil de fer ait la même densité que le reste. */
-  function station(peindre, force) {
+  function stationPrimitive(peindre, force) {
     var n = new THREE.Group();
     var A = ARGENT, R = ROUGE;
     var i, c, a, b;
@@ -419,6 +419,9 @@
       [-12.264, 2.952, -109.662, 2.868],
       [8.595, 0.582, -111.808, 2.868]
     ] },
+    /* La station n'a pas de tuyères et sa mesure est une
+       envergure, pas une longueur. */
+    seuil: { longueur: 268, moteurs: [] },
     perseus: { longueur: 180, moteurs: [
       [29.389, 3.697, -82.774, 4.705],
       [-29.25, 3.743, -82.823, 4.102],
@@ -481,7 +484,7 @@
      leurs halos et calculer leurs cadrages sans attendre. La
      géométrie s'y ajoute quand elle arrive, et userData.quandPret
      permet à l'appelant de faire ce qu'il doit refaire ensuite. */
-  function coqueReelle(nomCoque, peindre, longueurVoulue, teinte, intensite, opaciteAretes) {
+  function coqueReelle(nomCoque, peindre, longueurVoulue, teinte, intensite, opaciteAretes, reglages) {
     var d = COQUES[nomCoque];
     var n = new THREE.Group();
     var k = longueurVoulue / d.longueur;
@@ -513,7 +516,16 @@
     });
     /* Une promesse rejetée sans preneur remonte dans la console du
        visiteur. L'acte, lui, se contente d'un groupe vide. */
-    n.userData.quandPret.catch(function () { return null; });
+    /* Si la coque ne se charge pas, l'acte doit quand même avoir
+       quelque chose à montrer : on retombe sur la silhouette
+       dessinée à la main, remise à la bonne envergure. */
+    n.userData.quandPret.catch(function () {
+      if (!reglages || !reglages.repli) { return null; }
+      var s = reglages.repli(peindre);
+      s.scale.setScalar(longueurVoulue / reglages.repliEnvergure);
+      n.add(s);
+      return null;
+    });
 
     return n;
   }
@@ -523,7 +535,7 @@
     return function (peindre, teinte, intensite, opaciteAretes) {
       return coqueReelle(nomCoque, peindre, longueur, teinte,
         intensite === undefined ? r.intensite : intensite,
-        opaciteAretes === undefined ? r.aretes : opaciteAretes);
+        opaciteAretes === undefined ? r.aretes : opaciteAretes, r);
     };
   }
 
@@ -535,10 +547,11 @@
      silhouettes primitives d'origine, une vingtaine de pièces
      s'additionnaient ; ici ce sont onze mille triangles, et à la
      même force la projection vire au blanc plein. */
-  function pourLaTable(nomCoque) {
+  function pourLaTable(nomCoque, repli, repliEnvergure, intensite) {
     var L = COQUES[nomCoque].longueur;
     return fabrique(nomCoque, 9.2 * Math.pow(L / 345, 0.22),
-      { intensite: 0.028, aretes: 0.075 });
+      { intensite: intensite === undefined ? 0.028 : intensite, aretes: 0.075,
+        repli: repli, repliEnvergure: repliEnvergure });
   }
 
   /* Les noms d'appel restent ceux des actes : ils décrivent un
@@ -550,6 +563,11 @@
   var foreuseReelle    = fabrique('reclaimer',   6.4);
   var porteNeantReel   = fabrique('javelin',    28.0);
   var chasseurReel     = fabrique('gladius',     2.4);
+  /* La station est désormais un maillage comme les autres, modelé
+     sous Blender plutôt qu'assemblé en volumes primitifs dans le
+     navigateur. L'ancienne silhouette reste en repli. */
+  var seuilReel        = fabrique('seuil', 264,
+    { repli: stationPrimitive, repliEnvergure: 11.2 });
   var fregateReelle    = fabrique('idris',      18.0);
 
   /* --- Fiches, pour la table d'hologrammes ---------------- */
@@ -644,14 +662,16 @@
     },
     {
       cle: 'station', nom: 'Le Seuil', classe: "Station d'attache",
-      division: 'Commandement', construire: function (p) { return station(p, 0.12); }, echelle: 0.5,
+      division: 'Commandement', /* Ses ponts sont de grandes surfaces planes : vues de biais,
+         elles saturent bien avant une coque de vaisseau. */
+      construire: pourLaTable('seuil', stationPrimitive, 11.2, 0.006), echelle: 0.8,
       fiche: [
         ['Modèle', "Conception propre à l'Ordre"],
         ['Rôle', 'Amarrage, réunion, dépôt'],
         ['Équipage', 'Variable'],
         ['Envergure', '268 m']
       ],
-      texte: "Le point de ralliement. Fût incliné, moyeu d'anneaux empilés, anneau d'habitation en rotation, quatre bras d'amarrage. On y entre, on y repart : tout n'est que passage."
+      texte: "Le point de ralliement. Fût segmenté, moyeu d'anneaux empilés, deux ponts d'amarrage, anneau d'habitation, quatre bras terminés en croix. On y entre, on y repart : tout n'est que passage."
     }
   ];
 
@@ -668,14 +688,14 @@
     foreuseLourde: foreuseLourde,
     chasseur: chasseurReel,
     fregate: fregateReelle,
-    station: station,
+    station: seuilReel,
     /* silhouettes de repli, dessinées à la main */
     repli: {
       corvette: corvette,
       cargo: cargo,
       foreuse: foreuse,
       porteNeant: porteNeant,
-      station: station
+      station: stationPrimitive
     },
     FICHES: FICHES
   };

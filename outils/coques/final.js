@@ -4,6 +4,7 @@ const {MeshoptSimplifier}=require('meshoptimizer');
 const {aretesBudget,tuyeres}=require('./extra.js');
 
 const SRC='/mnt/user-data/uploads/Documents/modeles-sc/';
+const SRC_STATION='/home/claude/wtest/outils/station/';
 const OUT=process.argv[2] || '/home/claude/wtest/public/coques/';
 
 /* Longueur reelle en metres d'apres la fiche technique RSI, et
@@ -24,7 +25,12 @@ const FLOTTE = {
      dessous de 100 000 triangles il n'en reste qu'un squelette.
      Si un modele se comporte ainsi, changer de vaisseau coute
      moins cher que de le rafistoler. */
-  'gladius':     {nom:'gladius',     longueur: 20, cible: 7000, aretes:6000}
+  'gladius':     {nom:'gladius',     longueur: 20, cible: 7000, aretes:6000},
+  /* La station n'est pas un vaisseau : elle vient de Blender, son
+     axe est déjà le bon, et l'échelle se prend sur l'envergure et
+     non sur la longueur. */
+  'seuil':       {nom:'seuil',       longueur:268, cible:20000, aretes:14000,
+                  ply:true, station:true}
 };
 
 function souder(pos, idx, eps){
@@ -73,7 +79,7 @@ function poupeEnZplus(pos){
   const forcer = JSON.parse(process.env.RETOURNER || '{}');
   const fiches=[]; let tot=0, totBr=0;
   for(const [base,fi] of Object.entries(FLOTTE)){
-    const m=lire(SRC+base+'.ctm');
+    const m=lire(fi.ply ? SRC_STATION+base+'.ply' : SRC+base+'.ctm');
     let {mn,mx}=boite(m.sommets);
     const diag=Math.hypot(mx[0]-mn[0],mx[1]-mn[1],mx[2]-mn[2]);
     const s=souder(m.sommets,m.indices,diag*1e-5);
@@ -96,10 +102,13 @@ function poupeEnZplus(pos){
     }
     const pos=new Float32Array(np), nSom=n;
 
-    const retourner = (fi.nom in forcer) ? forcer[fi.nom] : poupeEnZplus(pos);
+    const retourner = fi.station ? false
+      : ((fi.nom in forcer) ? forcer[fi.nom] : poupeEnZplus(pos));
     ({mn,mx}=boite(pos));
     const cx=(mn[0]+mx[0])/2, cy=(mn[1]+mx[1])/2, cz=(mn[2]+mx[2])/2;
-    const ech = fi.longueur/(mx[2]-mn[2]);
+    const ech = fi.station
+      ? fi.longueur/Math.max(mx[0]-mn[0], mx[1]-mn[1], mx[2]-mn[2])
+      : fi.longueur/(mx[2]-mn[2]);
     for(let i=0;i<pos.length;i+=3){
       let x=(pos[i]-cx)*ech, y=(pos[i+1]-cy)*ech, z=(pos[i+2]-cz)*ech;
       if(retourner){ x=-x; z=-z; }   /* lacet de PI, proue ramenee en +Z */
@@ -111,7 +120,7 @@ function poupeEnZplus(pos){
        saccade par coque, et il fallait ensuite deviner ou sont
        les moteurs. */
     const {aretes,seuil}=aretesBudget(pos,ni,fi.aretes);
-    const moteurs=tuyeres(pos,nSom,0.055);
+    const moteurs=fi.station ? [] : tuyeres(pos,nSom,0.055);
 
     ({mn,mx}=boite(pos));
     const ext=[mx[0]-mn[0]||1, mx[1]-mn[1]||1, mx[2]-mn[2]||1];

@@ -156,15 +156,13 @@
     return g;
   }
 
+  /* La station est un maillage d'un seul tenant : son anneau
+     d'habitation ne peut plus tourner tout seul. C'est la station
+     entière qui dérive lentement, ce qui se lit aussi bien à cette
+     distance et coûte une ligne au lieu d'un démontage. */
   var anneau = null;
   if (CATALOGUE && CATALOGUE.station) {
-    var corps = CATALOGUE.station(peindreStation);
-    corps.scale.setScalar(24);
-    station.add(corps);
-    /* L'anneau d'habitation tourne : c'est lui, et pas le reste,
-       qui dit que la station est habitée. Il est le seul enfant
-       du groupe à porter ce rôle, on le retient par son rang. */
-    anneau = corps.userData.anneau || null;
+    station.add(CATALOGUE.station(peindreStation));
   } else {
     var anneauG = new THREE.TorusGeometry(120, 11, 10, 64);
     anneau = bloc(anneauG, 0xeef0f4, 0.55);
@@ -478,6 +476,7 @@
     camera.rotation.z = Math.sin(avance * 2.6) * 0.08;
 
     if (anneau) { anneau.rotation.z += dt * 0.11; }
+    else { station.rotation.y += dt * 0.035; }
     feux.material.opacity = 0.55 + 0.45 * Math.abs(Math.sin(t * 1.4));
     halo.material.opacity = 0.5 + 0.3 * Math.sin(t * 0.6);
 
