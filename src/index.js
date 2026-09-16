@@ -460,7 +460,7 @@ export default {
       if (!laisser) {
         const chemin = url.pathname;
         const autorise = LAISSEZ_PASSER.indexOf(chemin) !== -1 ||
-          chemin.startsWith('/polices/');
+          chemin.startsWith('/polices/') || chemin.startsWith('/assets/saut/');
 
         /* Un robot qui demande robots.txt doit lire un refus, pas la
            page de chantier servie en HTML. */

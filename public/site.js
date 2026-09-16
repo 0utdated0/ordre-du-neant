@@ -39,10 +39,20 @@
     for (var i = 0; i < 260; i++) {
       traits.push({ a: Math.random() * 6.2832, r: 0.15 + Math.random() * 0.95, rouge: Math.random() > 0.85 });
     }
-    var vaisseaux = [0, 1].map(function (k) {
-      return { a: (k ? -0.6 : 2.4) + Math.random() * 0.4, debut: 120 + k * 260, duree: 1300 };
+    /* Deux vaisseaux de la flotte, les mêmes coques que le saut : ils nous
+       dépassent et filent vers le fond, réacteurs allumés. */
+    var FLOTTE = {
+      gladius: { l: 560, h: 206, moteurs: [[0.7664, 0.7663, 0.0239], [0.7225, 0.7325, 0.0191], [0.5308, 0.8312, 0.0155], [0.5875, 0.7738, 0.0168]] },
+      perseus: { l: 528, h: 336, moteurs: [[0.0927, 0.5543, 0.0261], [0.6326, 0.6598, 0.0228], [0.5936, 0.8667, 0.0202], [0.1173, 0.7619, 0.0194], [0.1804, 0.5528, 0.0189], [0.5473, 0.6229, 0.0189]] }
+    };
+    var vaisseaux = [
+      { nom: 'perseus', base: 0.9, ox: -0.55, oy: 0.25, debut: 60, duree: 1700, miroir: true },
+      { nom: 'gladius', base: 0.55, ox: 0.6, oy: -0.2, debut: 280, duree: 1500, miroir: false }
+    ];
+    vaisseaux.forEach(function (v) {
+      v.img = new Image();
+      v.img.src = '/assets/saut/' + v.nom + '.webp';
     });
-    var forme = [[1, 0], [-0.55, 0.62], [-0.3, 0.16], [-0.85, 0.12], [-0.85, -0.12], [-0.3, -0.16], [-0.55, -0.62]];
     var eclair = null;
     var t0 = performance.now();
 
@@ -68,25 +78,28 @@
       /* deux vaisseaux nous dépassent et filent vers le point de fuite */
       vaisseaux.forEach(function (v) {
         var q = (t - v.debut) / v.duree;
-        if (q <= 0 || q >= 1) { return; }
-        var e = 1 - Math.pow(1 - q, 3);
-        var rayon = diag * 1.1 * (1 - e) + 6;
-        var taille = 170 * (1 - e) + 3;
-        var x = cx + Math.cos(v.a) * rayon, y = cy + Math.sin(v.a) * rayon;
+        if (q <= 0 || q >= 1 || !v.img.complete || !v.img.naturalWidth) { return; }
+        var d = FLOTTE[v.nom];
+        var z = 0.6 * Math.pow(40, Math.pow(q, 0.8));
+        var l = v.base * diag * 0.9 / z, hauteur = l * d.h / d.l;
+        var x = cx + v.ox * diag / z, y = cy + v.oy * diag / z;
+        var alpha = Math.min(1, q / 0.1) * Math.min(1, (1 - q) / 0.25);
         ctx.save();
+        ctx.globalAlpha = alpha;
         ctx.translate(x, y);
-        ctx.rotate(v.a + Math.PI);
-        var halo = ctx.createRadialGradient(-taille * 0.85, 0, 0, -taille * 0.85, 0, taille * 0.8);
-        halo.addColorStop(0, 'rgba(255,255,255,.95)');
-        halo.addColorStop(0.3, 'rgba(255,77,77,.8)');
-        halo.addColorStop(1, 'rgba(224,16,32,0)');
-        ctx.fillStyle = halo;
-        ctx.beginPath(); ctx.arc(-taille * 0.85, 0, taille * 0.8, 0, 6.2832); ctx.fill();
-        ctx.beginPath();
-        forme.forEach(function (pt, k) { k ? ctx.lineTo(pt[0] * taille, pt[1] * taille) : ctx.moveTo(pt[0] * taille, pt[1] * taille); });
-        ctx.closePath();
-        ctx.fillStyle = '#07070a'; ctx.fill();
-        ctx.strokeStyle = 'rgba(238,240,244,.7)'; ctx.lineWidth = Math.max(.8, taille * 0.02); ctx.stroke();
+        if (v.miroir) { ctx.scale(-1, 1); }
+        ctx.drawImage(v.img, -l / 2, -hauteur / 2, l, hauteur);
+        ctx.globalCompositeOperation = 'lighter';
+        d.moteurs.forEach(function (m) {
+          var gx = (m[0] - 0.5) * l, gy = (m[1] - 0.5) * hauteur;
+          var r = Math.max(2.5, m[2] * l * 3.2);
+          var h = ctx.createRadialGradient(gx, gy, 0, gx, gy, r);
+          h.addColorStop(0, 'rgba(255,245,245,1)');
+          h.addColorStop(0.25, 'rgba(255,90,90,.9)');
+          h.addColorStop(1, 'rgba(224,16,32,0)');
+          ctx.fillStyle = h;
+          ctx.beginPath(); ctx.arc(gx, gy, r, 0, 6.2832); ctx.fill();
+        });
         ctx.restore();
       });
 
