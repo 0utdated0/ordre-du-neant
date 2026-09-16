@@ -139,6 +139,11 @@ async function lireEffectif(jeton, guilde, avecNoms) {
   const interne = {
     humains: membres.filter((m) => m.user && !m.user.bot).map((m) => m.user.id),
     bots: membres.filter((m) => m.user && m.user.bot).map((m) => m.user.id),
+    /* Le widget ne donne ni identifiant ni drapeau « bot », seulement
+       un nom affiché : on garde tous les noms possibles des bots pour
+       les reconnaître dans ses salons vocaux. */
+    nomsBots: [].concat(...membres.filter((m) => m.user && m.user.bot).map((m) =>
+      [m.nick, m.user.global_name, m.user.username].filter(Boolean))),
   };
 
   return {
@@ -245,15 +250,23 @@ async function lirePresence(guilde, jeton, interne) {
     const liste = (w.channels || []).map((c) => ({ id: c.id, nom: c.name, occupants: [] }));
     const parId = new Map(liste.map((x) => [x.id, x]));
     const reserve = { id: null, nom: 'Salon réservé', occupants: [] };
+    /* Relevé en ligne : le seul occupant vocal affiché était « Vigie
+       ODN », le bot lui-même, sous « Salon réservé ». Les bots sortent
+       du détail des salons comme ils sortent des compteurs. */
+    const nomsBots = new Set(((interne && interne.nomsBots) || []).map((x) => x.toLowerCase()));
     for (const m of w.members || []) {
       if (!m.channel_id) continue;
+      if (nomsBots.has(String(m.username || '').toLowerCase())) continue;
       if (parId.has(m.channel_id)) parId.get(m.channel_id).occupants.push(m.username);
       else reserve.occupants.push(m.username);
     }
     salons = liste.filter((x) => x.occupants.length);
     if (reserve.occupants.length) salons.push(reserve);
     salons = salons.slice(0, 6);
-    if (enVocal === null) enVocal = (w.members || []).filter((m) => m.channel_id).length;
+    if (enVocal === null) {
+      enVocal = (w.members || []).filter((m) => m.channel_id &&
+        !nomsBots.has(String(m.username || '').toLowerCase())).length;
+    }
     if (enLigne === null && typeof w.presence_count === 'number') {
       enLigne = Math.max(0, w.presence_count - autresBots);
     }
@@ -360,7 +373,26 @@ export default {
     /* Les fichiers de public/ sont normalement servis avant même
        d'atteindre le Worker. Ce renvoi couvre le reste, et produit
        le 404 des assets pour une adresse inconnue. */
-    const reponse = await env.ASSETS.fetch(request);
+    let reponse = await env.ASSETS.fetch(request);
+
+    /* Adresse inconnue : la page 404 de l'Ordre, avec son vrai statut,
+       plutôt que la réponse vide de Cloudflare. Seulement pour une
+       page demandée par un navigateur ; un fichier manquant (image,
+       script) garde un 404 nu. */
+    if (reponse.status === 404 && request.method === 'GET' &&
+        (request.headers.get('Accept') || '').includes('text/html')) {
+      const page = await env.ASSETS.fetch(new URL('/404.html', url.origin));
+      if (page.ok) {
+        return new Response(page.body, {
+          status: 404,
+          headers: {
+            'Content-Type': 'text/html; charset=utf-8',
+            'Cache-Control': 'no-cache',
+            'X-Robots-Tag': 'noindex',
+          },
+        });
+      }
+    }
 
     /* Pages, scripts et feuille de style : toujours revalidés. Sans
        consigne explicite, un navigateur ou une règle de cache de la

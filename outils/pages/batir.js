@@ -153,6 +153,17 @@ const PAGES = [
     rail: [['passage', 'I', 'Entrer'], ['entree', 'II', 'Parcours'],
            ['allies', 'III', 'Alliés'], ['faq', 'IV', 'Questions']],
     scripts: ['trois', 'scene', 'site']
+  },
+  {
+    /* Page d'erreur : ni dans le menu, ni dans le plan, ni dans le
+       plan du site. Le Worker la sert pour toute adresse inconnue. */
+    cle: 'perdu', fichier: '404.html', url: '/404', cachee: true,
+    menu: 'Hors carte',
+    titre: "Hors carte | L'Ordre du Néant",
+    description: "Cette adresse ne mène nulle part sur le site de l'Ordre du Néant.",
+    sections: ['perdu'],
+    rail: [],
+    scripts: ['trois', 'scene', 'site']
   }
 ];
 
@@ -180,7 +191,7 @@ const APPEL = {
 };
 
 function menuDe(courante, plan) {
-  return PAGES.filter(function (p) { return plan || !p.horsMenu; }).map(function (p) {
+  return PAGES.filter(function (p) { return !p.cachee && (plan || !p.horsMenu); }).map(function (p) {
     const actif = p.cle === courante.cle;
     return '    <a href="' + p.url + '"' + (actif ? ' aria-current="page"' : '') +
            '>' + p.menu + '</a>';
@@ -260,7 +271,7 @@ const jour = new Date().toISOString().slice(0, 10);
 fs.writeFileSync(path.join(SORTIE, 'sitemap.xml'),
   '<?xml version="1.0" encoding="UTF-8"?>\n' +
   '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-  PAGES.map(function (p) {
+  PAGES.filter(function (p) { return !p.cachee; }).map(function (p) {
     return '  <url><loc>https://ordre-du-neant.fr' + p.url + '</loc>' +
            '<lastmod>' + jour + '</lastmod>' +
            '<priority>' + (p.url === '/' ? '1.0' : '0.8') + '</priority></url>';

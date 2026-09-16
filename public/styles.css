@@ -2802,3 +2802,27 @@ h2.ascension__titre.balaye{margin-inline:0}
    collait donc jamais. « clip » coupe pareil sans créer ce conteneur. */
 .page-divisions #divisions-liste{overflow:clip}
 .page-divisions .division{scroll-margin-top:11rem}
+
+/* =========================================================
+   404 : HORS CARTE
+   Un radar qui balaie et ne trouve qu'un point isolé.
+   ========================================================= */
+.acte--perdu{min-height:calc(100vh - 5rem);min-height:calc(100svh - 5rem);text-align:center}
+.perdu__balise{position:relative;width:clamp(170px,26vw,230px);margin:0 auto 1.8rem}
+.perdu__balise svg{width:100%;height:auto;overflow:visible}
+.perdu__cercle{fill:none;stroke:rgba(238,240,244,.22);stroke-width:1}
+.perdu__cercle--fin{stroke:rgba(238,240,244,.1);stroke-dasharray:2 5}
+.perdu__axes{stroke:rgba(224,16,32,.6);stroke-width:1}
+.perdu__balayage{fill:rgba(224,16,32,.16);transform-origin:110px 110px;animation:tourne 4s linear infinite}
+.perdu__point{fill:var(--braise);animation:pulse-rec 1.6s ease-in-out infinite}
+.perdu__code{
+  position:absolute;inset:0;display:grid;place-items:center;
+  font-family:var(--titre);font-size:clamp(1.8rem,1.2rem + 2vw,2.6rem);
+  color:transparent;-webkit-text-stroke:1px rgba(238,240,244,.85);letter-spacing:.06em;
+}
+.perdu__titre{
+  font-family:var(--titre);font-weight:400;
+  font-size:clamp(2.2rem,1.3rem + 4vw,4.4rem);line-height:1.1;margin:0 0 1.4rem;
+}
+.acte--perdu .portes{gap:.7rem}
+@media (prefers-reduced-motion:reduce){.perdu__balayage,.perdu__point{animation:none}}
