@@ -87,7 +87,9 @@
 *,*::before,*::after{box-sizing:border-box}
 
 html{
-  scroll-behavior:smooth;
+  /* Pas de scroll-behavior:smooth ici : les liens d'ancre défilent
+     déjà en douceur par site.js. Posé sur html, il se combinait sur
+     téléphone au redimensionnement de la barre d'adresse. */
   background:var(--noir);
   -webkit-text-size-adjust:100%;
 }
@@ -100,8 +102,15 @@ body{
   font-weight:300;
   font-size:clamp(1rem,.94rem + .28vw,1.125rem);
   line-height:1.72;
-  overflow-x:hidden;
 }
+/* Débordement horizontal coupé sur html, avec clip et non hidden.
+   overflow-x:hidden sur body faisait du body un conteneur de
+   défilement distinct de la page : sur téléphone, défiler vers le bas
+   puis remonter faisait réapparaître la barre d'adresse, la hauteur de
+   la vue changeait, et le navigateur ramenait la page tout en haut.
+   « clip » coupe sans créer de conteneur de défilement. */
+html{overflow-x:hidden}
+@supports (overflow:clip){html{overflow-x:clip}}
 
 img{max-width:100%;display:block}
 a{color:inherit}
@@ -3046,4 +3055,70 @@ body:not(.page-accueil) main{padding-top:clamp(5.6rem,9vh,6.6rem)}
   .barre__bouton[aria-expanded="true"] span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg)}
   body:not(.page-accueil) main{padding-top:5rem}
   .index-divisions{top:4.6rem}
+}
+
+/* =========================================================
+   TÉLÉPHONE
+   ---------------------------------------------------------
+   Relevé automatique des neuf pages en 360 px : aucun débordement,
+   mais des dizaines de libellés entre 7 et 9,5 px (capitales en
+   Michroma à .46 à .58rem), des liens de pied de 26 px de haut, et
+   quelques mises en page à reprendre, vues sur captures.
+   ========================================================= */
+@media (max-width:760px){
+  /* ---- tailles minimales de lecture ---- */
+  .acte__num,.approche__num,.ascension__num,.appel__devise,.lecture__cote,
+  .document-tete__cote,.temps-codex__marque,.parcours__temps,.etapes__role,
+  .division__bloc h4,.division__donnees dt,.poste__libelle,.compteur__lib{font-size:.66rem;letter-spacing:.18em}
+  .travail__titre{font-size:.66rem}
+  .travail__lignes dt{font-size:.6rem}
+  .travail__lignes dd{font-size:.74rem}
+  .onglet__num{font-size:.62rem}
+  .onglet__nom{font-size:.68rem}
+  .article__num{font-size:.6rem}
+  .page-regle .article__num{font-size:.62rem}
+  .holo__classe,.holo__donnees dt{font-size:.64rem}
+  .lien-clair,.grande-porte__lien{font-size:.68rem}
+  .porte{font-size:.7rem;padding:1.05rem 1.4rem}
+  .barre__cta{font-size:.62rem}
+  .filtre{font-size:.62rem;padding:.7rem .9rem}
+  .compteur__lib{letter-spacing:.12em}
+  .vocal__nom,.holo__mention,.sceau-regle__legende,.signature-regle__qui,.signature-regle__devise,
+  .grande-porte__chiffre small,.index-divisions span,.cran span,.echelon__voie,.descente i,
+  .division__code,.division__effectif,.poste__etat,.temps-codex__marque{font-size:.62rem}
+
+  /* ---- zones de toucher ---- */
+  .pied__plan{gap:0}
+  .pied__plan a{display:inline-block;padding:.75rem .7rem;font-size:.66rem}
+  .pied nav:not(.pied__plan) a{display:inline-block;padding:.7rem .3rem}
+  .faq__item summary{padding-block:1.35rem}
+
+  /* ---- accueil : fiche technique en haut, les vaisseaux dégagés ----
+     La fiche flottait au milieu de l'écran, pile sur les coques. */
+  .travail__fiche{
+    top:5.2rem;bottom:auto;left:var(--marge);right:var(--marge);
+    padding:.65rem .8rem;
+    background:linear-gradient(135deg, rgba(8,8,11,.7), rgba(3,3,5,.55));
+  }
+  .travail__lignes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem .6rem}
+  .travail__lignes div{display:grid;gap:.1rem}
+  .travail__lignes dd{text-align:left;line-height:1.3}
+  .travail__titre{margin-bottom:.5rem}
+  /* le numéro d'acte passait sous la barre */
+  .approche__num{top:auto;bottom:clamp(1.2rem,4vh,2rem)}
+
+  /* ---- la Règle : l'en-tête sortait de l'écran ---- */
+  .document-tete{grid-template-columns:minmax(0,1fr)}
+  .document-tete__sceau{max-width:240px}
+  .document-tete__cote{display:block;white-space:normal;line-height:1.6}
+  .sommaire-regle{grid-template-columns:minmax(0,1fr)}
+
+  /* ---- fin de page : moins de vide entre l'appel et le pied ---- */
+  .acte--appel{padding-block:3.5rem 2rem}
+  .pied{padding-top:2.5rem}
+  footer{background:linear-gradient(180deg, transparent, var(--noir) 4rem)}
+
+  /* ---- grain : un calque fixe deux fois plus grand que l'écran et
+     animé en transform, coûteux au défilement sur téléphone ---- */
+  .grain{inset:0;animation:none}
 }
