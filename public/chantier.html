@@ -382,6 +382,9 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
 #saut{opacity:0;transition:opacity 1.1s ease-in-out}
 #saut3d{position:fixed;inset:0;z-index:6;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 1.1s ease-in-out}
 #saut3d.visible{opacity:1}
+.preparation #saut3d{opacity:1;z-index:1;transition:opacity 2s ease-out}
+.preparation.saut-en-cours #saut3d{opacity:0;z-index:6;transition:opacity 1.1s ease-in-out}
+.preparation.saut-en-cours #saut3d.visible{opacity:1}
 /* Sous l'explosion, la page d'attente s'efface pour de bon : elle ne doit
    pas réapparaître quand le souffle se dissipe. */
 .saut-en-cours .bloc,.saut-en-cours footer,.saut-en-cours #etoiles,.saut-en-cours .rayons,
@@ -692,7 +695,10 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
         /* La scène est montée et ses nuanceurs compilés maintenant, pas au
            moment du saut : sinon l'image se fige pendant l'explosion. */
         flotte3d.scene = sceneFlotte(innerWidth, innerHeight, Math.min(window.devicePixelRatio || 1, 2));
-        if (flotte3d.scene) { flotte3d.scene.compiler(); }
+        if (flotte3d.scene) {
+          flotte3d.scene.compiler();
+          window.addEventListener('resize', function () { flotte3d.scene.taille(innerWidth, innerHeight); });
+        }
         if (essai) { window.__odnFlotte = flotte3d; }
       })
       .catch(function () { flotte3d.prete = false; });
@@ -705,7 +711,8 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     return new THREE.CanvasTexture(c);
   }
 
-  /* Prépare la scène ; rend une fonction image(t) ou null. */
+  /* Prépare la scène. Elle sert deux fois : la dernière minute, quand
+     la flotte vient se ranger devant le point de saut, puis le saut. */
   function sceneFlotte(L, H, dpr) {
     if (!flotte3d.prete || !window.THREE || !window.ODN || !window.ODN.travaux) { return null; }
     var rendu;
@@ -717,13 +724,13 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     rendu.setClearColor(0x000000, 0);
     var toile = rendu.domElement;
     toile.id = 'saut3d';
-    window.addEventListener('resize', function () { if (flotte3d.scene) { flotte3d.scene.taille(innerWidth, innerHeight); } });
     toile.setAttribute('aria-hidden', 'true');
     document.body.appendChild(toile);
 
     var scene = new THREE.Scene();
-    scene.fog = new THREE.Fog(0x000000, 900, 3600);
-    var camera = new THREE.PerspectiveCamera(62, L / H, 0.5, 5000);
+    scene.fog = new THREE.Fog(0x000000, 1200, 3800);
+    var FOV = 62;
+    var camera = new THREE.PerspectiveCamera(FOV, L / H, 0.5, 6000);
 
     var HALO = texture(function (x, l) {
       var g = x.createRadialGradient(l / 2, l / 2, 0, l / 2, l / 2, l / 2);
@@ -743,71 +750,157 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     }, 8, 128);
 
     var peindre = window.ODN.travaux.peintre(0xeef0f4, 0.3);
-    /* [nom, départ (ms), x, y, roulis] : x et y sont des décalages latéraux
-       fixes ; le vaisseau file tout droit vers le fond, la perspective fait
-       le reste. */
-    var plan = [
-      ['idris', 250, -58, 16, -0.12], ['polaris', 560, 44, 26, 0.18],
-      ['javelin', 820, 10, -52, 0.05], ['perseus', 1080, -40, -22, -0.2],
-      ['gladius', 1260, 26, -14, 0.35], ['gladius', 1360, 17, 14, -0.3],
-      ['perseus', 1600, 30, 34, 0.15], ['polaris', 1820, -34, 30, -0.1],
-      ['gladius', 2020, -22, -18, 0.4], ['gladius', 2100, -13, -26, -0.35]
-    ];
-    var appareils = plan.map(function (p) {
-      var d = FLOTTE3D[p[0]];
-      var k = d.long / d.L;
+
+    function construire(nom, echelle) {
+      var d = FLOTTE3D[nom];
+      var longueurVue = d.long * (echelle || 1);
+      var k = longueurVue / d.L;
       var porteur = new THREE.Group();
-      var coque = peindre(flotte3d.geos[p[0]]);
+      var coque = peindre(flotte3d.geos[nom]);
       coque.scale.setScalar(k);
-      /* l'avant des coques est vers +z : on les retourne vers le fond */
       porteur.add(coque);
-      d.m.forEach(function (m) {
+      var tuyeres = d.m.map(function (m) {
         var halo = new THREE.Sprite(new THREE.SpriteMaterial({
           map: HALO, transparent: true, opacity: 1, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
         }));
         halo.position.set(m[0] * k, m[1] * k, m[2] * k - m[3] * k * 0.4);
-        halo.scale.setScalar(m[3] * k * 5.5);
         porteur.add(halo);
-        var longueur = d.long * 1.4;
         var flamme = new THREE.Mesh(
-          new THREE.ConeGeometry(m[3] * k * 0.9, longueur, 12, 1, true),
+          new THREE.ConeGeometry(m[3] * k * 0.9, 1, 12, 1, true),
           new THREE.MeshBasicMaterial({ map: FLAMME, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false })
         );
-        /* le cône s'étire derrière la tuyère, pointe vers l'arrière */
         flamme.rotation.x = -Math.PI / 2;
-        flamme.position.set(m[0] * k, m[1] * k, m[2] * k - longueur / 2);
         porteur.add(flamme);
+        return { halo: halo, flamme: flamme, x: m[0] * k, y: m[1] * k, z: m[2] * k, r: m[3] * k };
       });
       porteur.rotation.order = 'YXZ';
       porteur.rotation.y = Math.PI;
       porteur.visible = false;
       scene.add(porteur);
-      return { o: porteur, debut: p[1], x: p[2], y: p[3], roulis: p[4], duree: 1800 + Math.random() * 300, long: d.long };
+      return { o: porteur, tuyeres: tuyeres, long: longueurVue };
+    }
+
+    /* poussée de 0 (au repos) à 1,5 (plein saut) : taille des halos et
+       longueur des flammes */
+    function pousser(a, force, t) {
+      var vacille = 0.92 + 0.08 * Math.sin(t / 45 + a.long);
+      a.tuyeres.forEach(function (ty) {
+        var f = Math.max(0.08, force) * vacille;
+        ty.halo.scale.setScalar(ty.r * (2.2 + 3.6 * Math.min(1, f)));
+        ty.halo.material.opacity = Math.min(1, 0.35 + f * 0.65);
+        var longueur = Math.max(0.01, a.long * 1.4 * f);
+        ty.flamme.scale.set(1, longueur, 1);
+        ty.flamme.position.set(ty.x, ty.y, ty.z - longueur / 2);
+        ty.flamme.visible = f > 0.12;
+      });
+    }
+
+    function lisse(q) { return q < 0 ? 0 : q > 1 ? 1 : q * q * (3 - 2 * q); }
+
+    /* ----- le garage : une place par vaisseau, devant le point de saut -----
+       [nom, x et y en fraction de la moitié de l'écran à cette profondeur,
+        profondeur] ; ils arrivent un par un, toutes les six secondes, de
+       soixante-dix à seize secondes avant l'ouverture. */
+    var places = [
+      ['polaris', -0.62, 0.40, -330], ['perseus', 0.60, 0.34, -300],
+      ['gladius', -0.44, -0.12, -190], ['gladius', 0.46, -0.16, -200],
+      ['javelin', 0.08, 0.66, -520], ['idris', -0.70, -0.42, -430],
+      ['perseus', 0.74, -0.40, -340], ['gladius', -0.26, 0.60, -230],
+      ['polaris', 0.34, 0.56, -380], ['gladius', 0.24, -0.54, -210]
+    ];
+    var garage = places.map(function (pl, i) {
+      /* vus par l'arrière, les vaisseaux paraissent courts : on les grossit */
+      var a = construire(pl[0], L / H < 1 ? 1.4 : 2.2);
+      a.sx = pl[1]; a.sy = pl[2]; a.z = pl[3];
+      a.arrivee = 70000 - i * 6000;   // restant (ms) au début de l'approche
+      a.depart = 150 + i * 120;       // instant du saut (ms) où il plonge
+      a.roulis = (i % 2 ? 1 : -1) * (0.35 + Math.random() * 0.2);
+      return a;
     });
+    function place(a) {
+      var demiH = Math.tan(FOV / 2 * Math.PI / 180) * -a.z;
+      var demiL = demiH * camera.aspect;
+      return { x: a.sx * demiL, y: a.sy * demiH, z: a.z };
+    }
+
+    /* ----- le passage rapproché, pendant le saut ----- */
+    var plan = [
+      ['idris', 700, -58, 16, -0.12], ['polaris', 900, 44, 26, 0.18],
+      ['javelin', 1100, 10, -52, 0.05], ['perseus', 1300, -40, -22, -0.2],
+      ['gladius', 1450, 26, -14, 0.35], ['gladius', 1540, 17, 14, -0.3],
+      ['perseus', 1700, 30, 34, 0.15], ['polaris', 1880, -34, 30, -0.1],
+      ['gladius', 2040, -22, -18, 0.4], ['gladius', 2120, -13, -26, -0.35]
+    ];
+    var passage = plan.map(function (p) {
+      var a = construire(p[0]);
+      a.debut = p[1]; a.x = p[2]; a.y = p[3]; a.roulis = p[4]; a.duree = 1700 + Math.random() * 300;
+      return a;
+    });
+
+    function rendre() {
+      camera.position.set(0, 0, 0);
+      rendu.render(scene, camera);
+    }
 
     return {
       toile: toile,
+
+      /* restant : millisecondes avant l'ouverture (entre 72 s et 0) */
+      preparation: function (restant, maintenant) {
+        passage.forEach(function (a) { a.o.visible = false; });
+        garage.forEach(function (a) {
+          var ecoule = a.arrivee - restant;       // depuis le début de son approche
+          if (ecoule < 0) { a.o.visible = false; return; }
+          var cible = place(a);
+          var q = Math.min(1, ecoule / 5200);
+          var e = 1 - Math.pow(1 - q, 3);         // freine en arrivant
+          /* il vient de derrière l'observateur, du même côté que sa place */
+          var dx = cible.x * 0.15 + (a.sx < 0 ? -1 : 1) * 60, dy = cible.y * 0.15 - 25, dz = 60;
+          a.o.visible = true;
+          a.o.position.set(dx + (cible.x - dx) * e, dy + (cible.y - dy) * e + Math.sin(maintenant / 1400 + a.z) * 1.5 * e,
+                           dz + (cible.z - dz) * e);
+          a.o.rotation.z = a.roulis * (1 - e) + Math.sin(maintenant / 2100 + a.sx * 5) * 0.02;
+          a.o.rotation.x = -0.05 * (1 - e);
+          /* plein gaz en approche, puis ralenti au repos */
+          pousser(a, 1.1 * (1 - lisse(q * 1.25)) + 0.12, maintenant);
+        });
+        rendre();
+      },
+
+      /* t : millisecondes depuis le début du saut */
       image: function (t) {
-        appareils.forEach(function (a) {
+        garage.forEach(function (a) {
+          if (a.arrivee < 0) { a.o.visible = false; return; }
+          var cible = place(a);
+          var q = (t - a.depart) / 1700;
+          if (q >= 1) { a.o.visible = false; return; }
+          a.o.visible = true;
+          var e = q <= 0 ? 0 : Math.pow(q, 2.6);
+          a.o.position.set(cible.x * (1 - e * 0.35), cible.y * (1 - e * 0.35), cible.z - 3200 * e);
+          a.o.rotation.z = 0;
+          a.o.rotation.x = 0;
+          pousser(a, q <= 0 ? 0.5 + t / 400 : 1.5, t);
+        });
+        passage.forEach(function (a) {
           var q = (t - a.debut) / a.duree;
           if (q <= 0 || q >= 1) { a.o.visible = false; return; }
           a.o.visible = true;
-          /* de juste devant l'observateur jusqu'au fond, en accélérant */
           var z = -(a.long * 1.1) - 3000 * Math.pow(q, 3);
           a.o.position.set(a.x, a.y, z);
           a.o.rotation.z = a.roulis * (1 - q);
           a.o.rotation.x = 0.04 * Math.sin(t / 300 + a.debut);
+          pousser(a, 1.4, t);
         });
-        /* léger tremblement de caméra, comme la toile 2D */
         camera.position.set((Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25, 0);
         rendu.render(scene, camera);
       },
+
       compiler: function () {
-        appareils.forEach(function (a) { a.o.visible = true; a.o.position.set(0, 0, -200); });
+        garage.concat(passage).forEach(function (a) { a.o.visible = true; a.o.position.set(0, 0, -300); pousser(a, 1, 0); });
         rendu.compile(scene, camera);
         rendu.render(scene, camera);
         rendu.clear();
-        appareils.forEach(function (a) { a.o.visible = false; });
+        garage.concat(passage).forEach(function (a) { a.o.visible = false; });
       },
       taille: function (l, h) { camera.aspect = l / h; camera.updateProjectionMatrix(); rendu.setSize(l, h); },
       liberer: function () { rendu.dispose(); toile.remove(); }
@@ -1095,6 +1188,10 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     /* Arrondi supérieur : « 10 » s'affiche de 10,0 à 9,001 secondes
        restantes, et le compteur atteint 00 à l'instant exact. */
     var total = Math.ceil(reste / 1000);
+    if (reste <= 72000 && !recharge && flotte3d.scene) {
+      if (!document.body.classList.contains('preparation')) { document.body.classList.add('preparation'); }
+      flotte3d.scene.preparation(reste, performance.now());
+    }
     if (total === dernierAffiche) { return; }
     if (!flotte3d.demandee && (essai || total <= 150)) { chargerFlotte3D(); }
     dernierAffiche = total;

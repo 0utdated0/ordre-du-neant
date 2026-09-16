@@ -436,7 +436,7 @@ export default {
     /* Répétition de l'ouverture : /apercu-ouverture?secondes=15 joue le
        compte à rebours et son animation, sans rien ouvrir. */
     if (url.pathname === '/apercu-ouverture') {
-      const secondes = Math.min(600, Math.max(3, parseInt(url.searchParams.get('secondes'), 10) || 15));
+      const secondes = Math.min(86400, Math.max(3, parseInt(url.searchParams.get('secondes'), 10) || 15));
       return pageChantier(env, url.origin, Date.now() + secondes * 1000, true);
     }
 
