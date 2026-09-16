@@ -94,7 +94,12 @@
       liens[j].classList.toggle('actif', j === courant);
     }
     var passe = surAccueil ? window.scrollY > window.innerHeight * 0.75 : true;
-    if (barre) { barre.classList.toggle('visible', passe); }
+    if (barre) {
+      barre.classList.toggle('visible', passe);
+      /* Au repos la barre est presque transparente ; dès qu'on défile,
+         le verre se densifie pour rester lisible sur le texte. */
+      barre.classList.toggle('defile', window.scrollY > 24);
+    }
     if (rail) {
       rail.classList.toggle('visible',
         surAccueil ? passe : window.scrollY > window.innerHeight * 0.25);
