@@ -307,6 +307,107 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
 @keyframes nuit{0%,20%{background:rgba(0,0,0,0)}60%,100%{background:#000}}
 @keyframes devise{0%,35%{opacity:0;letter-spacing:.9em}70%,100%{opacity:1;letter-spacing:.35em}}
 
+
+/* ---------- un effet propre à chaque seconde, de 10 à 1 ---------- */
+.fx{position:fixed;inset:0;z-index:3;pointer-events:none;overflow:hidden}
+
+/* 10 : balayage d'un scanner */
+.fx-scan::before{
+  content:"";position:absolute;left:0;right:0;top:-12vh;height:12vh;
+  background:linear-gradient(180deg,transparent,rgba(224,16,32,.08) 40%,rgba(255,77,77,.55) 92%,#fff 100%);
+  box-shadow:0 2px 24px rgba(255,77,77,.8);
+  animation:scan .95s cubic-bezier(.5,0,.5,1) forwards;
+}
+@keyframes scan{to{transform:translateY(112vh)}}
+
+/* 9 : parasite sur le titre */
+.fx9 h1 .grand{animation:glitch .6s steps(1) forwards}
+@keyframes glitch{
+  0%{text-shadow:-6px 0 #e01020,6px 0 #6ff;transform:translate(3px,0);clip-path:inset(0 0 55% 0)}
+  15%{text-shadow:5px 0 #e01020,-5px 0 #6ff;transform:translate(-4px,1px);clip-path:inset(40% 0 0 0)}
+  30%{text-shadow:-3px 0 #e01020,3px 0 #6ff;transform:translate(2px,-1px);clip-path:inset(20% 0 30% 0)}
+  45%{text-shadow:8px 0 #e01020,-8px 0 #6ff;transform:translate(-6px,0);clip-path:none}
+  60%{text-shadow:-2px 0 #e01020,2px 0 #6ff;transform:none}
+  100%{text-shadow:0 0 64px rgba(224,16,32,.38),0 0 20px rgba(0,0,0,.9);transform:none;clip-path:none}
+}
+
+/* 8 : l'emblème s'embrase */
+.fx8 .sceau{animation:embrase .9s cubic-bezier(.16,1,.3,1)}
+@keyframes embrase{
+  0%{transform:scale(1.25) rotate(-6deg);filter:brightness(2.4) drop-shadow(0 0 60px #ff4d4d) drop-shadow(0 0 120px #e01020)}
+  100%{transform:none;filter:drop-shadow(0 0 54px rgba(224,16,32,.42)) drop-shadow(0 0 16px rgba(255,77,77,.28))}
+}
+.fx-halo{
+  position:absolute;width:10rem;height:10rem;margin:-5rem 0 0 -5rem;border-radius:50%;
+  border:2px solid rgba(255,255,255,.9);box-shadow:0 0 40px #ff4d4d;
+  animation:halo .9s ease-out forwards;
+}
+@keyframes halo{from{transform:scale(.3);opacity:1}to{transform:scale(3.2);opacity:0;border-width:0}}
+
+/* 7 : grille en perspective */
+.fx-grille{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,77,77,.55) 1px,transparent 1px),linear-gradient(90deg,rgba(255,77,77,.55) 1px,transparent 1px);
+  background-size:56px 56px;
+  -webkit-mask-image:radial-gradient(ellipse 70% 60% at 50% 100%,#000 0%,rgba(0,0,0,.6) 45%,transparent 75%);
+  mask-image:radial-gradient(ellipse 70% 60% at 50% 100%,#000 0%,rgba(0,0,0,.6) 45%,transparent 75%);
+  animation:grille .95s ease-out forwards;
+}
+@keyframes grille{0%{opacity:0;background-position:0 0}20%{opacity:1}100%{opacity:0;background-position:0 -112px}}
+
+/* 6 : colonnes de lumière */
+.fx-colonne{
+  position:absolute;bottom:-10%;width:2px;height:120%;
+  background:linear-gradient(0deg,transparent,rgba(255,77,77,.9) 50%,transparent);
+  box-shadow:0 0 18px 3px rgba(224,16,32,.6);
+  transform-origin:50% 100%;
+  animation:colonne .9s cubic-bezier(.16,1,.3,1) forwards;
+}
+@keyframes colonne{0%{transform:scaleY(0);opacity:1}50%{opacity:1}100%{transform:scaleY(1);opacity:0}}
+
+/* 5 : balayage radar autour du compteur */
+.fx-radar{
+  position:absolute;width:34rem;height:34rem;margin:-17rem 0 0 -17rem;border-radius:50%;
+  background:conic-gradient(from 0deg,rgba(224,16,32,0) 0deg,rgba(224,16,32,0) 280deg,rgba(255,77,77,.55) 358deg,rgba(255,255,255,.9) 360deg);
+  -webkit-mask-image:radial-gradient(circle,transparent 22%,#000 23%,#000 70%,transparent 71%);mask-image:radial-gradient(circle,transparent 22%,#000 23%,#000 70%,transparent 71%);
+  animation:radar .95s linear forwards;
+}
+@keyframes radar{0%{transform:rotate(0);opacity:0}15%{opacity:1}85%{opacity:1}100%{transform:rotate(360deg);opacity:0}}
+
+/* 4 : la devise s'allume lettre par lettre */
+.devise .lettre{display:inline-block;transition:none}
+.fx4 .devise .lettre{animation:lettre .7s ease-out both;animation-delay:calc(var(--i) * 22ms)}
+@keyframes lettre{0%{color:#ff4d4d;text-shadow:0 0 12px #ff4d4d,0 0 28px #e01020;transform:translateY(-6px) scale(1.45)}45%{color:#fff;text-shadow:0 0 10px #ff4d4d}100%{color:inherit;text-shadow:none;transform:none}}
+
+/* 3 : format cinéma, les bandes noires se referment */
+.fx-bande{position:absolute;left:0;right:0;height:0;background:#000;border-color:rgba(224,16,32,.8);animation:bande .95s cubic-bezier(.7,0,.3,1) forwards}
+.fx-bande--haut{top:0;border-bottom:1px solid}
+.fx-bande--bas{bottom:0;border-top:1px solid}
+@keyframes bande{0%{height:0}40%,60%{height:14vh}100%{height:0}}
+
+/* 2 : implosion de particules */
+.fx-grain{
+  position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;
+  background:#fff;box-shadow:0 0 10px #ff4d4d,0 0 20px #e01020;
+  animation:implose .85s cubic-bezier(.55,0,1,.45) forwards;
+}
+@keyframes implose{from{transform:translate(var(--dx),var(--dy)) scale(1.4);opacity:0}20%{opacity:1}to{transform:translate(0,0) scale(.3);opacity:0}}
+
+/* 1 : coup au cœur, aberration et noir d'une fraction de seconde */
+.fx1 .bloc{animation:coeur .9s cubic-bezier(.16,1,.3,1)}
+@keyframes coeur{
+  0%{transform:scale(1)}12%{transform:scale(1.08);filter:drop-shadow(-5px 0 rgba(224,16,32,.9)) drop-shadow(5px 0 rgba(102,255,255,.6))}
+  24%{transform:scale(.98);filter:none}36%{transform:scale(1.05);filter:drop-shadow(-3px 0 rgba(224,16,32,.8)) drop-shadow(3px 0 rgba(102,255,255,.5))}
+  100%{transform:none;filter:none}
+}
+.fx-noir{position:absolute;inset:0;background:#000;animation:noir .5s steps(1) forwards}
+@keyframes noir{0%{opacity:.92}12%{opacity:0}24%{opacity:.75}36%,100%{opacity:0}}
+
+@media (prefers-reduced-motion:reduce){
+  .fx,.fx9 h1 .grand,.fx8 .sceau,.fx4 .devise .lettre,.fx1 .bloc{animation:none !important}
+  .fx{display:none}
+}
+
 @media (prefers-reduced-motion:reduce){
   .chiffre-geant,.onde{display:none}
   .tic .bloc,.tic .rebours__cases span:last-child strong,.final .rebours__titre{animation:none}
@@ -419,7 +520,91 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     document.body.appendChild(onde);
 
     setTimeout(function () { geant.remove(); onde.remove(); }, 1300);
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches && EFFETS[n]) {
+      try { EFFETS[n](); } catch (e) { /* un effet raté ne doit jamais bloquer le compte */ }
+    }
   }
+
+
+  /* Un effet différent pour chaque seconde, en plus du battement. */
+  function calque(classe) {
+    var c = document.createElement('div');
+    c.className = 'fx ' + (classe || '');
+    c.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(c);
+    setTimeout(function () { c.remove(); }, 1200);
+    return c;
+  }
+  function classePassagere(nom) {
+    document.body.classList.remove(nom);
+    void document.body.offsetWidth;
+    document.body.classList.add(nom);
+    setTimeout(function () { document.body.classList.remove(nom); }, 1100);
+  }
+  function centre(el) {
+    var r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }
+  var devise = document.querySelector('.devise');
+  if (devise && !devise.querySelector('.lettre')) {
+    var brut = devise.textContent;
+    devise.textContent = '';
+    Array.prototype.forEach.call(brut, function (ch, i) {
+      var sp = document.createElement('span');
+      sp.className = 'lettre';
+      sp.style.setProperty('--i', i);
+      sp.textContent = ch === ' ' ? '\u00a0' : ch;
+      devise.appendChild(sp);
+    });
+  }
+
+  var EFFETS = {
+    10: function () { calque('fx-scan'); },
+    9: function () { classePassagere('fx9'); },
+    8: function () {
+      classePassagere('fx8');
+      var c = calque(), halo = document.createElement('div'), p = centre(document.querySelector('.sceau'));
+      halo.className = 'fx-halo'; halo.style.left = p.x + 'px'; halo.style.top = p.y + 'px';
+      c.appendChild(halo);
+    },
+    7: function () { var c = calque(), g = document.createElement('div'); g.className = 'fx-grille'; c.appendChild(g); },
+    6: function () {
+      var c = calque();
+      for (var i = 0; i < 9; i++) {
+        var col = document.createElement('div');
+        col.className = 'fx-colonne';
+        col.style.left = (6 + i * 11 + (Math.random() * 4 - 2)) + '%';
+        col.style.animationDelay = (Math.abs(4 - i) * 45) + 'ms';
+        c.appendChild(col);
+      }
+    },
+    5: function () {
+      var c = calque(), r = document.createElement('div'), p = centre(bloc.querySelector('.rebours__cases'));
+      r.className = 'fx-radar'; r.style.left = p.x + 'px'; r.style.top = p.y + 'px';
+      c.appendChild(r);
+    },
+    4: function () { classePassagere('fx4'); },
+    3: function () {
+      var c = calque();
+      ['haut', 'bas'].forEach(function (cote) {
+        var b = document.createElement('div'); b.className = 'fx-bande fx-bande--' + cote; c.appendChild(b);
+      });
+    },
+    2: function () {
+      var c = calque(), p = centre(bloc.querySelector('.rebours__cases'));
+      for (var i = 0; i < 46; i++) {
+        var g = document.createElement('div'), angle = Math.random() * 6.2832, dist = 220 + Math.random() * Math.max(innerWidth, innerHeight) * 0.6;
+        g.className = 'fx-grain';
+        g.style.left = p.x + 'px'; g.style.top = p.y + 'px';
+        g.style.setProperty('--dx', Math.cos(angle) * dist + 'px');
+        g.style.setProperty('--dy', Math.sin(angle) * dist + 'px');
+        g.style.animationDelay = Math.random() * 180 + 'ms';
+        c.appendChild(g);
+      }
+    },
+    1: function () { classePassagere('fx1'); var c = calque(), n = document.createElement('div'); n.className = 'fx-noir'; c.appendChild(n); },
+  };
 
   function ouvrir() {
     window.ODN_ELAN = 1.6;
