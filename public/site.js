@@ -10,6 +10,111 @@
   var tactile = window.matchMedia('(hover: none)').matches;
 
   /* ---------------------------------------------------------
+     Sortie de saut
+     ---------------------------------------------------------
+     À l'ouverture, la page d'attente se termine par un saut et pose
+     un repère en session. Ici, le site apparaît en sortie de saut :
+     les traînées d'étoiles ralentissent jusqu'à redevenir des points,
+     deux vaisseaux filent vers le point de fuite, un dernier éclair.
+     --------------------------------------------------------- */
+  if (document.documentElement.classList.contains('arrivee')) {
+    try { sessionStorage.removeItem('odn-arrivee'); } catch (e) {}
+    setTimeout(function () { document.documentElement.classList.remove('arrivee'); }, 2000);
+    if (!doux) { sortieDeSaut(); }
+  }
+
+  function sortieDeSaut() {
+    var toile = document.createElement('canvas');
+    toile.id = 'sortie-saut';
+    toile.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(toile);
+    var ctx = toile.getContext('2d');
+    if (!ctx) { toile.remove(); return; }
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var L = innerWidth, H = innerHeight, cx = L / 2, cy = H / 2;
+    var diag = Math.sqrt(L * L + H * H) / 2;
+    toile.width = L * dpr; toile.height = H * dpr;
+    var DUREE = 2200;
+    var traits = [];
+    for (var i = 0; i < 260; i++) {
+      traits.push({ a: Math.random() * 6.2832, r: 0.15 + Math.random() * 0.95, rouge: Math.random() > 0.85 });
+    }
+    var vaisseaux = [0, 1].map(function (k) {
+      return { a: (k ? -0.6 : 2.4) + Math.random() * 0.4, debut: 120 + k * 260, duree: 1300 };
+    });
+    var forme = [[1, 0], [-0.55, 0.62], [-0.3, 0.16], [-0.85, 0.12], [-0.85, -0.12], [-0.3, -0.16], [-0.55, -0.62]];
+    var eclair = null;
+    var t0 = performance.now();
+
+    function image(maintenant) {
+      var t = maintenant - t0, p = Math.min(1, t / DUREE);
+      var reste = 1 - p;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, L, H);
+
+      /* traînées qui raccourcissent : le saut se termine */
+      var longueur = reste * reste * reste * 0.55;
+      ctx.lineCap = 'round';
+      traits.forEach(function (tr) {
+        var r1 = tr.r * diag, r0 = r1 * (1 - longueur);
+        ctx.strokeStyle = (tr.rouge ? 'rgba(255,77,77,' : 'rgba(238,240,244,') + (reste * 0.9) + ')';
+        ctx.lineWidth = 0.6 + tr.r * 1.8 * reste;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(tr.a) * r0, cy + Math.sin(tr.a) * r0);
+        ctx.lineTo(cx + Math.cos(tr.a) * (r1 + 0.5), cy + Math.sin(tr.a) * (r1 + 0.5));
+        ctx.stroke();
+      });
+
+      /* deux vaisseaux nous dépassent et filent vers le point de fuite */
+      vaisseaux.forEach(function (v) {
+        var q = (t - v.debut) / v.duree;
+        if (q <= 0 || q >= 1) { return; }
+        var e = 1 - Math.pow(1 - q, 3);
+        var rayon = diag * 1.1 * (1 - e) + 6;
+        var taille = 170 * (1 - e) + 3;
+        var x = cx + Math.cos(v.a) * rayon, y = cy + Math.sin(v.a) * rayon;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(v.a + Math.PI);
+        var halo = ctx.createRadialGradient(-taille * 0.85, 0, 0, -taille * 0.85, 0, taille * 0.8);
+        halo.addColorStop(0, 'rgba(255,255,255,.95)');
+        halo.addColorStop(0.3, 'rgba(255,77,77,.8)');
+        halo.addColorStop(1, 'rgba(224,16,32,0)');
+        ctx.fillStyle = halo;
+        ctx.beginPath(); ctx.arc(-taille * 0.85, 0, taille * 0.8, 0, 6.2832); ctx.fill();
+        ctx.beginPath();
+        forme.forEach(function (pt, k) { k ? ctx.lineTo(pt[0] * taille, pt[1] * taille) : ctx.moveTo(pt[0] * taille, pt[1] * taille); });
+        ctx.closePath();
+        ctx.fillStyle = '#07070a'; ctx.fill();
+        ctx.strokeStyle = 'rgba(238,240,244,.7)'; ctx.lineWidth = Math.max(.8, taille * 0.02); ctx.stroke();
+        ctx.restore();
+      });
+
+      /* un dernier éclair, bref */
+      if (!eclair && t > 380) {
+        var a = Math.random() * 6.2832, pts = [[cx + Math.cos(a) * diag, cy + Math.sin(a) * diag]];
+        for (var j = 1; j <= 14; j++) {
+          var f = 1 - j / 14;
+          pts.push([cx + Math.cos(a) * diag * f + (Math.random() - 0.5) * 70 * f, cy + Math.sin(a) * diag * f + (Math.random() - 0.5) * 70 * f]);
+        }
+        eclair = { t: t, pts: pts };
+      }
+      if (eclair && t - eclair.t < 160) {
+        var force = 1 - (t - eclair.t) / 160;
+        ctx.beginPath();
+        eclair.pts.forEach(function (pt, k) { k ? ctx.lineTo(pt[0], pt[1]) : ctx.moveTo(pt[0], pt[1]); });
+        ctx.shadowColor = '#ff2030'; ctx.shadowBlur = 22;
+        ctx.strokeStyle = 'rgba(255,60,70,' + force + ')'; ctx.lineWidth = 4; ctx.stroke();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = 'rgba(255,255,255,' + force + ')'; ctx.lineWidth = 1.4; ctx.stroke();
+      }
+
+      if (p < 1) { requestAnimationFrame(image); } else { toile.remove(); }
+    }
+    requestAnimationFrame(image);
+  }
+
+  /* ---------------------------------------------------------
      Titre du seuil, lettre à lettre
      ---------------------------------------------------------
      Chaque caractère devient un span animé avec son propre

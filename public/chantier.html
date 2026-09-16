@@ -360,9 +360,61 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
   background:rgba(224,16,32,.15);
 }
 .eclair .rejouer:hover{background:rgba(224,16,32,.35)}
+.eclair--saut{animation:none;background:transparent}
 @keyframes souffle{0%{transform:scale(0);opacity:1}35%{opacity:1}100%{transform:scale(4.5);opacity:0}}
 @keyframes nuit{0%,20%{background:rgba(0,0,0,0)}60%,100%{background:#000}}
 @keyframes devise{0%,35%{opacity:0;letter-spacing:.9em}70%,100%{opacity:1;letter-spacing:.35em}}
+
+/* ---------- le saut : de la page d'attente au site ---------- */
+#saut{position:fixed;inset:0;z-index:6;width:100%;height:100%;display:block;pointer-events:none}
+.saut-blanc{position:fixed;inset:0;z-index:7;pointer-events:none;background:#fff;opacity:0;transition:opacity .45s ease-in}
+.saut-blanc.plein{opacity:1}
+.saut-devise{
+  position:fixed;left:50%;top:50%;z-index:7;margin:0;transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none;white-space:nowrap;
+  font-family:var(--titre);font-size:clamp(.66rem,1.9vw,1.35rem);letter-spacing:.3em;text-indent:.3em;text-transform:uppercase;
+  color:#fff;text-shadow:0 0 24px rgba(224,16,32,.95),0 0 60px rgba(224,16,32,.6);
+  opacity:0;animation:saut-devise 2.6s ease-out .5s forwards;
+}
+@keyframes saut-devise{
+  0%{opacity:0;letter-spacing:.8em;filter:blur(8px);transform:translate(-50%,-50%) scale(.92)}
+  30%{opacity:1;letter-spacing:.3em;filter:none;transform:translate(-50%,-50%) scale(1)}
+  75%{opacity:1;letter-spacing:.3em;transform:translate(-50%,-50%) scale(1.04)}
+  100%{opacity:0;letter-spacing:.26em;transform:translate(-50%,-50%) scale(1.12)}
+}
+.saut-eclat{position:fixed;inset:0;z-index:6;pointer-events:none;background:#ffecec;opacity:0}
+.saut-boutons{position:fixed;left:0;right:0;bottom:16vh;z-index:8;display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;padding:0 1rem}
+.saut-boutons a{
+  font-family:var(--titre);font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+  color:#000;text-decoration:none;padding:.9rem 1.6rem;border:1px solid #000;background:rgba(255,255,255,.7);
+}
+.saut-boutons a:hover{background:#fff}
+
+/* ---------- chaque heure pleine : l'annonce ---------- */
+.annonce-heure{
+  position:fixed;left:50%;top:50%;z-index:4;margin:0;pointer-events:none;text-align:center;
+  font-family:var(--titre);font-weight:400;text-transform:uppercase;white-space:nowrap;
+  font-size:clamp(.95rem,2.8vw,2.5rem);letter-spacing:.22em;text-indent:.22em;color:#fff;
+  text-shadow:0 0 30px rgba(224,16,32,.95),0 0 80px rgba(224,16,32,.6);
+  opacity:0;animation:annonce-heure 3.2s cubic-bezier(.16,1,.3,1) forwards;
+}
+.annonce-heure::before,.annonce-heure::after{
+  content:"";position:absolute;left:-12%;right:-12%;height:1px;
+  background:linear-gradient(90deg,transparent,#ff4d4d,transparent);
+  animation:annonce-trait 3.2s cubic-bezier(.16,1,.3,1) forwards;
+}
+.annonce-heure::before{top:-1.1em}
+.annonce-heure::after{bottom:-1.1em}
+@keyframes annonce-heure{
+  0%{opacity:0;transform:translate(-50%,-50%) scale(1.25);letter-spacing:.7em;filter:blur(10px)}
+  18%{opacity:1;transform:translate(-50%,-50%) scale(1);letter-spacing:.22em;filter:none}
+  78%{opacity:1;transform:translate(-50%,-50%) scale(1.02);letter-spacing:.22em}
+  100%{opacity:0;transform:translate(-50%,-50%) scale(.96);letter-spacing:.22em}
+}
+@keyframes annonce-trait{0%{transform:scaleX(0)}25%{transform:scaleX(1)}80%{opacity:1}100%{opacity:0;transform:scaleX(1.2)}}
+.heure-voile{position:fixed;inset:0;z-index:3;pointer-events:none;background:radial-gradient(ellipse at center,rgba(0,0,0,.8) 25%,rgba(0,0,0,.9) 100%);opacity:0;animation:heure-voile 3.2s ease-out forwards}
+@keyframes heure-voile{0%{opacity:0}15%,75%{opacity:1}100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.annonce-heure,.annonce-heure::before,.annonce-heure::after{animation-duration:.01ms}}
 
 
 @media (prefers-reduced-motion:reduce){
@@ -502,10 +554,30 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     classes.forEach(function (c) { document.body.classList.add(c); });
     setTimeout(function () { classes.forEach(function (c) { document.body.classList.remove(c); }); }, 1500);
     onde(false, 120, pleine ? 0.5 : 0.2);
-    if (pleine) { onde(false, 300, 0.5); }
-    window.ODN_ELAN = pleine ? 0.55 : 0.3;
+    if (pleine) {
+      onde(false, 300, 0.5);
+      onde(false, 520, 0.7);
+      var heures = total / 3600;
+      var voile = document.createElement('div');
+      voile.className = 'heure-voile';
+      voile.setAttribute('aria-hidden', 'true');
+      var annonce = document.createElement('p');
+      annonce.className = 'annonce-heure';
+      annonce.setAttribute('aria-hidden', 'true');
+      annonce.textContent = heures === 1 ? 'Plus qu\u2019une heure' : 'Plus que ' + heures + ' heures';
+      var geant = document.createElement('div');
+      geant.className = 'chiffre-geant';
+      geant.style.setProperty('--k', '0.45');
+      geant.setAttribute('aria-hidden', 'true');
+      geant.textContent = heures;
+      document.body.appendChild(voile);
+      document.body.appendChild(geant);
+      document.body.appendChild(annonce);
+      setTimeout(function () { voile.remove(); annonce.remove(); geant.remove(); }, 3400);
+    }
+    window.ODN_ELAN = pleine ? 0.8 : 0.3;
     clearTimeout(elanMinute);
-    elanMinute = setTimeout(function () { if (derniere === null) { window.ODN_ELAN = 0; } }, 700);
+    elanMinute = setTimeout(function () { if (derniere === null) { window.ODN_ELAN = 0; } }, pleine ? 1600 : 700);
   }
 
   function battre(n) {
@@ -547,12 +619,210 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
   }
 
 
-  function ouvrir() {
+  /* À zéro : le flash rouge, puis le saut. Les étoiles filent vers
+     l'observateur, des vaisseaux de l'Ordre jaillissent du centre et
+     passent de part et d'autre, des éclairs zèbrent l'écran, tout blanchit,
+     et le site s'ouvre en sortie de saut. */
+  function ouvrir(apres) {
     window.ODN_ELAN = 1.6;
     var eclair = document.createElement('div');
-    eclair.className = 'eclair';
-    eclair.innerHTML = '<p>Tout n\u2019est que passage</p>';
+    eclair.className = 'eclair eclair--saut';
     document.body.appendChild(eclair);
+    setTimeout(function () { sauter(apres); }, 450);
+  }
+
+  function sauter(apres) {
+    var doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var toile = document.createElement('canvas');
+    toile.id = 'saut';
+    toile.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(toile);
+    var devise = document.createElement('p');
+    devise.className = 'saut-devise';
+    devise.textContent = 'Tout n\u2019est que passage';
+    document.body.appendChild(devise);
+    var blanc = document.createElement('div');
+    blanc.className = 'saut-blanc';
+    document.body.appendChild(blanc);
+    /* L'éclat des éclairs passe par un calque à part : peint dans la toile,
+       il s'accumulerait d'image en image en voile gris. */
+    var eclat = document.createElement('div');
+    eclat.className = 'saut-eclat';
+    document.body.appendChild(eclat);
+
+    var ctx = toile.getContext('2d');
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    var L = innerWidth, H = innerHeight;
+    toile.width = L * dpr; toile.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var cx = L / 2, cy = H / 2, diag = Math.sqrt(L * L + H * H) / 2;
+    var DUREE = doux ? 900 : 3400;
+
+    var etoiles = [];
+    for (var i = 0; i < 420; i++) {
+      etoiles.push({ a: Math.random() * 6.2832, z: Math.random(), v: 0.4 + Math.random() * 0.8, rouge: Math.random() > 0.88 });
+    }
+    var vaisseaux = [];
+    var gabarits = [
+      [[1, 0], [-0.55, 0.62], [-0.3, 0.16], [-0.85, 0.12], [-0.85, -0.12], [-0.3, -0.16], [-0.55, -0.62]],
+      [[1, 0], [0.1, 0.22], [-0.2, 0.75], [-0.5, 0.75], [-0.35, 0.18], [-0.9, 0.2], [-0.9, -0.2], [-0.35, -0.18], [-0.5, -0.75], [-0.2, -0.75], [0.1, -0.22]],
+      [[1, 0.06], [1, -0.06], [0.2, -0.3], [-0.9, -0.34], [-0.7, 0], [-0.9, 0.34], [0.2, 0.3]],
+    ];
+    for (var v = 0; v < 9; v++) {
+      var ang = (v / 9) * 6.2832 + (Math.random() - 0.5) * 0.5;
+      vaisseaux.push({
+        a: ang, debut: 250 + v * 290 + Math.random() * 120, duree: 1100 + Math.random() * 500,
+        forme: gabarits[v % gabarits.length], taille: 0.8 + Math.random() * 0.6, roulis: (Math.random() - 0.5) * 0.8,
+      });
+    }
+    var eclairs = [];
+    var prochainEclair = 200;
+
+    function trajet(x1, y1, x2, y2, deplacement) {
+      var pts = [[x1, y1], [x2, y2]];
+      for (var passe = 0; passe < 5; passe++) {
+        var suite = [pts[0]];
+        for (var j = 0; j < pts.length - 1; j++) {
+          var mx = (pts[j][0] + pts[j + 1][0]) / 2, my = (pts[j][1] + pts[j + 1][1]) / 2;
+          var dx = pts[j + 1][0] - pts[j][0], dy = pts[j + 1][1] - pts[j][1];
+          var n = (Math.random() - 0.5) * deplacement;
+          suite.push([mx - dy * n / 100, my + dx * n / 100], pts[j + 1]);
+        }
+        pts = suite;
+        deplacement *= 0.55;
+      }
+      return pts;
+    }
+    function nouvelEclair(t) {
+      var bord = Math.random() * 6.2832;
+      var x1 = cx + Math.cos(bord) * diag * 1.1, y1 = cy + Math.sin(bord) * diag * 1.1;
+      var x2 = cx + Math.cos(bord + (Math.random() - 0.5) * 0.6) * diag * (0.05 + Math.random() * 0.3);
+      var y2 = cy + Math.sin(bord + (Math.random() - 0.5) * 0.6) * diag * (0.05 + Math.random() * 0.3);
+      var branches = [trajet(x1, y1, x2, y2, 60)];
+      var tronc = branches[0];
+      for (var b = 0; b < 2; b++) {
+        var depart = tronc[Math.floor(tronc.length * (0.3 + Math.random() * 0.4))];
+        branches.push(trajet(depart[0], depart[1], depart[0] + (Math.random() - 0.5) * diag * 0.6, depart[1] + (Math.random() - 0.5) * diag * 0.6, 45));
+      }
+      eclairs.push({ t: t, vie: 90 + Math.random() * 110, branches: branches });
+    }
+
+    var t0 = performance.now(), blanchi = false;
+    function image(maintenant) {
+      var t = maintenant - t0;
+      var p = Math.min(1, t / DUREE);
+      var vitesse = 0.004 + p * p * 0.09;
+
+      /* secousse qui grandit avec le saut */
+      var sec = doux ? 0 : p * p * 9;
+      ctx.setTransform(dpr, 0, 0, dpr, dpr * (Math.random() - 0.5) * sec, dpr * (Math.random() - 0.5) * sec);
+      /* fond : noir au premier passage, puis léger effacement pour garder
+         un peu de rémanence aux traits */
+      ctx.fillStyle = t < 60 ? '#000' : 'rgba(0,0,0,.55)';
+      ctx.fillRect(-20, -20, L + 40, H + 40);
+
+      /* tunnel : lueur rouge au centre */
+      var lueur = ctx.createRadialGradient(cx, cy, 0, cx, cy, diag * (0.25 + p * 0.5));
+      lueur.addColorStop(0, 'rgba(255,255,255,' + (0.15 + p * 0.5) + ')');
+      lueur.addColorStop(0.25, 'rgba(224,16,32,' + (0.12 + p * 0.25) + ')');
+      lueur.addColorStop(1, 'rgba(224,16,32,0)');
+      ctx.fillStyle = lueur;
+      ctx.fillRect(0, 0, L, H);
+
+      /* étoiles en traits */
+      ctx.lineCap = 'round';
+      for (var i = 0; i < etoiles.length; i++) {
+        var e = etoiles[i];
+        var z0 = e.z;
+        e.z += vitesse * e.v * (0.3 + e.z * 2.2);
+        if (e.z > 1.2) { e.z = 0.02 + Math.random() * 0.08; e.a = Math.random() * 6.2832; continue; }
+        var r0 = z0 * z0 * diag * 1.3, r1 = e.z * e.z * diag * 1.3;
+        ctx.strokeStyle = e.rouge ? 'rgba(255,77,77,' + Math.min(1, e.z + 0.2) + ')' : 'rgba(238,240,244,' + Math.min(1, e.z + 0.15) + ')';
+        ctx.lineWidth = 0.5 + e.z * 2.4;
+        ctx.beginPath();
+        ctx.moveTo(cx + Math.cos(e.a) * r0, cy + Math.sin(e.a) * r0);
+        ctx.lineTo(cx + Math.cos(e.a) * r1, cy + Math.sin(e.a) * r1);
+        ctx.stroke();
+      }
+
+      /* vaisseaux : du point de fuite jusqu'au bord, de plus en plus grands */
+      if (!doux) {
+        for (var v = 0; v < vaisseaux.length; v++) {
+          var n = vaisseaux[v];
+          var q = (t - n.debut) / n.duree;
+          if (q <= 0 || q >= 1) { continue; }
+          var e3 = q * q * q;
+          var rayon = 8 + e3 * diag * 1.25;
+          var taille = (6 + e3 * 190) * n.taille;
+          var x = cx + Math.cos(n.a) * rayon, y = cy + Math.sin(n.a) * rayon;
+          /* traînée de réacteur, du centre vers la poupe */
+          var queue = ctx.createLinearGradient(cx + Math.cos(n.a) * rayon * 0.35, cy + Math.sin(n.a) * rayon * 0.35, x, y);
+          queue.addColorStop(0, 'rgba(224,16,32,0)');
+          queue.addColorStop(1, 'rgba(255,77,77,' + (0.35 + q * 0.5) + ')');
+          ctx.strokeStyle = queue;
+          ctx.lineWidth = Math.max(1, taille * 0.16);
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(n.a) * rayon * 0.35, cy + Math.sin(n.a) * rayon * 0.35);
+          ctx.lineTo(x, y);
+          ctx.stroke();
+
+          ctx.save();
+          ctx.translate(x, y);
+          ctx.rotate(n.a + n.roulis * q);
+          /* halo des réacteurs */
+          var halo = ctx.createRadialGradient(-taille * 0.85, 0, 0, -taille * 0.85, 0, taille * 0.7);
+          halo.addColorStop(0, 'rgba(255,255,255,.95)');
+          halo.addColorStop(0.3, 'rgba(255,77,77,.8)');
+          halo.addColorStop(1, 'rgba(224,16,32,0)');
+          ctx.fillStyle = halo;
+          ctx.beginPath(); ctx.arc(-taille * 0.85, 0, taille * 0.7, 0, 6.2832); ctx.fill();
+          /* coque */
+          ctx.beginPath();
+          n.forme.forEach(function (pt, k) {
+            if (k === 0) { ctx.moveTo(pt[0] * taille, pt[1] * taille); } else { ctx.lineTo(pt[0] * taille, pt[1] * taille); }
+          });
+          ctx.closePath();
+          ctx.fillStyle = '#07070a';
+          ctx.fill();
+          ctx.strokeStyle = 'rgba(238,240,244,' + (0.45 + q * 0.4) + ')';
+          ctx.lineWidth = Math.max(0.8, taille * 0.018);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+
+      /* éclairs */
+      if (!doux && t > prochainEclair && t < DUREE - 250) {
+        nouvelEclair(t);
+        if (Math.random() > 0.5) { nouvelEclair(t); }
+        prochainEclair = t + 380 - p * 260 + Math.random() * 120;
+      }
+      var flash = 0;
+      eclairs = eclairs.filter(function (ec) { return t - ec.t < ec.vie; });
+      eclairs.forEach(function (ec) {
+        var force = 1 - (t - ec.t) / ec.vie;
+        flash = Math.max(flash, force * 0.22);
+        ec.branches.forEach(function (br, k) {
+          ctx.beginPath();
+          br.forEach(function (pt, j) { if (j === 0) { ctx.moveTo(pt[0], pt[1]); } else { ctx.lineTo(pt[0], pt[1]); } });
+          ctx.shadowColor = '#ff2030';
+          ctx.shadowBlur = 24;
+          ctx.strokeStyle = 'rgba(255,60,70,' + force + ')';
+          ctx.lineWidth = (k === 0 ? 5 : 2.5) * (0.6 + force);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          ctx.strokeStyle = 'rgba(255,255,255,' + force + ')';
+          ctx.lineWidth = k === 0 ? 1.6 : 0.9;
+          ctx.stroke();
+        });
+      });
+      eclat.style.opacity = flash.toFixed(3);
+
+      if (p >= 0.88 && !blanchi) { blanchi = true; blanc.classList.add('plein'); }
+      if (t < DUREE + 700) { requestAnimationFrame(image); }
+      else if (apres) { apres(); }
+    }
+    requestAnimationFrame(image);
   }
 
   function tic() {
@@ -562,22 +832,26 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
       document.getElementById('rebours-titre').textContent = 'Ouverture';
       if (!recharge && essai) {
         recharge = true;
-        ouvrir();
-        /* Répétition : on reste sur l'écran noir et on propose de rejouer. */
-        setTimeout(function () {
-          var bouton = document.createElement('a');
-          bouton.className = 'rejouer';
-          bouton.href = location.href;
-          bouton.textContent = 'Rejouer';
-          document.querySelector('.eclair').appendChild(bouton);
-        }, 2600);
+        /* Répétition : on reste sur le blanc et on propose de rejouer, ou de
+           voir l'arrivée sur le site (visible avant l'heure avec le lien de passage). */
+        ouvrir(function () {
+          var boutons = document.createElement('div');
+          boutons.className = 'saut-boutons';
+          boutons.innerHTML = '<a href="' + location.href + '">Rejouer</a><a href="/" data-arrivee>Voir l\u2019arrivée sur le site</a>';
+          boutons.querySelector('[data-arrivee]').addEventListener('click', function () {
+            try { sessionStorage.setItem('odn-arrivee', String(Date.now())); } catch (e) {}
+          });
+          document.body.appendChild(boutons);
+        });
       }
       if (!recharge) {
         recharge = true;
-        ouvrir();
-        /* Le temps de l'éclair, plus une à deux secondes étalées pour ne
-           pas recharger tous les visiteurs dans la même milliseconde. */
-        setTimeout(function () { location.reload(); }, 2200 + Math.random() * 1500);
+        ouvrir(function () {
+          /* Le site affichera la sortie de saut. Une demi-seconde étalée
+             pour ne pas recharger tous les visiteurs dans la même milliseconde. */
+          try { sessionStorage.setItem('odn-arrivee', String(Date.now())); } catch (e) {}
+          setTimeout(function () { location.reload(); }, Math.random() * 500);
+        });
       }
       return;
     }

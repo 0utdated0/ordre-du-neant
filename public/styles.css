@@ -3139,3 +3139,15 @@ body:not(.page-accueil) main{padding-top:clamp(5.6rem,9vh,6.6rem)}
      animé en transform, coûteux au défilement sur téléphone ---- */
   .grain{inset:0;animation:none}
 }
+
+/* =========================================================
+   Sortie de saut : premier affichage du site après l'ouverture
+   ========================================================= */
+html.arrivee::after{
+  content:"";position:fixed;inset:0;z-index:2147483000;pointer-events:none;
+  background:radial-gradient(circle at 50% 50%,#fff 0%,#fff 35%,#ffd6d6 60%,#e01020 100%);
+  animation:arrivee-blanc 1.7s cubic-bezier(.3,0,.2,1) .15s both;
+}
+@keyframes arrivee-blanc{0%{opacity:1}35%{opacity:.85}100%{opacity:0}}
+#sortie-saut{position:fixed;inset:0;z-index:2147482999;width:100%;height:100%;pointer-events:none}
+@media (prefers-reduced-motion:reduce){html.arrivee::after{animation-duration:.4s}}
