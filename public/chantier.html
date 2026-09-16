@@ -380,6 +380,8 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
 @keyframes choc-saut{from{transform:scale(.1);opacity:1}to{transform:scale(6);opacity:0}}
 @keyframes nuit-saut{0%,50%{background:rgba(0,0,0,0)}100%{background:#000}}
 #saut{opacity:0;transition:opacity 1.1s ease-in-out}
+#saut3d{position:fixed;inset:0;z-index:6;width:100%;height:100%;pointer-events:none;opacity:0;transition:opacity 1.1s ease-in-out}
+#saut3d.visible{opacity:1}
 /* Sous l'explosion, la page d'attente s'efface pour de bon : elle ne doit
    pas réapparaître quand le souffle se dissipe. */
 .saut-en-cours .bloc,.saut-en-cours footer,.saut-en-cours #etoiles,.saut-en-cours .rayons,
@@ -642,6 +644,176 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     });
   }, 1500);
 
+
+  /* ---------------------------------------------------------
+     La flotte en trois dimensions
+     ---------------------------------------------------------
+     Les coques du site, chargées par ses propres scripts, dans une
+     vraie scène en perspective : chaque vaisseau pointe vers le point
+     de sortie du saut et s'y enfonce, avec la déformation de la
+     perspective. Chargée deux minutes et demie avant l'ouverture
+     (tout de suite en répétition) : environ 2,5 Mo, variantes allégées
+     des coques. Si quoi que ce soit manque, les images 2D prennent le relais. */
+  var FLOTTE3D = {
+    idris:   { L: 239, long: 62, m: [[-0.478,-2.026,-112.295,4.291],[0.625,-3.052,-109.765,2.868],[9.151,4.308,-111.249,3.679],[-8.035,6.043,-111.35,2.868],[-12.264,2.952,-109.662,2.868],[8.595,0.582,-111.808,2.868]] },
+    polaris: { L: 155, long: 38, m: [[25.428,11.879,-72.321,5.411],[-24.274,11.47,-72.611,5.451],[-23.903,-11.092,-72.508,5.59],[25.262,-10.65,-72.702,5.916],[25.988,0.923,-70.132,4.91]] },
+    javelin: { L: 345, long: 74, m: [[-31.862,13.165,-164.471,7.734],[-33.623,-12.056,-164.523,7.537],[-20.553,-21.355,-164.143,6.886],[-20.455,20.798,-164.354,7.042],[20.842,21.455,-164.219,6.385],[28.288,-15.096,-164.312,7.389]] },
+    perseus: { L: 180, long: 32, m: [[29.389,3.697,-82.774,4.705],[-29.25,3.743,-82.823,4.102],[-25.882,-9.369,-84.652,3.632],[26.13,-9.331,-84.623,3.499],[19.925,4.582,-81.771,3.402],[-19.995,4.672,-81.812,3.402]] },
+    gladius: { L: 20, long: 13, m: [[-2.014,-0.241,-9.506,0.478],[-1.198,0.074,-9.6,0.381],[2.083,-0.173,-9.667,0.31],[1.164,0.098,-9.728,0.336],[-1.085,-0.294,-9.22,0.264],[2.77,-0.513,-9.683,0.264]] }
+  };
+  var flotte3d = { demandee: false, prete: false, geos: {} };
+
+  function script(src) {
+    return new Promise(function (ok, ko) {
+      var e = document.createElement('script');
+      e.src = src; e.onload = ok; e.onerror = ko;
+      document.head.appendChild(e);
+    });
+  }
+
+  function chargerFlotte3D() {
+    if (flotte3d.demandee) { return; }
+    flotte3d.demandee = true;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) { return; }
+    script('/vendor/three.min.js')
+      .then(function () {
+        window.ODN = window.ODN || {};
+        window.ODN.acte = window.ODN.acte || function () {};
+        return script('/coques.js');
+      })
+      .then(function () { return script('/travaux.js'); })
+      .then(function () {
+        return Promise.all(Object.keys(FLOTTE3D).map(function (nom) {
+          return window.ODN.coque(nom, 'petit').then(function (geo) { flotte3d.geos[nom] = geo; });
+        }));
+      })
+      .then(function () {
+        flotte3d.prete = true;
+        /* La scène est montée et ses nuanceurs compilés maintenant, pas au
+           moment du saut : sinon l'image se fige pendant l'explosion. */
+        flotte3d.scene = sceneFlotte(innerWidth, innerHeight, Math.min(window.devicePixelRatio || 1, 2));
+        if (flotte3d.scene) { flotte3d.scene.compiler(); }
+        if (essai) { window.__odnFlotte = flotte3d; }
+      })
+      .catch(function () { flotte3d.prete = false; });
+  }
+
+  function texture(dessin, l, h) {
+    var c = document.createElement('canvas');
+    c.width = l; c.height = h;
+    dessin(c.getContext('2d'), l, h);
+    return new THREE.CanvasTexture(c);
+  }
+
+  /* Prépare la scène ; rend une fonction image(t) ou null. */
+  function sceneFlotte(L, H, dpr) {
+    if (!flotte3d.prete || !window.THREE || !window.ODN || !window.ODN.travaux) { return null; }
+    var rendu;
+    try {
+      rendu = new THREE.WebGLRenderer({ antialias: true, alpha: true, premultipliedAlpha: true });
+    } catch (e) { return null; }
+    rendu.setPixelRatio(Math.min(dpr, 1.5));
+    rendu.setSize(L, H);
+    rendu.setClearColor(0x000000, 0);
+    var toile = rendu.domElement;
+    toile.id = 'saut3d';
+    window.addEventListener('resize', function () { if (flotte3d.scene) { flotte3d.scene.taille(innerWidth, innerHeight); } });
+    toile.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(toile);
+
+    var scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0x000000, 900, 3600);
+    var camera = new THREE.PerspectiveCamera(62, L / H, 0.5, 5000);
+
+    var HALO = texture(function (x, l) {
+      var g = x.createRadialGradient(l / 2, l / 2, 0, l / 2, l / 2, l / 2);
+      g.addColorStop(0, 'rgba(255,245,245,1)');
+      g.addColorStop(0.18, 'rgba(255,90,90,0.95)');
+      g.addColorStop(0.5, 'rgba(224,16,32,0.35)');
+      g.addColorStop(1, 'rgba(224,16,32,0)');
+      x.fillStyle = g; x.fillRect(0, 0, l, l);
+    }, 128, 128);
+    var FLAMME = texture(function (x, l, h) {
+      var g = x.createLinearGradient(0, 0, 0, h);
+      g.addColorStop(0, 'rgba(224,16,32,0)');
+      g.addColorStop(0.55, 'rgba(224,20,36,0.35)');
+      g.addColorStop(0.9, 'rgba(255,90,90,0.9)');
+      g.addColorStop(1, 'rgba(255,200,200,1)');
+      x.fillStyle = g; x.fillRect(0, 0, l, h);
+    }, 8, 128);
+
+    var peindre = window.ODN.travaux.peintre(0xeef0f4, 0.3);
+    /* [nom, départ (ms), x, y, roulis] : x et y sont des décalages latéraux
+       fixes ; le vaisseau file tout droit vers le fond, la perspective fait
+       le reste. */
+    var plan = [
+      ['idris', 250, -58, 16, -0.12], ['polaris', 560, 44, 26, 0.18],
+      ['javelin', 820, 10, -52, 0.05], ['perseus', 1080, -40, -22, -0.2],
+      ['gladius', 1260, 26, -14, 0.35], ['gladius', 1360, 17, 14, -0.3],
+      ['perseus', 1600, 30, 34, 0.15], ['polaris', 1820, -34, 30, -0.1],
+      ['gladius', 2020, -22, -18, 0.4], ['gladius', 2100, -13, -26, -0.35]
+    ];
+    var appareils = plan.map(function (p) {
+      var d = FLOTTE3D[p[0]];
+      var k = d.long / d.L;
+      var porteur = new THREE.Group();
+      var coque = peindre(flotte3d.geos[p[0]]);
+      coque.scale.setScalar(k);
+      /* l'avant des coques est vers +z : on les retourne vers le fond */
+      porteur.add(coque);
+      d.m.forEach(function (m) {
+        var halo = new THREE.Sprite(new THREE.SpriteMaterial({
+          map: HALO, transparent: true, opacity: 1, depthWrite: false, blending: THREE.AdditiveBlending, fog: false
+        }));
+        halo.position.set(m[0] * k, m[1] * k, m[2] * k - m[3] * k * 0.4);
+        halo.scale.setScalar(m[3] * k * 5.5);
+        porteur.add(halo);
+        var longueur = d.long * 1.4;
+        var flamme = new THREE.Mesh(
+          new THREE.ConeGeometry(m[3] * k * 0.9, longueur, 12, 1, true),
+          new THREE.MeshBasicMaterial({ map: FLAMME, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide, fog: false })
+        );
+        /* le cône s'étire derrière la tuyère, pointe vers l'arrière */
+        flamme.rotation.x = -Math.PI / 2;
+        flamme.position.set(m[0] * k, m[1] * k, m[2] * k - longueur / 2);
+        porteur.add(flamme);
+      });
+      porteur.rotation.order = 'YXZ';
+      porteur.rotation.y = Math.PI;
+      porteur.visible = false;
+      scene.add(porteur);
+      return { o: porteur, debut: p[1], x: p[2], y: p[3], roulis: p[4], duree: 1800 + Math.random() * 300, long: d.long };
+    });
+
+    return {
+      toile: toile,
+      image: function (t) {
+        appareils.forEach(function (a) {
+          var q = (t - a.debut) / a.duree;
+          if (q <= 0 || q >= 1) { a.o.visible = false; return; }
+          a.o.visible = true;
+          /* de juste devant l'observateur jusqu'au fond, en accélérant */
+          var z = -(a.long * 1.1) - 3000 * Math.pow(q, 3);
+          a.o.position.set(a.x, a.y, z);
+          a.o.rotation.z = a.roulis * (1 - q);
+          a.o.rotation.x = 0.04 * Math.sin(t / 300 + a.debut);
+        });
+        /* léger tremblement de caméra, comme la toile 2D */
+        camera.position.set((Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.25, 0);
+        rendu.render(scene, camera);
+      },
+      compiler: function () {
+        appareils.forEach(function (a) { a.o.visible = true; a.o.position.set(0, 0, -200); });
+        rendu.compile(scene, camera);
+        rendu.render(scene, camera);
+        rendu.clear();
+        appareils.forEach(function (a) { a.o.visible = false; });
+      },
+      taille: function (l, h) { camera.aspect = l / h; camera.updateProjectionMatrix(); rendu.setSize(l, h); },
+      liberer: function () { rendu.dispose(); toile.remove(); }
+    };
+  }
+
   /* À zéro : le flash rouge, puis le saut. Les étoiles filent vers
      l'observateur, des vaisseaux de l'Ordre jaillissent du centre et
      passent de part et d'autre, des éclairs zèbrent l'écran, tout blanchit,
@@ -663,7 +835,11 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     toile.id = 'saut';
     toile.setAttribute('aria-hidden', 'true');
     document.body.appendChild(toile);
-    requestAnimationFrame(function () { requestAnimationFrame(function () { toile.classList.add('visible'); }); });
+    var flotte3dScene = doux ? null : (flotte3d.scene || null);
+    requestAnimationFrame(function () { requestAnimationFrame(function () {
+      toile.classList.add('visible');
+      if (flotte3dScene) { flotte3dScene.toile.classList.add('visible'); }
+    }); });
     var devise = document.createElement('p');
     devise.className = 'saut-devise';
     devise.textContent = 'Tout n\u2019est que passage';
@@ -779,7 +955,8 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
       }
 
       /* vaisseaux : de l'observateur vers le point de sortie */
-      if (!doux) {
+      if (flotte3dScene) { flotte3dScene.image(t); }
+      if (!doux && !flotte3dScene) {
         var visibles = [];
         flotte.forEach(function (v) {
           var q = (t - v.debut) / v.duree;
@@ -919,6 +1096,7 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
        restantes, et le compteur atteint 00 à l'instant exact. */
     var total = Math.ceil(reste / 1000);
     if (total === dernierAffiche) { return; }
+    if (!flotte3d.demandee && (essai || total <= 150)) { chargerFlotte3D(); }
     dernierAffiche = total;
     h.textContent = deux(Math.floor(total / 3600));
     m.textContent = deux(Math.floor(total / 60) % 60);

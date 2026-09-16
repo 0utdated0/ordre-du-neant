@@ -460,7 +460,10 @@ export default {
       if (!laisser) {
         const chemin = url.pathname;
         const autorise = LAISSEZ_PASSER.indexOf(chemin) !== -1 ||
-          chemin.startsWith('/polices/') || chemin.startsWith('/assets/saut/');
+          chemin.startsWith('/polices/') || chemin.startsWith('/assets/saut/') ||
+          /* la flotte du saut : moteur 3D, décodeur et coques du site */
+          chemin.startsWith('/vendor/') || chemin.startsWith('/coques/') ||
+          ['/coques.js', '/coque-ouvriere.js', '/travaux.js'].indexOf(chemin) !== -1;
 
         /* Un robot qui demande robots.txt doit lire un refus, pas la
            page de chantier servie en HTML. */
