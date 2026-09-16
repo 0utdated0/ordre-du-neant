@@ -387,6 +387,12 @@ export default {
     if (url.pathname === '/api/ordre') {
       return servirOrdre(request, env, ctx);
     }
+    if (url.pathname === '/api/radio') {
+      return servirRadio(request, env, ctx);
+    }
+    if (url.pathname === '/api/radio/flux') {
+      return relayerFlux(request, env, ctx);
+    }
 
     /* Les fichiers de public/ sont normalement servis avant même
        d'atteindre le Worker. Ce renvoi couvre le reste, et produit
@@ -482,6 +488,173 @@ function reponse(corps, statut, secondes) {
       'Content-Type': 'application/json; charset=utf-8',
       'Cache-Control': 'public, max-age=' + secondes + ', s-maxage=' + secondes,
       'Access-Control-Allow-Origin': 'https://ordre-du-neant.fr',
+    },
+  });
+}
+
+
+/* --------------------------------------------------------
+   Radio de l'Ordre
+   --------------------------------------------------------
+   Vigie ODN joue une webradio dans le salon « Radio de l'Ordre » et
+   tient à jour, dans la discussion de ce salon, une fiche titrée
+   RADIO DE L'ORDRE dont le lien est l'adresse du flux (voir
+   publierStation dans le code du bot). On relit cette fiche pour
+   savoir quelle station tourne, puis on lit le titre en cours dans
+   les métadonnées ICY du flux lui-même.
+
+   Seize stations ne diffusent qu'en http : un navigateur refuse de
+   les jouer depuis une page https. Pour celles-là, le son passe par
+   /api/radio/flux, qui ne relaie QUE la station en cours : ce n'est
+   pas un proxy ouvert.
+   -------------------------------------------------------- */
+const TITRE_FICHE_RADIO = "RADIO DE L'ORDRE";
+const RADIO_CACHE_SECONDES = 20;
+
+function normaliserNom(n) {
+  return String(n || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[’'`]/g, "'").replace(/[^a-z0-9']+/g, ' ').trim();
+}
+
+async function lireStation(env) {
+  const jeton = env.DISCORD_TOKEN, guilde = env.GUILD_ID;
+  if (!jeton || !guilde) throw new Error('configuration');
+  const [salons, moi] = await Promise.all([
+    discord('/guilds/' + guilde + '/channels', jeton),
+    discord('/users/@me', jeton),
+  ]);
+  const salon = salons.find((c) => c.type === 2 && normaliserNom(c.name) === normaliserNom("Radio de l'Ordre"));
+  if (!salon) return null;
+  const messages = await discord('/channels/' + salon.id + '/messages?limit=30', jeton);
+  const fiche = messages.find((m) => m.author && m.author.id === moi.id &&
+    m.embeds && m.embeds[0] && m.embeds[0].title === TITRE_FICHE_RADIO && m.embeds[0].url);
+  if (!fiche) return null;
+  const e = fiche.embeds[0];
+  const champ = (nom) => ((e.fields || []).find((f) => f.name === nom) || {}).value || null;
+  const desc = String(e.description || '').split('\n')[1] || '';
+  return {
+    nom: champ('Station'),
+    genre: champ('Genre'),
+    description: desc.replace(/^\*|\*$/g, ''),
+    flux: e.url,
+    depuis: fiche.edited_timestamp || fiche.timestamp,
+  };
+}
+
+/* Lit le titre en cours dans le flux : on demande les métadonnées ICY,
+   on lit jusqu'au premier bloc (icy-metaint octets de son, un octet de
+   longueur, puis le texte), et on coupe. Quelques dizaines de Ko. */
+async function lireTitre(flux) {
+  const ctrl = new AbortController();
+  const minuterie = setTimeout(() => ctrl.abort(), 6000);
+  try {
+    const r = await fetch(flux, {
+      headers: { 'Icy-MetaData': '1', 'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)' },
+      signal: ctrl.signal,
+    });
+    const intervalle = parseInt(r.headers.get('icy-metaint') || '', 10);
+    const nomFlux = r.headers.get('icy-name');
+    if (!r.ok || !r.body || !intervalle || intervalle > 200000) {
+      ctrl.abort();
+      return { titre: null, nomFlux: nomFlux };
+    }
+    const lecteur = r.body.getReader();
+    const morceaux = [];
+    let recu = 0, attendu = intervalle + 1, texte = null;
+    while (true) {
+      const { value, done } = await lecteur.read();
+      if (done) break;
+      morceaux.push(value); recu += value.length;
+      if (recu >= attendu) {
+        const tout = new Uint8Array(recu);
+        let o = 0; for (const m of morceaux) { tout.set(m, o); o += m.length; }
+        const longueur = tout[intervalle] * 16;
+        if (longueur === 0) { texte = ''; break; }
+        attendu = intervalle + 1 + longueur;
+        if (recu >= attendu) {
+          texte = new TextDecoder('utf-8').decode(tout.slice(intervalle + 1, attendu));
+          break;
+        }
+      }
+    }
+    lecteur.cancel().catch(() => {});
+    ctrl.abort();
+    const m = /StreamTitle='(.*?)';/.exec(texte || '');
+    return { titre: m && m[1] ? m[1].trim() : null, nomFlux: nomFlux };
+  } catch (e) {
+    return { titre: null, nomFlux: null };
+  } finally {
+    clearTimeout(minuterie);
+  }
+}
+
+async function servirRadio(request, env, ctx) {
+  const cache = caches.default;
+  const cle = new Request(new URL(request.url).origin + '/api/radio', { method: 'GET' });
+  const garde = await cache.match(cle);
+  if (garde) return garde;
+
+  let corps;
+  try {
+    const station = await lireStation(env);
+    if (!station) {
+      corps = { disponible: false, raison: 'aucune-fiche' };
+    } else {
+      const lu = await lireTitre(station.flux);
+      let artiste = null, titre = lu.titre;
+      if (titre && titre.indexOf(' - ') > 0) {
+        artiste = titre.slice(0, titre.indexOf(' - ')).trim();
+        titre = titre.slice(titre.indexOf(' - ') + 3).trim();
+      }
+      corps = {
+        disponible: true,
+        maj: new Date().toISOString(),
+        station: { nom: station.nom, genre: station.genre, description: station.description },
+        artiste: artiste,
+        titre: titre,
+        /* https : lu directement par le navigateur ; http : relayé. */
+        ecoute: /^https:/i.test(station.flux) ? station.flux : '/api/radio/flux',
+        cle: station.flux,
+      };
+    }
+  } catch (e) {
+    corps = { disponible: false, raison: 'indisponible' };
+  }
+  const sortie = new Response(JSON.stringify(corps), {
+    headers: {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Cache-Control': 'public, max-age=' + RADIO_CACHE_SECONDES + ', s-maxage=' + RADIO_CACHE_SECONDES,
+    },
+  });
+  ctx.waitUntil(cache.put(cle, sortie.clone()));
+  return sortie;
+}
+
+async function relayerFlux(request, env, ctx) {
+  /* La station vient d'abord du relevé en cache de /api/radio, pour ne
+     pas interroger Discord à chaque auditeur qui appuie sur lecture. */
+  let station = null;
+  const garde = await caches.default.match(new Request(new URL(request.url).origin + '/api/radio'));
+  if (garde) {
+    const d = await garde.json().catch(() => null);
+    if (d && d.cle) station = { flux: d.cle };
+  }
+  if (!station) {
+    try { station = await lireStation(env); } catch (e) { station = null; }
+  }
+  if (!station || !/^http:/i.test(station.flux)) {
+    return new Response('Aucun flux à relayer.', { status: 404 });
+  }
+  const amont = await fetch(station.flux, {
+    headers: { 'User-Agent': 'OrdreDuNeant (https://ordre-du-neant.fr, 1.0)' },
+  });
+  if (!amont.ok || !amont.body) {
+    return new Response('Flux indisponible.', { status: 502 });
+  }
+  return new Response(amont.body, {
+    headers: {
+      'Content-Type': amont.headers.get('Content-Type') || 'audio/mpeg',
+      'Cache-Control': 'no-store',
     },
   });
 }

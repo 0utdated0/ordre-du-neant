@@ -28,7 +28,7 @@
 <link rel="apple-touch-icon" href="/assets/embleme-512.png">
 <link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=0da7baee57">
+<link rel="stylesheet" href="/styles.css?v=aed1995e39">
 
 </head>
 
@@ -59,6 +59,14 @@
     <a href="/rejoindre">Rejoindre</a>
   </nav>
 
+  <!-- Radio de l'Ordre : masquée tant que /api/radio n'a pas répondu. -->
+  <button class="radio-mini" type="button" data-radio-bouton hidden
+          aria-pressed="false" aria-label="Écouter la Radio de l'Ordre">
+    <span class="radio-mini__icone" aria-hidden="true"></span>
+    <span class="egaliseur" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="radio-mini__texte"><em>Radio</em><strong data-radio="resume">Radio de l'Ordre</strong></span>
+  </button>
+
   <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
        d'admission. Ce bouton-ci ouvre le Discord : deux destinations
        différentes ne peuvent pas porter le même mot. -->
@@ -66,9 +74,10 @@
 </div>
 <nav class="rail" id="rail" aria-label="Sections">
   <a href="#vigie" data-cible="vigie"><span>I</span><em>Vigie</em></a>
-  <a href="#operations" data-cible="operations"><span>II</span><em>Opérations</em></a>
-  <a href="#galerie" data-cible="galerie"><span>III</span><em>Galerie</em></a>
-  <a href="#appel" data-cible="appel"><span>IV</span><em>Entrer</em></a>
+  <a href="#radio" data-cible="radio"><span>II</span><em>Radio</em></a>
+  <a href="#operations" data-cible="operations"><span>III</span><em>Opérations</em></a>
+  <a href="#galerie" data-cible="galerie"><span>IV</span><em>Galerie</em></a>
+  <a href="#appel" data-cible="appel"><span>V</span><em>Entrer</em></a>
 </nav>
 <main id="contenu">
 <section class="acte acte--donnees" id="vigie">
@@ -119,10 +128,59 @@
   </div>
 </section>
 
+<section class="acte acte--texte acte--radio" id="radio">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">Acte II</p>
+      <h2 class="balaye">Radio de l'Ordre</h2>
+      <p class="intro">
+        La station que Vigie ODN diffuse en ce moment dans le salon vocal, jouée ici en
+        même temps. On la change sur Discord, le site suit.
+      </p>
+    </div>
+
+    <div class="poste revele" data-radio-poste>
+      <div class="poste__cadran" aria-hidden="true">
+        <svg viewBox="0 0 200 200" focusable="false">
+          <circle class="poste__onde poste__onde--1" cx="100" cy="100" r="46"/>
+          <circle class="poste__onde poste__onde--2" cx="100" cy="100" r="66"/>
+          <circle class="poste__onde poste__onde--3" cx="100" cy="100" r="86"/>
+          <path class="poste__antenne" d="M100 100 L100 40 M88 52 L100 40 L112 52"/>
+          <circle class="poste__coeur" cx="100" cy="100" r="7"/>
+        </svg>
+      </div>
+
+      <div class="poste__infos">
+        <p class="poste__etat"><span class="poste__direct">En direct</span><span data-radio="genre"></span></p>
+        <p class="poste__station" data-radio="station">Radio de l'Ordre</p>
+        <p class="poste__description" data-radio="description"></p>
+        <div class="poste__morceau">
+          <span class="poste__libelle">Morceau en cours</span>
+          <p class="poste__titre" data-radio="titre">Titre non communiqué</p>
+          <p class="poste__artiste" data-radio="artiste"></p>
+        </div>
+        <div class="poste__commandes">
+          <button class="poste__lecture" type="button" data-radio-bouton aria-pressed="false" aria-label="Écouter la Radio de l'Ordre">
+            <span class="poste__icone" aria-hidden="true"></span>
+            <span class="poste__action">Écouter</span>
+          </button>
+          <label class="poste__volume">
+            <span class="poste__libelle">Volume</span>
+            <input type="range" min="0" max="100" step="1" value="70" data-radio-volume aria-label="Volume de la radio">
+          </label>
+          <span class="egaliseur egaliseur--grand" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+        </div>
+        <p class="poste__aide">Changer de station : <code>/radio</code> dans le salon « Radio de l'Ordre » sur Discord.</p>
+        <p class="avis" data-radio="avis" hidden></p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="acte acte--donnees acte--operations" id="operations">
   <div class="contenu contenu--large">
     <div class="entete revele">
-      <p class="acte__num">Acte II</p>
+      <p class="acte__num">Acte III</p>
       <h2 class="balaye">Les opérations</h2>
       <p class="intro">
         Annoncées à l'avance, avec ordre de mission et inscription d'équipage.
@@ -138,7 +196,7 @@
 <section class="acte acte--galerie" id="galerie">
   <div class="contenu contenu--large">
     <div class="entete entete--centre revele">
-      <p class="acte__num">Acte III</p>
+      <p class="acte__num">Acte IV</p>
       <h2 class="balaye">La galerie</h2>
       <p class="intro">
         Captures d'opérations, de convois et d'expéditions. Le verse tel que
@@ -205,5 +263,6 @@
 <script src="/scene.js?v=5839ff321f" defer></script>
 <script src="/site.js?v=2a1912f05c" defer></script>
 <script src="/vigie.js?v=281b6452ae" defer></script>
+<script src="/radio.js?v=9bcf92d61d" defer></script>
 </body>
 </html>

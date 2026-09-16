@@ -138,9 +138,9 @@ const PAGES = [
     menu: 'La vie',
     titre: "La vie de l'Ordre - effectif, opérations, galerie | L'Ordre du Néant",
     description: "L'effectif en direct depuis le Discord, les opérations planifiées et la galerie des sorties de l'Ordre du Néant.",
-    sections: ['vigie', 'operations', 'galerie', ':appel'],
-    rail: [['vigie', 'I', 'Vigie'], ['operations', 'II', 'Opérations'],
-           ['galerie', 'III', 'Galerie'], ['appel', 'IV', 'Entrer']],
+    sections: ['vigie', 'radio', 'operations', 'galerie', ':appel'],
+    rail: [['vigie', 'I', 'Vigie'], ['radio', 'II', 'Radio'], ['operations', 'III', 'Opérations'],
+           ['galerie', 'IV', 'Galerie'], ['appel', 'V', 'Entrer']],
     scripts: ['trois', 'scene', 'site', 'vigie'],
     visionneuse: true
   },
@@ -171,7 +171,7 @@ const FICHIERS = {
   trois: 'vendor/three.min.js', coques: 'coques.js', vaisseaux: 'vaisseaux.js',
   scene: 'scene.js', approche: 'approche.js', flotte: 'flotte.js', saut: 'saut.js',
   ascension: 'ascension.js', plongee: 'plongee.js', site: 'site.js', vigie: 'vigie.js',
-  acte3d: 'acte3d.js', travaux: 'travaux.js', convoi: 'convoi.js',
+  radio: 'radio.js', acte3d: 'acte3d.js', travaux: 'travaux.js', convoi: 'convoi.js',
   extraction: 'extraction.js', recuperation: 'recuperation.js', ligne: 'ligne.js',
   vitesse: 'vitesse.js', appontage: 'appontage.js'
 };
@@ -254,7 +254,8 @@ for (const p of PAGES) {
     .replace('{{CORPS}}', corpsDe(p))
     .replace('{{VISIONNEUSE}}', p.visionneuse ? bloc('visionneuse') : '')
     .replace('{{PIED}}', bloc('pied').replace('{{PLAN}}', menuDe(p, true)))
-    .replace('{{SCRIPTS}}', p.scripts.map(function (s) {
+    /* La radio a son bouton dans la barre de toutes les pages. */
+    .replace('{{SCRIPTS}}', p.scripts.concat(['radio']).map(function (s) {
       return '<script src="/' + FICHIERS[s] + '?v=' + empreinte(FICHIERS[s]) + '" defer></script>';
     }).join('\n'))
     .replace('href="/styles.css"', 'href="/styles.css?v=' + empreinte('styles.css') + '"');

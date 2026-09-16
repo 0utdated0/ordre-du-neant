@@ -11,6 +11,14 @@
     {{MENU}}
   </nav>
 
+  <!-- Radio de l'Ordre : masquée tant que /api/radio n'a pas répondu. -->
+  <button class="radio-mini" type="button" data-radio-bouton hidden
+          aria-pressed="false" aria-label="Écouter la Radio de l'Ordre">
+    <span class="radio-mini__icone" aria-hidden="true"></span>
+    <span class="egaliseur" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="radio-mini__texte"><em>Radio</em><strong data-radio="resume">Radio de l'Ordre</strong></span>
+  </button>
+
   <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
        d'admission. Ce bouton-ci ouvre le Discord : deux destinations
        différentes ne peuvent pas porter le même mot. -->
