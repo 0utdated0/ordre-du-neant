@@ -21,6 +21,48 @@
     try { sessionStorage.removeItem('odn-arrivee'); } catch (e) {}
     setTimeout(function () { document.documentElement.classList.remove('arrivee'); }, 2000);
     if (!doux) { sortieDeSaut(); }
+    sonDeSortie();
+  }
+
+  /* Le son de la sortie, si le visiteur l'avait activé sur la page
+     d'attente. Certains navigateurs refusent tout son sans nouveau geste :
+     on essaie, et on se tait s'ils disent non. */
+  function sonDeSortie() {
+    var AC = window.AudioContext || window.webkitAudioContext;
+    var voulu = false;
+    try { voulu = localStorage.getItem('odn-son') === 'oui'; } catch (e) {}
+    if (!AC || !voulu) { return; }
+    var ctx = new AC();
+    function jouer() {
+      if (ctx.state !== 'running') { return; }
+      var t = ctx.currentTime, maitre = ctx.createGain();
+      maitre.gain.value = 0.8; maitre.connect(ctx.destination);
+      var b = ctx.createBuffer(1, ctx.sampleRate * 3, ctx.sampleRate), d = b.getChannelData(0);
+      for (var i = 0; i < d.length; i++) { d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / d.length, 1.5); }
+      /* l'aspiration du saut qui retombe */
+      var n = ctx.createBufferSource(), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+      n.buffer = b; lp.type = 'lowpass';
+      lp.frequency.setValueAtTime(8000, t); lp.frequency.exponentialRampToValueAtTime(120, t + 2.4);
+      g.gain.setValueAtTime(0.7, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 2.6);
+      n.connect(lp); lp.connect(g); g.connect(maitre); n.start(t);
+      /* l'arrivée : un coup sourd et un accord qui s'ouvre */
+      var o = ctx.createOscillator(), og = ctx.createGain();
+      o.frequency.setValueAtTime(90, t); o.frequency.exponentialRampToValueAtTime(30, t + 2.5);
+      og.gain.setValueAtTime(0.9, t); og.gain.exponentialRampToValueAtTime(0.0001, t + 2.8);
+      o.connect(og); og.connect(maitre); o.start(t); o.stop(t + 3);
+      [57, 64, 69, 72].forEach(function (m, k) {
+        var v = ctx.createOscillator(), vg = ctx.createGain();
+        v.type = 'triangle'; v.frequency.value = 440 * Math.pow(2, (m - 69) / 12);
+        vg.gain.setValueAtTime(0.0001, t + 0.3);
+        vg.gain.linearRampToValueAtTime(0.05 / (k + 1), t + 1.2);
+        vg.gain.exponentialRampToValueAtTime(0.0001, t + 5);
+        v.connect(vg); vg.connect(maitre); v.start(t + 0.3); v.stop(t + 5.2);
+      });
+    }
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(jouer).catch(function () {});
+      setTimeout(function () { if (ctx.state !== 'running') { ctx.close(); } }, 1500);
+    } else { jouer(); }
   }
 
   function sortieDeSaut() {
