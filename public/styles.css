@@ -1341,6 +1341,15 @@ footer{position:relative;z-index:10;overflow:hidden;
   background:rgba(224,16,32,.2);
 }
 .operation--encours{background:rgba(224,16,32,.04)}
+.operations__archives-titre{
+  margin:clamp(2.5rem,5vw,4rem) 0 .4rem;
+  font-family:var(--titre);font-weight:400;
+  font-size:.62rem;letter-spacing:.2em;text-transform:uppercase;
+  color:rgba(134,139,149,.75);
+  padding-bottom:.8rem;border-bottom:1px solid rgba(238,240,244,.1);
+}
+.operation--passee .operation__date span{color:rgba(134,139,149,.8)}
+.operation--passee .operation__corps h3{color:rgba(238,240,244,.72)}
 
 /* ---------- galerie ---------- */
 .galerie__grille{

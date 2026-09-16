@@ -24,6 +24,7 @@
   var jourSemaine = new Intl.DateTimeFormat('fr-FR', {
     weekday: 'long', timeZone: 'Europe/Paris'
   });
+  var annee = new Intl.DateTimeFormat('fr-FR', { year: 'numeric', timeZone: 'Europe/Paris' });
 
   function $(id) { return document.getElementById(id); }
 
@@ -257,7 +258,7 @@
       avis('avis-operations',
         exemple
           ? "Données d'exemple. Le site n'est pas encore relié au Discord de l'Ordre."
-          : "Aucune opération n'est inscrite au tableau pour l'instant. Elles s'annoncent sur le Discord.",
+          : "Aucune opération à venir pour l'instant. Elles s'annoncent sur le Discord.",
         exemple ? 'exemple' : 'discret');
       return;
     }
@@ -270,48 +271,68 @@
     }
 
     liste.innerHTML = '';
-    ops.forEach(function (o) {
-      var debut = new Date(o.debut);
-      var li = document.createElement('li');
-      li.className = 'operation' + (o.encours ? ' operation--encours' : '');
+    ops.forEach(function (o) { liste.appendChild(ligneOperation(o, false)); });
+  }
 
-      var date = document.createElement('div');
-      date.className = 'operation__date';
-      var j = document.createElement('strong');
-      j.textContent = jourMois.format(debut);
-      var h = document.createElement('span');
-      h.textContent = heure.format(debut);
-      var sem = document.createElement('em');
-      sem.textContent = jourSemaine.format(debut);
-      date.appendChild(sem);
-      date.appendChild(j);
-      date.appendChild(h);
+  /* Les opérations terminées restent inscrites, de la plus récente
+     à la plus ancienne, sous le tableau des prochaines. */
+  function rendreArchives(d) {
+    var liste = $('operations-archives');
+    var titre = $('titre-archives');
+    if (!liste || !titre) { return; }
+    var arc = d.archives;
+    var vide = !arc || arc.erreur || !arc.length;
+    liste.hidden = vide;
+    titre.hidden = vide;
+    liste.innerHTML = '';
+    if (vide) { return; }
+    arc.forEach(function (o) { liste.appendChild(ligneOperation(o, true)); });
+  }
 
-      var corps = document.createElement('div');
-      corps.className = 'operation__corps';
-      var titre = document.createElement('h3');
-      titre.textContent = o.nom;
-      corps.appendChild(titre);
-      if (o.resume) {
-        var p = document.createElement('p');
-        p.textContent = o.resume;
-        corps.appendChild(p);
-      }
+  function ligneOperation(o, passee) {
+    var debut = new Date(o.debut);
+    var li = document.createElement('li');
+    li.className = 'operation' + (o.encours ? ' operation--encours' : '') + (passee ? ' operation--passee' : '');
 
-      var meta = document.createElement('div');
-      meta.className = 'operation__meta';
-      if (o.encours) { meta.appendChild(etiquette('En cours', 'vive')); }
-      if (o.lieu) { meta.appendChild(etiquette(o.lieu)); }
-      if (o.fin) { meta.appendChild(etiquette(duree(o.debut, o.fin))); }
-      if (typeof o.inscrits === 'number' && o.inscrits > 0) {
-        meta.appendChild(etiquette(o.inscrits + (o.inscrits > 1 ? ' inscrits' : ' inscrit')));
-      }
-      corps.appendChild(meta);
+    var date = document.createElement('div');
+    date.className = 'operation__date';
+    var j = document.createElement('strong');
+    var an = annee.format(debut);
+    j.textContent = jourMois.format(debut) + (an !== annee.format(new Date()) ? ' ' + an : '');
+    var h = document.createElement('span');
+    h.textContent = heure.format(debut);
+    var sem = document.createElement('em');
+    sem.textContent = jourSemaine.format(debut);
+    date.appendChild(sem);
+    date.appendChild(j);
+    date.appendChild(h);
 
-      li.appendChild(date);
-      li.appendChild(corps);
-      liste.appendChild(li);
-    });
+    var corps = document.createElement('div');
+    corps.className = 'operation__corps';
+    var titre = document.createElement('h3');
+    titre.textContent = o.nom;
+    corps.appendChild(titre);
+    if (o.resume) {
+      var p = document.createElement('p');
+      p.textContent = o.resume;
+      corps.appendChild(p);
+    }
+
+    var meta = document.createElement('div');
+    meta.className = 'operation__meta';
+    if (passee) { meta.appendChild(etiquette('Menée')); }
+    if (o.encours) { meta.appendChild(etiquette('En cours', 'vive')); }
+    if (o.lieu) { meta.appendChild(etiquette(o.lieu)); }
+    if (o.fin) { meta.appendChild(etiquette(duree(o.debut, o.fin))); }
+    if (o.divisions) { meta.appendChild(etiquette(o.divisions)); }
+    if (typeof o.inscrits === 'number' && o.inscrits > 0) {
+      meta.appendChild(etiquette(o.inscrits + (o.inscrits > 1 ? ' inscrits' : ' inscrit')));
+    }
+    corps.appendChild(meta);
+
+    li.appendChild(date);
+    li.appendChild(corps);
+    return li;
   }
 
   function etiquette(texte, ton) {
@@ -441,6 +462,7 @@
   charger().then(function (r) {
     rendreVigie(r.donnees, r.exemple);
     rendreOperations(r.donnees, r.exemple);
+    rendreArchives(r.donnees);
   }).catch(function () {
     avis('avis-vigie', "Le registre est momentanément indisponible.", 'discret');
     avis('avis-operations', "Le tableau des opérations est momentanément indisponible.", 'discret');

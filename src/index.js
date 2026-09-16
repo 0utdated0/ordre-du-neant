@@ -182,6 +182,70 @@ async function lireOperations(jeton, guilde) {
 }
 
 /* --------------------------------------------------------
+   Opérations passées : relevées dans #calendrier-opérations
+   --------------------------------------------------------
+   Discord oublie un événement dès qu'il est terminé. Le bot, lui,
+   poste chaque opération dans le salon du calendrier : ce salon
+   sert d'archive. On y relit ses fiches « OPÉRATION : » et
+   « ÉVÉNEMENT : » dont l'heure de fin est passée.
+   -------------------------------------------------------- */
+const ARCHIVES_MAX = 12;
+
+function sansAccents(t) {
+  return String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+/* Les fiches plus anciennes ont un titre tout en capitales. */
+function casse(t) {
+  if (/[a-zà-ÿ]/.test(t)) return t;
+  const bas = t.toLowerCase();
+  return bas.charAt(0).toUpperCase() + bas.slice(1);
+}
+
+function lireFiche(m, maintenant) {
+  if (!m.author || !m.author.bot || !m.embeds || !m.embeds.length) return null;
+  const e = m.embeds[0];
+  const t = String(e.title || '').match(/^(OP[ÉE]RATION|[ÉE]V[ÉE]NEMENT)\s*:\s*(.+)$/i);
+  if (!t) return null;
+  const champ = (nom) => (e.fields || []).find((f) => sansAccents(f.name) === sansAccents(nom));
+  const quand = champ('Quand');
+  const unix = quand && String(quand.value).match(/<t:(\d+)/);
+  if (!unix) return null;
+  const debut = Number(unix[1]) * 1000;
+  const d = champ('Durée');
+  const heures = d ? parseFloat(String(d.value).replace(',', '.')) : 2;
+  const fin = debut + (isFinite(heures) ? heures : 2) * 3600e3;
+  if (fin > maintenant) return null;
+  const lien = String(e.url || '').match(/\/events\/\d+\/(\d+)/);
+  const div = champ('Divisions') || champ('Pôle');
+  const lieu = champ('Lieu');
+  return {
+    id: lien ? lien[1] : m.id,
+    nom: casse(t[2].trim()).slice(0, 120),
+    resume: String(e.description || '').slice(0, 220),
+    debut: new Date(debut).toISOString(),
+    fin: new Date(fin).toISOString(),
+    lieu: lieu ? String(lieu.value).slice(0, 80) : null,
+    divisions: div ? (String(div.value).split(',').length >= 8 ? 'Toutes les divisions' : String(div.value).slice(0, 120)) : null,
+  };
+}
+
+async function lireArchives(jeton, guilde) {
+  const salons = await discord('/guilds/' + guilde + '/channels', jeton);
+  const salon = salons.find((c) => c.type === 0 && sansAccents(c.name) === 'calendrier operations');
+  if (!salon) return [];
+  const messages = await discord('/channels/' + salon.id + '/messages?limit=100', jeton);
+  const maintenant = Date.now();
+  const vus = new Set();
+  return messages
+    .map((m) => lireFiche(m, maintenant))
+    .filter((f) => f && !vus.has(f.id) && vus.add(f.id))
+    .sort((a, b) => b.debut.localeCompare(a.debut))
+    .slice(0, ARCHIVES_MAX);
+}
+
+/* --------------------------------------------------------
    Présence : widget public du serveur
    Le widget doit être activé dans les paramètres du serveur.
    S'il ne l'est pas, on le dit au lieu d'échouer.
@@ -461,9 +525,10 @@ async function servirOrdre(request, env, ctx) {
 
   /* L'effectif d'abord : la présence a besoin de la liste des
      membres pour relever le vocal et retirer les bots. */
-  const [eff, ope] = await Promise.allSettled([
+  const [eff, ope, arc] = await Promise.allSettled([
     lireEffectif(jeton, guilde, avecNoms),
     lireOperations(jeton, guilde),
+    lireArchives(jeton, guilde),
   ]);
   const interne = eff.status === 'fulfilled' ? eff.value.interne : null;
   if (eff.status === 'fulfilled') delete eff.value.interne;
@@ -473,6 +538,7 @@ async function servirOrdre(request, env, ctx) {
     maj: new Date().toISOString(),
     effectif: eff.status === 'fulfilled' ? eff.value : { erreur: String((eff.reason && eff.reason.message) || eff.reason) },
     operations: ope.status === 'fulfilled' ? ope.value : { erreur: String((ope.reason && ope.reason.message) || ope.reason) },
+    archives: arc.status === 'fulfilled' ? arc.value : { erreur: String((arc.reason && arc.reason.message) || arc.reason) },
     presence: pre.status === 'fulfilled' ? pre.value : { disponible: false, raison: 'indisponible' },
   };
 
