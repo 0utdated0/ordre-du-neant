@@ -62,7 +62,8 @@
           "Combat",
           "Exploration"
         ],
-        "depuis": "2026-06-02T10:00:00.000Z"
+        "depuis": "2026-06-02T10:00:00.000Z",
+        "bienfaiteur": true
       },
       {
         "nom": "Hades",
@@ -76,7 +77,8 @@
           "Sécurité",
           "Combat"
         ],
-        "depuis": "2026-06-11T18:20:00.000Z"
+        "depuis": "2026-06-11T18:20:00.000Z",
+        "bienfaiteur": true
       },
       {
         "nom": "Yod",
@@ -194,7 +196,8 @@
         ],
         "depuis": "2026-09-02T16:48:00.000Z"
       }
-    ]
+    ],
+    "bienfaiteurs": 2
   },
   "operations": [
     {

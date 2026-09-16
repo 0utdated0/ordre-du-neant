@@ -160,10 +160,13 @@
   var tousMembres = [];
   var filtreActif = 'tous';
 
+  var nombreBienfaiteurs = 0;
+
   function rendreRegistre(eff) {
     var boite = $('registre');
     if (!boite) { return; }
     tousMembres = (eff && eff.membres) || [];
+    if (eff && typeof eff.bienfaiteurs === 'number') { nombreBienfaiteurs = eff.bienfaiteurs; }
 
     if (!tousMembres.length) {
       boite.hidden = true;
@@ -211,6 +214,13 @@
       var nom = document.createElement('span');
       nom.className = 'ligne__nom';
       nom.textContent = m.nom;
+      if (m.bienfaiteur) {
+        var marque = document.createElement('span');
+        marque.className = 'marque-bienfaiteur';
+        marque.textContent = 'Bienfaiteur';
+        marque.title = 'Soutient l\'Ordre en boostant le serveur Discord';
+        nom.appendChild(marque);
+      }
 
       var ech = document.createElement('span');
       ech.className = 'ligne__echelon' + (m.voie === 'conféré' ? ' ligne__echelon--confere' : '');
@@ -242,7 +252,11 @@
 
     $('registre-pied').textContent = retenus.length +
       (retenus.length > 1 ? ' membres' : ' membre') +
-      (filtreActif === 'tous' ? '' : ' en ' + filtreActif);
+      (filtreActif === 'tous' ? '' : ' en ' + filtreActif) +
+      (nombreBienfaiteurs > 0
+        ? ' · L\'Ordre est soutenu par ' + nombreBienfaiteurs +
+          (nombreBienfaiteurs > 1 ? ' bienfaiteurs' : ' bienfaiteur')
+        : '');
   }
 
   /* ---------------------------------------------------------

@@ -88,9 +88,12 @@ async function lireEffectif(jeton, guilde, avecNoms) {
 
   const liste = [];
   let recus = 0;
+  /* Bienfaiteurs : membres qui boostent le serveur (premium_since). */
+  let bienfaiteurs = 0;
 
   for (const m of membres) {
     if (m.user && m.user.bot) continue;
+    if (m.premium_since) bienfaiteurs++;
 
     const noms = (m.roles || []).map((id) => parId.get(id)).filter(Boolean);
     if (noms.some((n) => JAMAIS_PUBLIER.indexOf(n) !== -1)) {
@@ -121,6 +124,7 @@ async function lireEffectif(jeton, guilde, avecNoms) {
         fonctions: fonctions,
         divisions: divisions.map((d) => d.replace('Div. ', '')),
         depuis: m.joined_at || null,
+        bienfaiteur: !!m.premium_since,
       });
     }
   }
@@ -150,6 +154,7 @@ async function lireEffectif(jeton, guilde, avecNoms) {
     interne: interne,
     total: membres.filter((m) => !(m.user && m.user.bot)).length,
     recus: recus,
+    bienfaiteurs: bienfaiteurs,
     parEchelon: parEchelon,
     parDivision: parDivision,
     parPassage: parPassage,
