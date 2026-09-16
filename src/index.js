@@ -244,6 +244,7 @@ async function lirePresence(guilde, jeton, interne) {
 
   const widget = rw.status === 'fulfilled' ? rw.value : null;
   let salons = [];
+  let statuts = null;
   let statutWidget = widget ? widget.status : 0;
   if (widget && widget.ok) {
     const w = await widget.json();
@@ -259,6 +260,21 @@ async function lirePresence(guilde, jeton, interne) {
       if (nomsBots.has(String(m.username || '').toLowerCase())) continue;
       if (parId.has(m.channel_id)) parId.get(m.channel_id).occupants.push(m.username);
       else reserve.occupants.push(m.username);
+    }
+    /* En ligne, recompté sur la liste du widget. Relevé du 16 : Discord
+       annonçait 5 connectés (approximate_presence_count), bot compris,
+       pour 3 joueurs et le bot réellement en ligne. Ce compte est
+       « approximatif » par définition et mis en cache chez Discord. La
+       liste du widget donne chaque membre connecté avec son statut :
+       on la compte, bots exclus, et on publie la répartition par statut
+       pour pouvoir vérifier au lieu de supposer. */
+    const presents = (w.members || []).filter((m) =>
+      !nomsBots.has(String(m.username || '').toLowerCase()));
+    if (presents.length < 99) {
+      enLigne = presents.length;
+      statuts = presents.reduce((acc, m) => {
+        acc[m.status] = (acc[m.status] || 0) + 1; return acc;
+      }, {});
     }
     salons = liste.filter((x) => x.occupants.length);
     if (reserve.occupants.length) salons.push(reserve);
@@ -287,6 +303,8 @@ async function lirePresence(guilde, jeton, interne) {
     enLigne: enLigne,
     enVocal: enVocal,
     salons: salons,
+    statuts: statuts,
+    source: statuts ? 'widget' : 'compte-approximatif',
     botsRetires: autresBots,
   };
 }

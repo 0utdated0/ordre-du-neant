@@ -76,7 +76,11 @@
     var eff = d.effectif || {};
     var pre = d.presence || {};
 
-    poserChiffre('recus', typeof eff.recus === 'number' ? eff.recus : null);
+    /* « Membres reçus » comptait les seuls porteurs d'un échelon (7),
+       sans les Initiés encore au Seuil : on attendait le nombre de
+       membres du serveur (9). La case donne maintenant le total, bots
+       exclus. */
+    poserChiffre('membres', typeof eff.total === 'number' ? eff.total : null);
     poserChiffre('enLigne', pre.disponible ? pre.enLigne : null);
     poserChiffre('enVocal', pre.disponible && !pre.partiel ? pre.enVocal : null);
 
