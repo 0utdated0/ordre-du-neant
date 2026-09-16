@@ -296,6 +296,13 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
   text-shadow:0 0 24px rgba(224,16,32,.9);
   opacity:0;animation:devise 2.4s ease-out forwards;
 }
+.eclair .rejouer{
+  position:absolute;bottom:18vh;left:50%;transform:translateX(-50%);pointer-events:auto;
+  font-family:var(--titre);font-size:.72rem;letter-spacing:.24em;text-transform:uppercase;
+  color:#fff;text-decoration:none;padding:.9rem 1.6rem;border:1px solid rgba(224,16,32,.8);
+  background:rgba(224,16,32,.15);
+}
+.eclair .rejouer:hover{background:rgba(224,16,32,.35)}
 @keyframes souffle{0%{transform:scale(0);opacity:1}35%{opacity:1}100%{transform:scale(4.5);opacity:0}}
 @keyframes nuit{0%,20%{background:rgba(0,0,0,0)}60%,100%{background:#000}}
 @keyframes devise{0%,35%{opacity:0;letter-spacing:.9em}70%,100%{opacity:1;letter-spacing:.35em}}
@@ -326,7 +333,7 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
 
   <span class="etat" id="etat"><span class="pouls" aria-hidden="true"></span><span id="etat-texte">Site en construction</span></span>
 
-  <div class="rebours" id="rebours" hidden data-ouverture="{{OUVERTURE}}" data-maintenant="{{MAINTENANT}}" aria-live="polite">
+  <div class="rebours" id="rebours" hidden data-ouverture="{{OUVERTURE}}" data-maintenant="{{MAINTENANT}}" data-essai="{{ESSAI}}" aria-live="polite">
     <p class="rebours__titre" id="rebours-titre">Ouverture</p>
     <div class="rebours__cases" role="timer">
       <span><strong id="r-h">00</strong><em>heures</em></span>
@@ -367,6 +374,7 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
   'use strict';
   var bloc = document.getElementById('rebours');
   var ouverture = Number(bloc && bloc.getAttribute('data-ouverture'));
+  var essai = bloc && bloc.getAttribute('data-essai') === '1';
   var serveur = Number(bloc && bloc.getAttribute('data-maintenant'));
   if (!ouverture || !serveur) { return; }
 
@@ -374,7 +382,7 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
   var jour = new Intl.DateTimeFormat('fr-FR', {
     weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris'
   }).format(new Date(ouverture)).replace(':', 'h');
-  document.getElementById('etat-texte').textContent = 'Ouverture le ' + jour;
+  document.getElementById('etat-texte').textContent = essai ? 'Répétition de l\u2019ouverture' : 'Ouverture le ' + jour;
   document.getElementById('titre-attente').textContent = "Ce lieu ouvre bientôt";
   bloc.hidden = false;
 
@@ -426,6 +434,18 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
     if (reste <= 0) {
       h.textContent = m.textContent = s.textContent = '00';
       document.getElementById('rebours-titre').textContent = 'Ouverture';
+      if (!recharge && essai) {
+        recharge = true;
+        ouvrir();
+        /* Répétition : on reste sur l'écran noir et on propose de rejouer. */
+        setTimeout(function () {
+          var bouton = document.createElement('a');
+          bouton.className = 'rejouer';
+          bouton.href = location.href;
+          bouton.textContent = 'Rejouer';
+          document.querySelector('.eclair').appendChild(bouton);
+        }, 2600);
+      }
       if (!recharge) {
         recharge = true;
         ouvrir();

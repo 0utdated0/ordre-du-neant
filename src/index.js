@@ -409,9 +409,36 @@ function passeChantier(request, env) {
   return biscuits.split(';').some((c) => c.trim() === 'passage=' + cle);
 }
 
+/* Page de chantier, avec l'heure d'ouverture et l'heure du serveur
+   glissées dedans : le compte à rebours ne dépend pas de l'horloge,
+   parfois fausse, de l'appareil du visiteur. En mode essai, la page ne
+   mène pas au site à zéro : elle rejoue. */
+async function pageChantier(env, origine, ouverture, essai) {
+  const page = await env.ASSETS.fetch(new URL('/chantier.html', origine));
+  const texte = (await page.text())
+    .replace('{{OUVERTURE}}', String(ouverture || ''))
+    .replace('{{MAINTENANT}}', String(Date.now()))
+    .replace('{{ESSAI}}', essai ? '1' : '');
+  return new Response(texte, {
+    status: 200,
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+      'X-Robots-Tag': 'noindex, nofollow',
+    },
+  });
+}
+
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url);
+
+    /* Répétition de l'ouverture : /apercu-ouverture?secondes=15 joue le
+       compte à rebours et son animation, sans rien ouvrir. */
+    if (url.pathname === '/apercu-ouverture') {
+      const secondes = Math.min(600, Math.max(3, parseInt(url.searchParams.get('secondes'), 10) || 15));
+      return pageChantier(env, url.origin, Date.now() + secondes * 1000, true);
+    }
 
     if (enChantier(env)) {
       const laisser = passeChantier(request, env);
@@ -447,21 +474,7 @@ export default {
         }
 
         if (!autorise) {
-          const page = await env.ASSETS.fetch(new URL('/chantier.html', url.origin));
-          /* L'heure d'ouverture et l'heure du serveur sont glissées dans
-             la page : le compte à rebours ne dépend pas de l'horloge,
-             parfois fausse, de l'appareil du visiteur. */
-          const texte = (await page.text())
-            .replace('{{OUVERTURE}}', String(instantOuverture(env) || ''))
-            .replace('{{MAINTENANT}}', String(Date.now()));
-          return new Response(texte, {
-            status: 200,
-            headers: {
-              'Content-Type': 'text/html; charset=utf-8',
-              'Cache-Control': 'no-store',
-              'X-Robots-Tag': 'noindex, nofollow',
-            },
-          });
+          return pageChantier(env, url.origin, instantOuverture(env), false);
         }
       }
     }
