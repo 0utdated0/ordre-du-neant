@@ -28,7 +28,13 @@
 
     // « oui » masque tout le site derrière la page de chantier.
     // Passer à « non » et pousser suffit à ouvrir le site.
-    "CHANTIER": "oui"
+    "CHANTIER": "oui",
+
+    // Ouverture programmée : passé cet instant, le chantier se lève
+    // tout seul, sans rien pousser. La page de chantier affiche un
+    // compte à rebours et se recharge à l'heure dite. Vider pour
+    // revenir à un chantier sans date.
+    "OUVERTURE": "2026-09-16T17:30:00+02:00"
   },
 
   "assets": {

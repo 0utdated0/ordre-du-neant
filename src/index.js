@@ -389,8 +389,15 @@ const LAISSEZ_PASSER = [
   '/assets/banniere-monde.webp',
 ];
 
+function instantOuverture(env) {
+  const t = Date.parse(String(env.OUVERTURE || ''));
+  return Number.isFinite(t) ? t : null;
+}
+
 function enChantier(env) {
-  return String(env.CHANTIER || 'non').toLowerCase() === 'oui';
+  if (String(env.CHANTIER || 'non').toLowerCase() !== 'oui') return false;
+  const ouverture = instantOuverture(env);
+  return ouverture === null || Date.now() < ouverture;
 }
 
 function passeChantier(request, env) {
@@ -441,7 +448,13 @@ export default {
 
         if (!autorise) {
           const page = await env.ASSETS.fetch(new URL('/chantier.html', url.origin));
-          return new Response(page.body, {
+          /* L'heure d'ouverture et l'heure du serveur sont glissées dans
+             la page : le compte à rebours ne dépend pas de l'horloge,
+             parfois fausse, de l'appareil du visiteur. */
+          const texte = (await page.text())
+            .replace('{{OUVERTURE}}', String(instantOuverture(env) || ''))
+            .replace('{{MAINTENANT}}', String(Date.now()));
+          return new Response(texte, {
             status: 200,
             headers: {
               'Content-Type': 'text/html; charset=utf-8',

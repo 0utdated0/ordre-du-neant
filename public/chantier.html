@@ -206,6 +206,24 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
 
 :focus-visible{outline:2px solid var(--braise);outline-offset:3px}
 
+.rebours{margin:1.6rem auto 2rem;text-align:center}
+.rebours__titre{
+  margin:0 0 .8rem;font-size:.7rem;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(134,139,149,.8);
+}
+.rebours__cases{display:flex;justify-content:center;gap:clamp(.6rem,3vw,1.2rem)}
+.rebours__cases span{
+  display:flex;flex-direction:column;align-items:center;gap:.35rem;
+  min-width:clamp(4.2rem,18vw,5.6rem);padding:.8rem .4rem .7rem;
+  border:1px solid rgba(238,240,244,.12);
+  background:linear-gradient(180deg,rgba(238,240,244,.05),rgba(238,240,244,.01));
+}
+.rebours__cases strong{
+  font-size:clamp(1.8rem,1.2rem + 3vw,2.8rem);font-weight:400;line-height:1;
+  color:#eef0f4;font-variant-numeric:tabular-nums;letter-spacing:.04em;
+}
+.rebours__cases em{font-style:normal;font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:rgba(224,16,32,.85)}
+
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
   #etoiles{display:none}
@@ -224,9 +242,18 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
   <h1><span class="petit">L'Ordre du</span><span class="grand">Néant</span></h1>
   <p class="devise">Tout n'est que passage</p>
 
-  <span class="etat"><span class="pouls" aria-hidden="true"></span>Site en construction</span>
+  <span class="etat" id="etat"><span class="pouls" aria-hidden="true"></span><span id="etat-texte">Site en construction</span></span>
 
-  <h2>Ce lieu n'est pas encore ouvert</h2>
+  <div class="rebours" id="rebours" hidden data-ouverture="{{OUVERTURE}}" data-maintenant="{{MAINTENANT}}" aria-live="polite">
+    <p class="rebours__titre" id="rebours-titre">Ouverture</p>
+    <div class="rebours__cases" role="timer">
+      <span><strong id="r-h">00</strong><em>heures</em></span>
+      <span><strong id="r-m">00</strong><em>minutes</em></span>
+      <span><strong id="r-s">00</strong><em>secondes</em></span>
+    </div>
+  </div>
+
+  <h2 id="titre-attente">Ce lieu n'est pas encore ouvert</h2>
 
   <p>
     Le site de l'Ordre est en cours de construction. Il n'y a rien à voir
@@ -250,6 +277,51 @@ footer p{font-size:.72rem;margin:.9rem 0 0;color:rgba(134,139,149,.45)}
   <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
   <p>Site non officiel. Star Citizen et Roberts Space Industries sont des marques de Cloud Imperium Rights LLC.</p>
 </footer>
+
+<script>
+/* Compte à rebours jusqu'à l'ouverture programmée. À zéro, la page se
+   recharge : le Worker sert alors le vrai site. */
+(function () {
+  'use strict';
+  var bloc = document.getElementById('rebours');
+  var ouverture = Number(bloc && bloc.getAttribute('data-ouverture'));
+  var serveur = Number(bloc && bloc.getAttribute('data-maintenant'));
+  if (!ouverture || !serveur) { return; }
+
+  var ecart = serveur - Date.now();
+  var jour = new Intl.DateTimeFormat('fr-FR', {
+    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris'
+  }).format(new Date(ouverture)).replace(':', 'h');
+  document.getElementById('etat-texte').textContent = 'Ouverture le ' + jour;
+  document.getElementById('titre-attente').textContent = "Ce lieu ouvre bientôt";
+  bloc.hidden = false;
+
+  var h = document.getElementById('r-h'), m = document.getElementById('r-m'), s = document.getElementById('r-s');
+  var deux = function (n) { return (n < 10 ? '0' : '') + n; };
+  var recharge = false;
+
+  function tic() {
+    var reste = ouverture - (Date.now() + ecart);
+    if (reste <= 0) {
+      h.textContent = m.textContent = s.textContent = '00';
+      document.getElementById('rebours-titre').textContent = 'Ouverture en cours';
+      if (!recharge) {
+        recharge = true;
+        /* Une à trois secondes de marge, étalées pour ne pas recharger
+           tous les visiteurs dans la même milliseconde. */
+        setTimeout(function () { location.reload(); }, 1000 + Math.random() * 2000);
+      }
+      return;
+    }
+    var total = Math.floor(reste / 1000);
+    h.textContent = deux(Math.floor(total / 3600));
+    m.textContent = deux(Math.floor(total / 60) % 60);
+    s.textContent = deux(total % 60);
+  }
+  tic();
+  setInterval(tic, 250);
+})();
+</script>
 
 <script>
 (function () {
