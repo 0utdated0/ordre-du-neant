@@ -24,15 +24,18 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#000000">
 
-<link rel="icon" href="/assets/embleme-512.png" type="image/png">
-<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="icon" href="/assets/embleme-48.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="/assets/embleme-180.png">
 <link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=0ae427b39d">
+<link rel="stylesheet" href="/styles.css?v=0192090ae8">
 <!-- Sortie de saut : posée par la page d'attente à l'ouverture, pour que le
      site apparaisse en arrivée et non d'un coup. Lue avant le premier affichage. -->
 <script>try{var odnSaut=+sessionStorage.getItem('odn-arrivee');if(odnSaut&&Date.now()-odnSaut<20000){document.documentElement.className+=' arrivee';}}catch(e){}</script>
 
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://ordre-du-neant.fr/#site","url":"https://ordre-du-neant.fr/","name":"L'Ordre du Néant","alternateName":["Ordre du Néant","NEANT"],"inLanguage":"fr-FR","publisher":{"@id":"https://ordre-du-neant.fr/#organisation"}},{"@type":"Organization","@id":"https://ordre-du-neant.fr/#organisation","name":"L'Ordre du Néant","url":"https://ordre-du-neant.fr/","alternateName":"NEANT","slogan":"Tout n'est que passage","description":"Organisation Star Citizen francophone structurée en huit divisions opérationnelles.","logo":"https://ordre-du-neant.fr/assets/embleme-512.png","sameAs":["https://robertsspaceindustries.com/en/orgs/NEANT"]},{"@type":"WebPage","@id":"https://ordre-du-neant.fr/vie#page","url":"https://ordre-du-neant.fr/vie","name":"La vie de l'Ordre - effectif, opérations, galerie | L'Ordre du Néant","description":"L'effectif en direct depuis le Discord, les opérations planifiées et la galerie des sorties de l'Ordre du Néant.","inLanguage":"fr-FR","isPartOf":{"@id":"https://ordre-du-neant.fr/#site"},"about":{"@id":"https://ordre-du-neant.fr/#organisation"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://ordre-du-neant.fr/"},{"@type":"ListItem","position":2,"name":"La vie","item":"https://ordre-du-neant.fr/vie"}]}]}
+</script>
 </head>
 
 <body class="page-vie">
@@ -44,7 +47,7 @@
 <div class="vignettage" aria-hidden="true"></div>
 
 <div class="barre" id="barre">
-  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme-120.webp" alt="" width="900" height="1251"></a>
   <span class="barre__nom">L'Ordre du Néant</span>
 
   <button class="barre__bouton" type="button" id="menu-bouton"
@@ -87,7 +90,7 @@
   <div class="contenu contenu--large">
     <div class="entete entete--centre revele">
       <p class="acte__num">Acte I</p>
-      <h2 class="balaye">La Vigie</h2>
+      <h1 class="titre-page balaye">La Vigie</h1>
       <p class="intro">
         Ce que le serveur de l'Ordre dit de lui-même, relevé à l'instant.
         Rien n'est saisi à la main : tout vient des rôles portés sur le Discord.
@@ -240,6 +243,12 @@
 <footer>
   <div class="pied">
     <p class="devise-pied">Tout n'est que passage</p>
+    <p class="pied__resume">
+      L'Ordre du Néant est une <a href="/ordre">organisation Star Citizen francophone</a> :
+      huit <a href="/divisions">divisions</a>, une <a href="/regle">règle écrite</a>,
+      des <a href="/vie">opérations en groupe</a> et un
+      <a href="/rejoindre">recrutement ouvert aux joueurs majeurs</a>.
+    </p>
     <nav class="pied__plan" aria-label="Plan du site">
           <a href="/">Histoire</a>
     <a href="/ordre">L'Ordre</a>

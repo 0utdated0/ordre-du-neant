@@ -386,6 +386,9 @@ async function lirePresence(guilde, jeton, interne) {
 const LAISSEZ_PASSER = [
   '/assets/embleme.webp',
   '/assets/embleme-512.png',
+  '/assets/embleme-360.webp',
+  '/assets/embleme-48.png',
+  '/assets/embleme-180.png',
   '/assets/banniere-monde.webp',
 ];
 

@@ -24,15 +24,18 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#000000">
 
-<link rel="icon" href="/assets/embleme-512.png" type="image/png">
-<link rel="apple-touch-icon" href="/assets/embleme-512.png">
+<link rel="icon" href="/assets/embleme-48.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="/assets/embleme-180.png">
 <link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=0ae427b39d">
+<link rel="stylesheet" href="/styles.css?v=0192090ae8">
 <!-- Sortie de saut : posée par la page d'attente à l'ouverture, pour que le
      site apparaisse en arrivée et non d'un coup. Lue avant le premier affichage. -->
 <script>try{var odnSaut=+sessionStorage.getItem('odn-arrivee');if(odnSaut&&Date.now()-odnSaut<20000){document.documentElement.className+=' arrivee';}}catch(e){}</script>
 
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://ordre-du-neant.fr/#site","url":"https://ordre-du-neant.fr/","name":"L'Ordre du Néant","alternateName":["Ordre du Néant","NEANT"],"inLanguage":"fr-FR","publisher":{"@id":"https://ordre-du-neant.fr/#organisation"}},{"@type":"Organization","@id":"https://ordre-du-neant.fr/#organisation","name":"L'Ordre du Néant","url":"https://ordre-du-neant.fr/","alternateName":"NEANT","slogan":"Tout n'est que passage","description":"Organisation Star Citizen francophone structurée en huit divisions opérationnelles.","logo":"https://ordre-du-neant.fr/assets/embleme-512.png","sameAs":["https://robertsspaceindustries.com/en/orgs/NEANT"]},{"@type":"WebPage","@id":"https://ordre-du-neant.fr/rejoindre#page","url":"https://ordre-du-neant.fr/rejoindre","name":"Rejoindre l'Ordre du Néant - recrutement Star Citizen francophone","description":"Comment entrer dans l'Ordre du Néant : conditions, sas d'admission, instruction du dossier. Recrutement ouvert aux pilotes majeurs parlant français.","inLanguage":"fr-FR","isPartOf":{"@id":"https://ordre-du-neant.fr/#site"},"about":{"@id":"https://ordre-du-neant.fr/#organisation"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://ordre-du-neant.fr/"},{"@type":"ListItem","position":2,"name":"Rejoindre","item":"https://ordre-du-neant.fr/rejoindre"}]}]}
+</script>
 </head>
 
 <body class="page-rejoindre">
@@ -44,7 +47,7 @@
 <div class="vignettage" aria-hidden="true"></div>
 
 <div class="barre" id="barre">
-  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme.webp" alt="" width="900" height="1251"></a>
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme-120.webp" alt="" width="900" height="1251"></a>
   <span class="barre__nom">L'Ordre du Néant</span>
 
   <button class="barre__bouton" type="button" id="menu-bouton"
@@ -84,7 +87,7 @@
 <main id="contenu">
 <section class="acte acte--passage" id="passage">
   <div class="contenu contenu--centre">
-    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
+    <h1 class="titre-page revele balaye">Entrer dans l'Ordre</h1>
     <p class="chapeau revele">
       Nous sommes une organisation jeune, encore réduite. Si vous préférez compter
       parmi les premiers plutôt que d'être le quatre-centième nom d'une liste,
@@ -242,6 +245,12 @@
 <footer>
   <div class="pied">
     <p class="devise-pied">Tout n'est que passage</p>
+    <p class="pied__resume">
+      L'Ordre du Néant est une <a href="/ordre">organisation Star Citizen francophone</a> :
+      huit <a href="/divisions">divisions</a>, une <a href="/regle">règle écrite</a>,
+      des <a href="/vie">opérations en groupe</a> et un
+      <a href="/rejoindre">recrutement ouvert aux joueurs majeurs</a>.
+    </p>
     <nav class="pied__plan" aria-label="Plan du site">
           <a href="/">Histoire</a>
     <a href="/ordre">L'Ordre</a>

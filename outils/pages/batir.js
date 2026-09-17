@@ -237,7 +237,48 @@ function corpsDe(p) {
     }
     return html;
   });
-  return '<main id="contenu">\n' + morceaux.join('\n\n') + '\n</main>';
+  let corps = morceaux.join('\n\n');
+  /* Un seul titre principal par page, pour les moteurs de recherche et
+     les lecteurs d'écran : le premier titre de la page passe en h1. Il
+     garde son apparence, les règles des h2 visent aussi h1.titre-page. */
+  if (corps.indexOf('<h1') < 0) {
+    const debut = corps.indexOf('<h2');
+    if (debut >= 0) {
+      const fin = corps.indexOf('</h2>', debut);
+      let ouvrant = corps.slice(debut, corps.indexOf('>', debut) + 1);
+      ouvrant = /class="/.test(ouvrant)
+        ? ouvrant.replace('<h2', '<h1').replace('class="', 'class="titre-page ')
+        : ouvrant.replace('<h2', '<h1 class="titre-page"');
+      corps = corps.slice(0, debut) + ouvrant + corps.slice(corps.indexOf('>', debut) + 1, fin) + '</h1>' + corps.slice(fin + 5);
+    }
+  }
+  return '<main id="contenu">\n' + corps + '\n</main>';
+}
+
+/* Données structurées de chaque page : la page elle-même, rattachée au
+   site et à l'organisation, et son fil d'Ariane depuis l'accueil. */
+function donneesStructurees(p) {
+  const racine = 'https://ordre-du-neant.fr';
+  const url = racine + (p.url === '/' ? '/' : p.url);
+  const graphe = [
+    { '@type': 'WebSite', '@id': racine + '/#site', url: racine + '/', name: "L'Ordre du Néant",
+      alternateName: ['Ordre du Néant', 'NEANT'], inLanguage: 'fr-FR',
+      publisher: { '@id': racine + '/#organisation' } },
+    { '@type': 'Organization', '@id': racine + '/#organisation', name: "L'Ordre du Néant", url: racine + '/',
+      alternateName: 'NEANT', slogan: "Tout n'est que passage",
+      description: 'Organisation Star Citizen francophone structurée en huit divisions opérationnelles.',
+      logo: racine + '/assets/embleme-512.png', sameAs: ['https://robertsspaceindustries.com/en/orgs/NEANT'] },
+    { '@type': 'WebPage', '@id': url + '#page', url: url, name: p.titre, description: p.description,
+      inLanguage: 'fr-FR', isPartOf: { '@id': racine + '/#site' }, about: { '@id': racine + '/#organisation' } }
+  ];
+  if (p.cle !== 'accueil') {
+    graphe.push({ '@type': 'BreadcrumbList', itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Accueil', item: racine + '/' },
+      { '@type': 'ListItem', position: 2, name: p.menu || p.titre.split(' | ')[0], item: url }
+    ] });
+  }
+  return '\n<script type="application/ld+json">\n' +
+    JSON.stringify({ '@context': 'https://schema.org', '@graph': graphe }) + '\n</script>';
 }
 
 let n = 0;
@@ -248,7 +289,7 @@ for (const p of PAGES) {
     .replace(/\{\{DESCRIPTION\}\}/g, p.description)
     .replace(/\{\{URL\}\}/g, p.url === '/' ? '/' : p.url)
     .replace('{{CLE}}', p.cle)
-    .replace('{{TETE}}', p.cle === 'accueil' ? lire('blocs/schema.html') : '')
+    .replace('{{TETE}}', donneesStructurees(p))
     .replace('{{BARRE}}', bloc('barre').replace('{{MENU}}', menuDe(p)))
     .replace('{{RAIL}}', railDe(p))
     .replace('{{CORPS}}', corpsDe(p))
