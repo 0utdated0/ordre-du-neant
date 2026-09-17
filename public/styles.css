@@ -3181,6 +3181,30 @@ html.sans-3d #plongee-scene{background-image:url(assets/repli/plongee-1.webp)}
 html.sans-3d #ascension-scene{background-image:url(assets/repli/ascension-1.webp)}
 html.sans-3d #flotte-scene{background-size:cover}
 
+/* Sans WebGL, la carte graphique est presque toujours absente aussi,
+   et c'est le processeur qui compose chaque image. Mesuré dans Chromium
+   sans carte graphique, accueil en 2056 px Retina : 29 images/s à l'arrêt
+   et 23 en défilant ; sans ces effets, 60 et 52. Le grain (calque fixe de
+   quatre écrans, animé), les flous d'arrière-plan et les animations en
+   boucle sont ce qui coûte : on les coupe ici, et seulement ici. */
+html.sans-3d .grain{display:none}
+html.sans-3d *,html.sans-3d *::before,html.sans-3d *::after{
+  backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
+}
+/* Sans flou, le verre laissait lire le texte de la page au travers. */
+html.sans-3d .barre::before,html.sans-3d .barre.defile::before{background:#08080b}
+html.sans-3d .menu{background:#060609}
+html.sans-3d .fragment{filter:none}
+html.sans-3d h2.balaye,html.sans-3d h1.titre-page.balaye{
+  animation:none;background:none;color:var(--argent);-webkit-text-fill-color:var(--argent);
+}
+html.sans-3d .descente span::after,html.sans-3d .pouls,html.sans-3d .galerie__vide .point,
+html.sans-3d .sceau__cadre,html.sans-3d .sceau__balayage,html.sans-3d .sceau-regle__anneau,
+html.sans-3d .attente--grand::after,html.sans-3d .perdu__balayage,html.sans-3d .perdu__point,
+html.sans-3d .division__effectif::before,html.sans-3d .egaliseur i,
+html.sans-3d .radio-active .poste__onde,html.sans-3d .sceau-regle__article,html.sans-3d .sceau-regle__balai,
+html.sans-3d .poste__direct::before{animation:none}
+
 .sans3d{
   position:fixed;left:16px;bottom:16px;z-index:70;
   width:min(26rem,calc(100vw - 32px));
@@ -3193,7 +3217,6 @@ html.sans-3d #flotte-scene{background-size:cover}
   box-shadow:0 18px 50px rgba(0,0,0,.6);
   color:var(--argent);
   font-size:.86rem;line-height:1.55;
-  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
   animation:sans3d-entree .5s cubic-bezier(.2,.7,.2,1) .8s both;
   transition:opacity .35s,transform .35s;
 }
