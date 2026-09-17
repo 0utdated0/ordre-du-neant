@@ -3156,3 +3156,71 @@ html.arrivee::after{
 .pied__resume{max-width:60ch;margin:0 auto 1.4rem;font-size:.82rem;line-height:1.7;color:rgba(134,139,149,.8);text-align:center}
 .pied__resume a{color:rgba(238,240,244,.85);text-decoration:none;border-bottom:1px solid rgba(224,16,32,.45)}
 .pied__resume a:hover{color:#fff;border-color:#e01020}
+
+/* =========================================================
+   SANS 3D  (WebGL refusé par le navigateur, voir repli.js)
+   ---------------------------------------------------------
+   Chaque scène garde sa place et montre une image fixe prise
+   sur la vraie scène. Le nom des images porte un numéro :
+   assets/ est en cache d'un an, une nouvelle prise de vue doit
+   changer de nom.
+   ========================================================= */
+html.sans-3d{background:#000 url(assets/repli/ciel-1.webp) center/cover no-repeat fixed}
+html.sans-3d body{background:transparent}
+html.sans-3d #neant{display:none}
+html.sans-3d [id$="-scene"]{background-position:center;background-size:cover;background-repeat:no-repeat}
+html.sans-3d #approche-scene{background-image:url(assets/repli/approche-1.webp)}
+html.sans-3d #appontage-scene{background-image:url(assets/repli/appontage-1.webp)}
+html.sans-3d #vitesse-scene{background-image:url(assets/repli/vitesse-1.webp)}
+html.sans-3d #extraction-scene{background-image:url(assets/repli/extraction-1.webp)}
+html.sans-3d #recuperation-scene{background-image:url(assets/repli/recuperation-1.webp)}
+html.sans-3d #convoi-scene{background-image:url(assets/repli/convoi-1.webp)}
+html.sans-3d #ligne-scene{background-image:url(assets/repli/ligne-1.webp)}
+html.sans-3d #saut-scene{background-image:url(assets/repli/saut-1.webp)}
+html.sans-3d #plongee-scene{background-image:url(assets/repli/plongee-1.webp)}
+html.sans-3d #ascension-scene{background-image:url(assets/repli/ascension-1.webp)}
+html.sans-3d #flotte-scene{background-size:cover}
+
+.sans3d{
+  position:fixed;left:16px;bottom:16px;z-index:70;
+  width:min(26rem,calc(100vw - 32px));
+  max-height:calc(100vh - 32px);max-height:calc(100svh - 32px);
+  overflow:auto;
+  padding:1.1rem 1.2rem 1rem;
+  background:rgba(5,5,8,.95);
+  border:1px solid rgba(238,240,244,.12);
+  border-left:2px solid var(--rouge);
+  box-shadow:0 18px 50px rgba(0,0,0,.6);
+  color:var(--argent);
+  font-size:.86rem;line-height:1.55;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  animation:sans3d-entree .5s cubic-bezier(.2,.7,.2,1) .8s both;
+  transition:opacity .35s,transform .35s;
+}
+@keyframes sans3d-entree{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.sans3d--parti{opacity:0;transform:translateY(12px)}
+.sans3d p{margin:0 0 .7rem}
+.sans3d__sur{
+  font-family:var(--titre);font-size:.52rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--rouge);margin-bottom:.35rem!important;
+}
+.sans3d__titre{font-family:var(--titre);font-size:.9rem;letter-spacing:.06em;text-transform:uppercase}
+.sans3d__texte{color:rgba(238,240,244,.78)}
+.sans3d__conseil{padding:.6rem .75rem;background:rgba(224,16,32,.08);border:1px solid rgba(224,16,32,.25)}
+.sans3d__conseil strong{font-weight:500;color:#fff}
+.sans3d__autres{margin:0 0 .7rem}
+.sans3d__autres summary{cursor:pointer;color:var(--cendre);font-size:.8rem}
+.sans3d__autres summary:hover{color:var(--argent)}
+.sans3d__autres dl{margin:.6rem 0 0}
+.sans3d__autres dt{font-weight:500;color:var(--argent);margin-top:.55rem}
+.sans3d__autres dd{margin:0;color:rgba(238,240,244,.7)}
+.sans3d__pied{font-size:.78rem;color:var(--cendre)}
+.sans3d__pied a{color:var(--argent)}
+.sans3d__fermer{
+  font-family:var(--titre);font-size:.58rem;letter-spacing:.22em;text-transform:uppercase;
+  padding:.6rem 1rem;cursor:pointer;
+  color:#fff;background:var(--rouge);border:0;
+}
+.sans3d__fermer:hover{background:var(--braise)}
+.sans3d__fermer:focus-visible{outline:1px solid #fff;outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.sans3d{animation:none;transition:none}}

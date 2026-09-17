@@ -159,7 +159,48 @@
   var moteur;
   try {
     moteur = new THREE.WebGLRenderer({ antialias: !petit, alpha: true, powerPreference: 'high-performance' });
-  } catch (e) { return; }
+  } catch (e) { tableFixe(); return; }
+
+  /* Sans WebGL, la table restait vide : pas d'onglets, pas de fiche,
+     tout était monté après le moteur de rendu. On garde les onglets
+     et la fiche, et chaque appareil montre une image fixe prise sur
+     la vraie projection (assets/repli). */
+  function tableFixe() {
+    document.documentElement.classList.add('sans-3d');
+    var zone = document.getElementById('flotte-onglets');
+    var boutons = [];
+    function choisir(i) {
+      hote.style.backgroundImage = 'url(/assets/repli/flotte-' + i + '-1.webp)';
+      ecrireFiche(FLOTTE[i]);
+      boutons.forEach(function (b, j) {
+        b.classList.toggle('onglet--actif', j === i);
+        b.setAttribute('aria-selected', j === i ? 'true' : 'false');
+        b.tabIndex = j === i ? 0 : -1;
+      });
+    }
+    if (zone) {
+      FLOTTE.forEach(function (f, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'onglet';
+        b.setAttribute('role', 'tab');
+        b.innerHTML = '<span class="onglet__num">' + String(i + 1).padStart(2, '0') +
+          '</span><span class="onglet__nom">' + f.nom + '</span>';
+        b.addEventListener('click', function () { choisir(i); });
+        b.addEventListener('keydown', function (e) {
+          if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+            e.preventDefault();
+            var n = (i + (e.key === 'ArrowRight' ? 1 : -1) + FLOTTE.length) % FLOTTE.length;
+            choisir(n);
+            boutons[n].focus();
+          }
+        });
+        zone.appendChild(b);
+        boutons.push(b);
+      });
+    }
+    choisir(0);
+  }
 
   moteur.setPixelRatio(Math.min(window.devicePixelRatio || 1, petit ? 1.25 : 1.8));
   moteur.setClearColor(0x000000, 0);

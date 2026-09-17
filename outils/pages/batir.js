@@ -168,7 +168,7 @@ const PAGES = [
 ];
 
 const FICHIERS = {
-  trois: 'vendor/three.min.js', coques: 'coques.js', vaisseaux: 'vaisseaux.js',
+  repli: 'repli.js', trois: 'vendor/three.min.js', coques: 'coques.js', vaisseaux: 'vaisseaux.js',
   scene: 'scene.js', approche: 'approche.js', flotte: 'flotte.js', saut: 'saut.js',
   ascension: 'ascension.js', plongee: 'plongee.js', site: 'site.js', vigie: 'vigie.js',
   radio: 'radio.js', acte3d: 'acte3d.js', travaux: 'travaux.js', convoi: 'convoi.js',
@@ -295,8 +295,9 @@ for (const p of PAGES) {
     .replace('{{CORPS}}', corpsDe(p))
     .replace('{{VISIONNEUSE}}', p.visionneuse ? bloc('visionneuse') : '')
     .replace('{{PIED}}', bloc('pied').replace('{{PLAN}}', menuDe(p, true)))
-    /* La radio a son bouton dans la barre de toutes les pages. */
-    .replace('{{SCRIPTS}}', p.scripts.concat(['radio']).map(function (s) {
+    /* La radio a son bouton dans la barre de toutes les pages, et le
+       repli sans 3D doit pouvoir servir partout. */
+    .replace('{{SCRIPTS}}', p.scripts.concat(['repli', 'radio']).map(function (s) {
       return '<script src="/' + FICHIERS[s] + '?v=' + empreinte(FICHIERS[s]) + '" defer></script>';
     }).join('\n'))
     .replace('href="/styles.css"', 'href="/styles.css?v=' + empreinte('styles.css') + '"');

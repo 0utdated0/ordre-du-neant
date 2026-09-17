@@ -28,7 +28,10 @@
 <link rel="apple-touch-icon" href="/assets/embleme-180.png">
 <link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=0192090ae8">
+<link rel="stylesheet" href="/styles.css?v=b460e87b7f">
+<!-- Sans WebGL (accélération matérielle coupée, carte graphique bloquée),
+     les scènes passent en images fixes : voir repli.js. ?sans-3d simule ce cas. -->
+<script>(function(){var d=document.documentElement,ok=false;if(/[?&]sans-3d(=|&|$)/.test(location.search)){var gc=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t){return /webgl/i.test(t)?null:gc.apply(this,arguments);};}try{var c=document.createElement('canvas'),g=c.getContext('webgl2')||c.getContext('webgl');ok=!!g;var x=g&&g.getExtension('WEBGL_lose_context');if(x){x.loseContext();}}catch(e){}if(!ok){d.className+=' sans-3d';}})();</script>
 <!-- Sortie de saut : posée par la page d'attente à l'ouverture, pour que le
      site apparaisse en arrivée et non d'un coup. Lue avant le premier affichage. -->
 <script>try{var odnSaut=+sessionStorage.getItem('odn-arrivee');if(odnSaut&&Date.now()-odnSaut<20000){document.documentElement.className+=' arrivee';}}catch(e){}</script>
@@ -279,6 +282,7 @@
 <script src="/scene.js?v=5839ff321f" defer></script>
 <script src="/site.js?v=35d1ad2fea" defer></script>
 <script src="/vigie.js?v=750b51ca3c" defer></script>
+<script src="/repli.js?v=2ef3c97172" defer></script>
 <script src="/radio.js?v=9bcf92d61d" defer></script>
 </body>
 </html>
