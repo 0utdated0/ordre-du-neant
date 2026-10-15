@@ -1,0 +1,49 @@
+<section class="acte acte--texte marche" id="minerais" aria-label="{{ACTE}}, les minerais">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">{{ACTE}}</p>
+      <h2 class="balaye">Le marché</h2>
+      <p class="intro">
+        Ce que valent les minerais et les marchandises, relevé par les joueurs et republié ici.
+        Stanton, Pyro et Nyx. Un prix trop vieux ou trop beau pour être vrai est écarté avant
+        d&rsquo;arriver sur cette page.
+      </p>
+      <p class="marche__etat" id="marche-etat" role="status">Lecture des relevés...</p>
+    </div>
+
+    <div class="marche__bloc revele">
+      <div class="marche__tete">
+        <h3>Minerais</h3>
+        <p class="marche__aide">
+          Le prix brut est celui des raffineries, le prix raffiné celui des comptoirs.
+          L&rsquo;écart dit si le passage par la raffinerie vaut l&rsquo;attente.
+          Cliquez une ligne pour voir tous les points de vente et les derniers relevés.
+        </p>
+      </div>
+
+      <div class="marche__outils">
+        <label class="marche__champ">
+          <span>Chercher un minerai</span>
+          <input type="search" id="minerais-recherche" placeholder="Quartz, Taranite, Hadanite..." autocomplete="off">
+        </label>
+        <div class="marche__filtres" id="minerais-systemes" role="group" aria-label="Filtrer par système"></div>
+      </div>
+
+      <div class="marche__cadre">
+        <table class="marche__table" id="table-minerais">
+          <thead>
+            <tr>
+              <th scope="col">Minerai</th>
+              <th scope="col" class="nombre">Brut</th>
+              <th scope="col">À la raffinerie</th>
+              <th scope="col" class="nombre">Raffiné</th>
+              <th scope="col">Au comptoir</th>
+              <th scope="col" class="nombre">Écart</th>
+            </tr>
+          </thead>
+          <tbody><tr class="marche__vide"><td colspan="6">Lecture des relevés...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

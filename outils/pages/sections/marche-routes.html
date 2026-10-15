@@ -1,0 +1,47 @@
+<section class="acte acte--texte marche" id="routes" aria-label="{{ACTE}}, les routes">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">{{ACTE}}</p>
+      <h2 class="balaye">Les routes</h2>
+      <p class="intro">
+        Acheter ici, revendre là. Le gain est donné par SCU : multipliez-le par la soute de
+        votre appareil. Seules les routes où il reste de la marchandise en rayon sont retenues,
+        parce qu&rsquo;une route sans stock n&rsquo;existe que sur le papier.
+      </p>
+    </div>
+
+    <div class="marche__bloc revele">
+      <div class="marche__outils">
+        <label class="marche__champ">
+          <span>Chercher une marchandise</span>
+          <input type="search" id="routes-recherche" placeholder="Agricium, Carbon-Silk..." autocomplete="off">
+        </label>
+        <div class="marche__filtres" id="routes-systemes" role="group" aria-label="Filtrer par système"></div>
+        <label class="marche__bascule">
+          <input type="checkbox" id="routes-illegal">
+          <span>Afficher les marchandises illégales</span>
+        </label>
+        <label class="marche__champ marche__champ--court">
+          <span>Soute (SCU)</span>
+          <input type="number" id="routes-soute" value="96" min="1" max="4000" step="1">
+        </label>
+      </div>
+
+      <div class="marche__cadre">
+        <table class="marche__table" id="table-routes">
+          <thead>
+            <tr>
+              <th scope="col">Marchandise</th>
+              <th scope="col">Acheter</th>
+              <th scope="col">Revendre</th>
+              <th scope="col" class="nombre">Gain / SCU</th>
+              <th scope="col" class="nombre">Marge</th>
+              <th scope="col" class="nombre">Soute pleine</th>
+            </tr>
+          </thead>
+          <tbody><tr class="marche__vide"><td colspan="6">Lecture des relevés...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

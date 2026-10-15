@@ -18,6 +18,8 @@
                      sans la liste nominative
    ========================================================= */
 
+import { servirMarche, servirMarcheHistorique } from './marche.js';
+
 const API = 'https://discord.com/api/v10';
 const CACHE_SECONDES = 300;
 
@@ -487,6 +489,15 @@ export default {
 
     if (url.pathname === '/api/ordre') {
       return servirOrdre(request, env, ctx);
+    }
+    /* Le marché : prix des minerais et des marchandises. Le bot lit
+       la même adresse, pour que Discord et le site disent la même
+       chose au même moment. */
+    if (url.pathname === '/api/marche') {
+      return servirMarche(request, env, ctx, reponse);
+    }
+    if (url.pathname === '/api/marche/historique') {
+      return servirMarcheHistorique(request, env, ctx, reponse);
     }
     if (url.pathname === '/api/radio') {
       return servirRadio(request, env, ctx);

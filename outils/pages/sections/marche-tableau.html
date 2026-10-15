@@ -1,0 +1,51 @@
+<section class="acte acte--texte marche" id="tableau" aria-label="{{ACTE}}, tout le marché">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <p class="acte__num">{{ACTE}}</p>
+      <h2 class="balaye">Tout le marché</h2>
+      <p class="intro">
+        Chaque marchandise suivie, avec les meilleurs points d&rsquo;achat et de revente du moment.
+        Cliquez une ligne pour ouvrir sa fiche : tous les comptoirs relevés, le stock, la date du
+        relevé et les derniers prix enregistrés.
+      </p>
+    </div>
+
+    <div class="marche__bloc revele">
+      <div class="marche__outils">
+        <label class="marche__champ">
+          <span>Chercher</span>
+          <input type="search" id="tableau-recherche" placeholder="Nom, famille, comptoir..." autocomplete="off">
+        </label>
+        <div class="marche__filtres" id="tableau-familles" role="group" aria-label="Filtrer par famille"></div>
+      </div>
+
+      <div class="marche__cadre">
+        <table class="marche__table" id="table-tout">
+          <thead>
+            <tr>
+              <th scope="col">Marchandise</th>
+              <th scope="col">Famille</th>
+              <th scope="col" class="nombre">Achat le moins cher</th>
+              <th scope="col">Où</th>
+              <th scope="col" class="nombre">Revente la mieux payée</th>
+              <th scope="col">Où</th>
+            </tr>
+          </thead>
+          <tbody><tr class="marche__vide"><td colspan="6">Lecture des relevés...</td></tr></tbody>
+        </table>
+      </div>
+
+      <p class="marche__source" id="marche-source"></p>
+    </div>
+  </div>
+</section>
+
+<div class="fiche-marche" id="fiche-marche" hidden aria-hidden="true">
+  <div class="fiche-marche__voile" data-fermer></div>
+  <div class="fiche-marche__panneau" role="dialog" aria-modal="true" aria-labelledby="fiche-titre" tabindex="-1">
+    <button type="button" class="fiche-marche__fermer" data-fermer aria-label="Fermer la fiche">×</button>
+    <p class="fiche-marche__sur" id="fiche-sur"></p>
+    <h3 id="fiche-titre"></h3>
+    <div id="fiche-corps"></div>
+  </div>
+</div>

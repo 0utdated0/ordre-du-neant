@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     Page assemblée par outils/pages/batir.js.
+     Ne rien modifier ici : tout se perd au prochain assemblage.
+     Le contenu est dans outils/pages/sections, la coquille dans
+     outils/pages/gabarit.html, la répartition dans batir.js.
+     ============================================================ -->
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Le marché - prix des minerais et routes de commerce | L'Ordre du Néant</title>
+<meta name="description" content="Prix des minerais et des marchandises dans Stanton, Pyro et Nyx : où vendre son minerai brut ou raffiné, et quelles routes d'achat et revente rapportent le plus. Relevés des joueurs, mis à jour en continu.">
+<link rel="canonical" href="https://ordre-du-neant.fr/marche">
+
+<meta property="og:type" content="website">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:site_name" content="L'Ordre du Néant">
+<meta property="og:title" content="Le marché - prix des minerais et routes de commerce | L'Ordre du Néant">
+<meta property="og:description" content="Prix des minerais et des marchandises dans Stanton, Pyro et Nyx : où vendre son minerai brut ou raffiné, et quelles routes d'achat et revente rapportent le plus. Relevés des joueurs, mis à jour en continu.">
+<meta property="og:url" content="https://ordre-du-neant.fr/marche">
+<meta property="og:image" content="https://ordre-du-neant.fr/assets/banniere-monde.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+
+<link rel="icon" href="/assets/embleme-48.png" type="image/png" sizes="48x48">
+<link rel="apple-touch-icon" href="/assets/embleme-180.png">
+<link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/styles.css?v=32168623a7">
+<!-- Sans WebGL (accélération matérielle coupée, carte graphique bloquée),
+     les scènes passent en images fixes : voir repli.js. ?sans-3d simule ce cas. -->
+<script>(function(){var d=document.documentElement,ok=false;if(/[?&]sans-3d(=|&|$)/.test(location.search)){var gc=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t){return /webgl/i.test(t)?null:gc.apply(this,arguments);};}try{var c=document.createElement('canvas'),g=c.getContext('webgl2')||c.getContext('webgl');ok=!!g;var x=g&&g.getExtension('WEBGL_lose_context');if(x){x.loseContext();}}catch(e){}if(!ok){d.className+=' sans-3d';}})();</script>
+<!-- Sortie de saut : posée par la page d'attente à l'ouverture, pour que le
+     site apparaisse en arrivée et non d'un coup. Lue avant le premier affichage. -->
+<script>try{var odnSaut=+sessionStorage.getItem('odn-arrivee');if(odnSaut&&Date.now()-odnSaut<20000){document.documentElement.className+=' arrivee';}}catch(e){}</script>
+
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://ordre-du-neant.fr/#site","url":"https://ordre-du-neant.fr/","name":"L'Ordre du Néant","alternateName":["Ordre du Néant","NEANT"],"inLanguage":"fr-FR","publisher":{"@id":"https://ordre-du-neant.fr/#organisation"}},{"@type":"Organization","@id":"https://ordre-du-neant.fr/#organisation","name":"L'Ordre du Néant","url":"https://ordre-du-neant.fr/","alternateName":"NEANT","slogan":"Tout n'est que passage","description":"Organisation Star Citizen francophone structurée en huit divisions opérationnelles.","logo":"https://ordre-du-neant.fr/assets/embleme-512.png","sameAs":["https://robertsspaceindustries.com/en/orgs/NEANT"]},{"@type":"WebPage","@id":"https://ordre-du-neant.fr/marche#page","url":"https://ordre-du-neant.fr/marche","name":"Le marché - prix des minerais et routes de commerce | L'Ordre du Néant","description":"Prix des minerais et des marchandises dans Stanton, Pyro et Nyx : où vendre son minerai brut ou raffiné, et quelles routes d'achat et revente rapportent le plus. Relevés des joueurs, mis à jour en continu.","inLanguage":"fr-FR","isPartOf":{"@id":"https://ordre-du-neant.fr/#site"},"about":{"@id":"https://ordre-du-neant.fr/#organisation"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":"https://ordre-du-neant.fr/"},{"@type":"ListItem","position":2,"name":"Le marché","item":"https://ordre-du-neant.fr/marche"}]}]}
+</script>
+</head>
+
+<body class="page-marche">
+
+<a class="evitement" href="#contenu">Aller au contenu</a>
+
+<canvas id="neant" aria-hidden="true"></canvas>
+<div class="grain" aria-hidden="true"></div>
+<div class="vignettage" aria-hidden="true"></div>
+
+<div class="barre" id="barre">
+  <a class="barre__sceau" href="/" aria-label="Accueil"><img src="/assets/embleme-120.webp" alt="" width="900" height="1251"></a>
+  <span class="barre__nom">L'Ordre du Néant</span>
+
+  <button class="barre__bouton" type="button" id="menu-bouton"
+          aria-expanded="false" aria-controls="menu" aria-label="Ouvrir le menu">
+    <span aria-hidden="true"></span><span aria-hidden="true"></span><span aria-hidden="true"></span>
+  </button>
+
+  <nav class="menu" id="menu" aria-label="Sections du site">
+        <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex">Codex</a>
+    <a href="/regle">La Règle</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/marche" aria-current="page">Le marché</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+  </nav>
+
+  <!-- Radio de l'Ordre : masquée tant que /api/radio n'a pas répondu. -->
+  <button class="radio-mini" type="button" data-radio-bouton hidden
+          aria-pressed="false" aria-label="Écouter la Radio de l'Ordre">
+    <span class="radio-mini__icone" aria-hidden="true"></span>
+    <span class="egaliseur" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    <span class="radio-mini__texte"><em>Radio</em><strong data-radio="resume">Radio de l'Ordre</strong></span>
+  </button>
+
+  <!-- Le menu a déjà une entrée « Rejoindre » qui mène à la page
+       d'admission. Ce bouton-ci ouvre le Discord : deux destinations
+       différentes ne peuvent pas porter le même mot. -->
+  <a class="barre__cta" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+</div>
+<nav class="rail" id="rail" aria-label="Sections">
+  <a href="#minerais" data-cible="minerais"><span>I</span><em>Minerais</em></a>
+  <a href="#routes" data-cible="routes"><span>II</span><em>Routes</em></a>
+  <a href="#tableau" data-cible="tableau"><span>III</span><em>Tout le marché</em></a>
+  <a href="#appel" data-cible="appel"><span>IV</span><em>Entrer</em></a>
+</nav>
+<main id="contenu">
+<section class="acte acte--texte marche" id="minerais" aria-label="les minerais">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <h1 class="titre-page balaye">Le marché</h1>
+      <p class="intro">
+        Ce que valent les minerais et les marchandises, relevé par les joueurs et republié ici.
+        Stanton, Pyro et Nyx. Un prix trop vieux ou trop beau pour être vrai est écarté avant
+        d&rsquo;arriver sur cette page.
+      </p>
+      <p class="marche__etat" id="marche-etat" role="status">Lecture des relevés...</p>
+    </div>
+
+    <div class="marche__bloc revele">
+      <div class="marche__tete">
+        <h3>Minerais</h3>
+        <p class="marche__aide">
+          Le prix brut est celui des raffineries, le prix raffiné celui des comptoirs.
+          L&rsquo;écart dit si le passage par la raffinerie vaut l&rsquo;attente.
+          Cliquez une ligne pour voir tous les points de vente et les derniers relevés.
+        </p>
+      </div>
+
+      <div class="marche__outils">
+        <label class="marche__champ">
+          <span>Chercher un minerai</span>
+          <input type="search" id="minerais-recherche" placeholder="Quartz, Taranite, Hadanite..." autocomplete="off">
+        </label>
+        <div class="marche__filtres" id="minerais-systemes" role="group" aria-label="Filtrer par système"></div>
+      </div>
+
+      <div class="marche__cadre">
+        <table class="marche__table" id="table-minerais">
+          <thead>
+            <tr>
+              <th scope="col">Minerai</th>
+              <th scope="col" class="nombre">Brut</th>
+              <th scope="col">À la raffinerie</th>
+              <th scope="col" class="nombre">Raffiné</th>
+              <th scope="col">Au comptoir</th>
+              <th scope="col" class="nombre">Écart</th>
+            </tr>
+          </thead>
+          <tbody><tr class="marche__vide"><td colspan="6">Lecture des relevés...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="acte acte--texte marche" id="routes" aria-label="les routes">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <h2 class="balaye">Les routes</h2>
+      <p class="intro">
+        Acheter ici, revendre là. Le gain est donné par SCU : multipliez-le par la soute de
+        votre appareil. Seules les routes où il reste de la marchandise en rayon sont retenues,
+        parce qu&rsquo;une route sans stock n&rsquo;existe que sur le papier.
+      </p>
+    </div>
+
+    <div class="marche__bloc revele">
+      <div class="marche__outils">
+        <label class="marche__champ">
+          <span>Chercher une marchandise</span>
+          <input type="search" id="routes-recherche" placeholder="Agricium, Carbon-Silk..." autocomplete="off">
+        </label>
+        <div class="marche__filtres" id="routes-systemes" role="group" aria-label="Filtrer par système"></div>
+        <label class="marche__bascule">
+          <input type="checkbox" id="routes-illegal">
+          <span>Afficher les marchandises illégales</span>
+        </label>
+        <label class="marche__champ marche__champ--court">
+          <span>Soute (SCU)</span>
+          <input type="number" id="routes-soute" value="96" min="1" max="4000" step="1">
+        </label>
+      </div>
+
+      <div class="marche__cadre">
+        <table class="marche__table" id="table-routes">
+          <thead>
+            <tr>
+              <th scope="col">Marchandise</th>
+              <th scope="col">Acheter</th>
+              <th scope="col">Revendre</th>
+              <th scope="col" class="nombre">Gain / SCU</th>
+              <th scope="col" class="nombre">Marge</th>
+              <th scope="col" class="nombre">Soute pleine</th>
+            </tr>
+          </thead>
+          <tbody><tr class="marche__vide"><td colspan="6">Lecture des relevés...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="acte acte--texte marche" id="tableau" aria-label="tout le marché">
+  <div class="contenu contenu--large">
+    <div class="entete entete--centre revele">
+      <h2 class="balaye">Tout le marché</h2>
+      <p class="intro">
+        Chaque marchandise suivie, avec les meilleurs points d&rsquo;achat et de revente du moment.
+        Cliquez une ligne pour ouvrir sa fiche : tous les comptoirs relevés, le stock, la date du
+        relevé et les derniers prix enregistrés.
+      </p>
+    </div>
+
+    <div class="marche__bloc revele">
+      <div class="marche__outils">
+        <label class="marche__champ">
+          <span>Chercher</span>
+          <input type="search" id="tableau-recherche" placeholder="Nom, famille, comptoir..." autocomplete="off">
+        </label>
+        <div class="marche__filtres" id="tableau-familles" role="group" aria-label="Filtrer par famille"></div>
+      </div>
+
+      <div class="marche__cadre">
+        <table class="marche__table" id="table-tout">
+          <thead>
+            <tr>
+              <th scope="col">Marchandise</th>
+              <th scope="col">Famille</th>
+              <th scope="col" class="nombre">Achat le moins cher</th>
+              <th scope="col">Où</th>
+              <th scope="col" class="nombre">Revente la mieux payée</th>
+              <th scope="col">Où</th>
+            </tr>
+          </thead>
+          <tbody><tr class="marche__vide"><td colspan="6">Lecture des relevés...</td></tr></tbody>
+        </table>
+      </div>
+
+      <p class="marche__source" id="marche-source"></p>
+    </div>
+  </div>
+</section>
+
+<div class="fiche-marche" id="fiche-marche" hidden aria-hidden="true">
+  <div class="fiche-marche__voile" data-fermer></div>
+  <div class="fiche-marche__panneau" role="dialog" aria-modal="true" aria-labelledby="fiche-titre" tabindex="-1">
+    <button type="button" class="fiche-marche__fermer" data-fermer aria-label="Fermer la fiche">×</button>
+    <p class="fiche-marche__sur" id="fiche-sur"></p>
+    <h3 id="fiche-titre"></h3>
+    <div id="fiche-corps"></div>
+  </div>
+</div>
+
+<section class="acte acte--appel" id="appel">
+  <div class="contenu contenu--centre">
+    <p class="appel__devise revele">Tout n'est que passage</p>
+    <h2 class="revele balaye">Entrer dans l'Ordre</h2>
+    <p class="chapeau revele">
+      Nous sommes une organisation jeune, encore réduite. Si vous préférez compter parmi les premiers plutôt que d'être le quatre-centième nom d'une liste, le moment est maintenant.
+    </p>
+    <div class="portes portes--bas revele">
+      <a class="porte porte--pleine" href="https://discord.gg/6UWSwhzeFY" rel="noopener">Rejoindre le Discord</a>
+      <a class="porte" href="/rejoindre">Comment entrer</a>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="pied">
+    <p class="devise-pied">Tout n'est que passage</p>
+    <p class="pied__resume">
+      L'Ordre du Néant est une <a href="/ordre">organisation Star Citizen francophone</a> :
+      huit <a href="/divisions">divisions</a>, une <a href="/regle">règle écrite</a>,
+      des <a href="/vie">opérations en groupe</a> et un
+      <a href="/rejoindre">recrutement ouvert aux joueurs majeurs</a>.
+    </p>
+    <nav class="pied__plan" aria-label="Plan du site">
+          <a href="/">Histoire</a>
+    <a href="/ordre">L'Ordre</a>
+    <a href="/codex">Codex</a>
+    <a href="/regle">La Règle</a>
+    <a href="/divisions">Divisions</a>
+    <a href="/flotte">La flotte</a>
+    <a href="/marche" aria-current="page">Le marché</a>
+    <a href="/vie">La vie</a>
+    <a href="/rejoindre">Rejoindre</a>
+    </nav>
+    <nav aria-label="Liens de l'Ordre">
+      <a href="https://discord.gg/6UWSwhzeFY" rel="noopener">Discord</a>
+      <a href="https://robertsspaceindustries.com/en/orgs/NEANT" rel="noopener">RSI</a>
+      <a href="mailto:contact@ordre-du-neant.fr">contact@ordre-du-neant.fr</a>
+    </nav>
+    <p class="mention">
+      Site non officiel, sans but lucratif, sans affiliation avec Cloud Imperium
+      Games. Star Citizen, Roberts Space Industries et les noms de vaisseaux sont
+      des marques de Cloud Imperium Rights LLC. Les modèles 3D présentés ici
+      proviennent du holoviewer de Roberts Space Industries et restent la
+      propriété de leur éditeur. La station Le Seuil est une conception propre à
+      l'Ordre. Fait par la communauté.
+    </p>
+  </div>
+</footer>
+
+<script src="/vendor/three.min.js?v=7a7802bf4f" defer></script>
+<script src="/scene.js?v=5839ff321f" defer></script>
+<script src="/site.js?v=35d1ad2fea" defer></script>
+<script src="/marche.js?v=941497c828" defer></script>
+<script src="/repli.js?v=2ef3c97172" defer></script>
+<script src="/radio.js?v=9bcf92d61d" defer></script>
+</body>
+</html>

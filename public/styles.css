@@ -3158,6 +3158,118 @@ html.arrivee::after{
 .pied__resume a:hover{color:#fff;border-color:#e01020}
 
 /* =========================================================
+   LE MARCHÉ
+   ---------------------------------------------------------
+   Trois tableaux de chiffres. Tout l'enjeu est la lisibilité :
+   colonnes alignées, nombres à droite, lieu en gris sous le
+   prix, et une ligne cliquable qui ouvre la fiche complète.
+   ========================================================= */
+.marche__bloc{margin-top:clamp(2rem,5vw,3.5rem)}
+.marche__etat{
+  margin-top:1.2rem;font-size:.86rem;color:var(--cendre);
+}
+.marche__tete h3,.marche__bloc h3{
+  font-family:var(--titre);font-size:1.1rem;letter-spacing:.08em;text-transform:uppercase;
+  margin:0 0 .6rem;color:var(--argent);
+}
+.marche__aide{color:rgba(238,240,244,.7);font-size:.92rem;max-width:70ch;margin:0 0 1.4rem}
+
+.marche__outils{
+  display:flex;flex-wrap:wrap;gap:1rem 1.6rem;align-items:flex-end;
+  margin-bottom:1.2rem;padding-bottom:1.2rem;
+  border-bottom:1px solid rgba(238,240,244,.1);
+}
+.marche__champ{display:flex;flex-direction:column;gap:.35rem;min-width:min(16rem,100%)}
+.marche__champ--court{min-width:7rem}
+.marche__champ span{
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.24em;text-transform:uppercase;color:var(--cendre);
+}
+.marche__champ input{
+  background:rgba(238,240,244,.05);border:1px solid rgba(238,240,244,.16);
+  color:var(--argent);font-family:var(--texte);font-size:.95rem;padding:.55rem .7rem;
+}
+.marche__champ input:focus-visible{outline:1px solid var(--rouge);outline-offset:1px}
+.marche__filtres{display:flex;flex-wrap:wrap;gap:.4rem}
+.marche__filtre{
+  font-family:var(--titre);font-size:.54rem;letter-spacing:.18em;text-transform:uppercase;
+  padding:.5rem .8rem;cursor:pointer;
+  background:transparent;border:1px solid rgba(238,240,244,.18);color:var(--cendre);
+}
+.marche__filtre:hover{color:var(--argent);border-color:rgba(238,240,244,.4)}
+.marche__filtre--actif{background:var(--rouge);border-color:var(--rouge);color:#fff}
+.marche__bascule{display:flex;align-items:center;gap:.5rem;font-size:.86rem;color:rgba(238,240,244,.74)}
+.marche__bascule input{accent-color:var(--rouge);width:1rem;height:1rem}
+
+.marche__cadre{overflow-x:auto;border:1px solid rgba(238,240,244,.1);background:rgba(3,3,5,.6)}
+.marche__table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:52rem}
+.marche__table th{
+  position:sticky;top:0;z-index:2;
+  background:#0a0a0d;
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--cendre);text-align:left;font-weight:400;
+  padding:.8rem .9rem;border-bottom:1px solid rgba(238,240,244,.14);
+}
+.marche__table td{padding:.7rem .9rem;border-bottom:1px solid rgba(238,240,244,.06);vertical-align:top}
+.marche__table .nombre{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.marche__table tbody tr:nth-child(even){background:rgba(238,240,244,.02)}
+.marche__ligne{cursor:pointer;transition:background .18s}
+.marche__ligne:hover,.marche__ligne:focus-visible{background:rgba(224,16,32,.1);outline:none}
+.marche__prix{display:block;color:var(--argent);font-variant-numeric:tabular-nums}
+.marche__lieu{display:block;color:rgba(238,240,244,.82)}
+.marche__detail{display:block;font-size:.76rem;color:var(--cendre);margin-top:.15rem}
+.marche__gain{color:var(--braise)}
+.marche__vide td{color:var(--cendre);text-align:center;padding:2rem}
+.marche__marque{
+  display:inline-block;margin-left:.5rem;padding:.1rem .4rem;
+  font-family:var(--titre);font-size:.44rem;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--cendre);border:1px solid rgba(238,240,244,.2);vertical-align:middle;
+}
+.marche__marque--rouge{color:var(--braise);border-color:rgba(224,16,32,.5)}
+.marche__source{margin-top:1.2rem;font-size:.8rem;color:var(--cendre)}
+.marche__source a{color:var(--argent)}
+
+/* la fiche d'une marchandise */
+.fiche-marche{position:fixed;inset:0;z-index:210;display:flex;align-items:center;justify-content:center;padding:1rem}
+.fiche-marche[hidden]{display:none}
+.fiche-marche__voile{position:absolute;inset:0;background:rgba(0,0,0,.8)}
+.fiche-marche__panneau{
+  position:relative;z-index:1;
+  width:min(44rem,100%);max-height:min(84vh,56rem);overflow:auto;
+  padding:1.8rem clamp(1.2rem,3vw,2.2rem) 2rem;
+  background:#06060a;border:1px solid rgba(238,240,244,.14);border-left:2px solid var(--rouge);
+}
+.fiche-marche__panneau:focus-visible{outline:none}
+.fiche-marche__fermer{
+  position:absolute;top:.6rem;right:.8rem;
+  background:none;border:0;color:var(--cendre);font-size:1.6rem;line-height:1;cursor:pointer;
+}
+.fiche-marche__fermer:hover{color:var(--argent)}
+.fiche-marche__sur{
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.26em;text-transform:uppercase;
+  color:var(--rouge);margin:0 0 .3rem;
+}
+.fiche-marche__panneau h3{
+  font-family:var(--titre);font-size:1.3rem;letter-spacing:.04em;margin:0 0 1rem;color:var(--argent);
+}
+.fiche-marche__resume{color:rgba(238,240,244,.78);font-size:.92rem;margin:0 0 1.2rem}
+.fiche-marche__bloc{margin-bottom:1.6rem}
+.fiche-marche__bloc h4{
+  font-family:var(--titre);font-size:.54rem;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--cendre);margin:0 0 .6rem;
+}
+.fiche-marche__offres{list-style:none;margin:0;padding:0;display:grid;gap:.5rem}
+.fiche-marche__offres li{font-size:.88rem;color:rgba(238,240,244,.76);border-bottom:1px solid rgba(238,240,244,.06);padding-bottom:.45rem}
+.fiche-marche__offres strong{color:var(--argent);font-weight:400;font-variant-numeric:tabular-nums}
+.fiche-marche__rien{color:var(--cendre);font-size:.88rem;margin:0}
+.fiche-marche__courbe{width:100%;height:auto;background:rgba(238,240,244,.03);border:1px solid rgba(238,240,244,.08)}
+.fiche-marche__lien{color:var(--argent);font-size:.86rem}
+
+@media (max-width:860px){
+  .marche__table{min-width:44rem;font-size:.84rem}
+  .marche__outils{gap:.8rem 1rem}
+}
+
+/* =========================================================
    SANS 3D  (WebGL refusé par le navigateur, voir repli.js)
    ---------------------------------------------------------
    Chaque scène garde sa place et montre une image fixe prise

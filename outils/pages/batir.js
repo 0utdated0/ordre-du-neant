@@ -134,6 +134,16 @@ const PAGES = [
     scripts: ['trois', 'coques', 'vaisseaux', 'scene', 'flotte', 'site']
   },
   {
+    cle: 'marche', fichier: 'marche.html', url: '/marche',
+    menu: 'Le marché',
+    titre: "Le marché - prix des minerais et routes de commerce | L'Ordre du Néant",
+    description: "Prix des minerais et des marchandises dans Stanton, Pyro et Nyx : où vendre son minerai brut ou raffiné, et quelles routes d'achat et revente rapportent le plus. Relevés des joueurs, mis à jour en continu.",
+    sections: ['marche-minerais', 'marche-routes', 'marche-tableau', ':appel'],
+    rail: [['minerais', 'I', 'Minerais'], ['routes', 'II', 'Routes'],
+           ['tableau', 'III', 'Tout le marché'], ['appel', 'IV', 'Entrer']],
+    scripts: ['trois', 'scene', 'site', 'marche']
+  },
+  {
     cle: 'vie', fichier: 'vie.html', url: '/vie',
     menu: 'La vie',
     titre: "La vie de l'Ordre - effectif, opérations, galerie | L'Ordre du Néant",
@@ -171,7 +181,7 @@ const FICHIERS = {
   repli: 'repli.js', trois: 'vendor/three.min.js', coques: 'coques.js', vaisseaux: 'vaisseaux.js',
   scene: 'scene.js', approche: 'approche.js', flotte: 'flotte.js', saut: 'saut.js',
   ascension: 'ascension.js', plongee: 'plongee.js', site: 'site.js', vigie: 'vigie.js',
-  radio: 'radio.js', acte3d: 'acte3d.js', travaux: 'travaux.js', convoi: 'convoi.js',
+  marche: 'marche.js', radio: 'radio.js', acte3d: 'acte3d.js', travaux: 'travaux.js', convoi: 'convoi.js',
   extraction: 'extraction.js', recuperation: 'recuperation.js', ligne: 'ligne.js',
   vitesse: 'vitesse.js', appontage: 'appontage.js'
 };
