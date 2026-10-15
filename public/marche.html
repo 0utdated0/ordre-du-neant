@@ -105,8 +105,11 @@
       <div class="marche__tete">
         <h3>Minerais</h3>
         <p class="marche__aide">
-          Le prix brut est celui des raffineries, le prix raffiné celui des comptoirs.
-          L&rsquo;écart dit si le passage par la raffinerie vaut l&rsquo;attente.
+          Le prix brut est celui que paient les raffineries, le prix raffiné celui des comptoirs,
+          et l&rsquo;écart dit si le passage par la raffinerie vaut l&rsquo;attente.
+          Les gemmes, elles, ne se raffinent pas : marquées <em>gemme</em>, elles se vendent
+          telles quelles au comptoir, ce qui explique une ligne sans colonne raffinée.
+          L&rsquo;écart n&rsquo;apparaît que si les deux prix existent.
           Cliquez une ligne pour voir tous les points de vente et les derniers relevés.
           Une case vide veut dire qu&rsquo;aucun relevé n&rsquo;existe, pas que le prix est nul :
           tout vient de ce que les joueurs remontent.
@@ -127,9 +130,9 @@
             <tr>
               <th scope="col">Minerai</th>
               <th scope="col" class="nombre">Brut</th>
-              <th scope="col">À la raffinerie</th>
+              <th scope="col">Où vendre le brut</th>
               <th scope="col" class="nombre">Raffiné</th>
-              <th scope="col">Au comptoir</th>
+              <th scope="col">Où vendre le raffiné</th>
               <th scope="col" class="nombre">Écart</th>
             </tr>
           </thead>
@@ -292,7 +295,7 @@
 <script src="/vendor/three.min.js?v=7a7802bf4f" defer></script>
 <script src="/scene.js?v=5839ff321f" defer></script>
 <script src="/site.js?v=35d1ad2fea" defer></script>
-<script src="/marche.js?v=47118c7092" defer></script>
+<script src="/marche.js?v=b959425b70" defer></script>
 <script src="/repli.js?v=2ef3c97172" defer></script>
 <script src="/radio.js?v=9bcf92d61d" defer></script>
 </body>

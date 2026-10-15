@@ -70,6 +70,16 @@
     var nom = document.createElement('span');
     nom.className = 'marche__lieu';
     nom.textContent = o.comptoir.nom;
+    /* Dire si l'acheteur est une raffinerie ou un comptoir : sans ça,
+       une ligne de gemme vendue au comptoir se lisait comme un prix de
+       raffinerie, et la colonne raffinée vide n'avait plus de sens. */
+    if (o.comptoir.raffinerie) {
+      var marque = document.createElement('span');
+      marque.className = 'marche__marque';
+      marque.textContent = 'raffinerie';
+      nom.appendChild(document.createTextNode(' '));
+      nom.appendChild(marque);
+    }
     var det = document.createElement('span');
     det.className = 'marche__detail';
     det.textContent = [o.comptoir.lieu, o.comptoir.systeme].filter(Boolean).join(' · ') + ' · ' + age(o.maj);
