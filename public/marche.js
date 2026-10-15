@@ -49,6 +49,15 @@
     return c;
   }
 
+  /* Un prix sans le lieu ne sert à rien, et une case vide ne dit pas
+     pourquoi elle est vide. Quand il n'y a pas d'offre, les deux
+     colonnes portent donc la raison et, quand il y en a une, la marche
+     à suivre : à raffiner, se vend brute, ne s'achète pas. */
+  function paireVide(ligne, raisonPrix, raisonLieu) {
+    ligne.appendChild(td(raisonPrix, 'nombre marche__absent'));
+    ligne.appendChild(td(raisonLieu, 'marche__absent'));
+  }
+
   function cellLieu(o, prix) {
     if (!o) { return td('pas de relevé', 'marche__absent'); }
     var c = document.createElement('td');
@@ -266,11 +275,24 @@
       }
       tr.appendChild(nom);
 
-      tr.appendChild(td(b ? aUEC(b.prix) : '-', 'nombre' + (b ? '' : ' marche__absent')));
-      tr.appendChild(cellLieu(b));
-      tr.appendChild(td(r ? aUEC(r.prix) : '-', 'nombre' + (r ? '' : ' marche__absent')));
-      tr.appendChild(cellLieu(r));
-      tr.appendChild(td(m.gainRaffinage === null ? '-' : '+' + m.gainRaffinage + ' %', 'nombre marche__gain'));
+      if (b) {
+        tr.appendChild(td(aUEC(b.prix), 'nombre'));
+        tr.appendChild(cellLieu(b));
+      } else {
+        paireVide(tr, 'à raffiner', 'aucune raffinerie ne l\'achète brut');
+      }
+
+      if (r) {
+        tr.appendChild(td(aUEC(r.prix), 'nombre'));
+        tr.appendChild(cellLieu(r));
+      } else if (m.gemme) {
+        paireVide(tr, 'se vend brute', 'sans passer par la raffinerie');
+      } else {
+        paireVide(tr, 'pas de relevé', 'aucun comptoir relevé');
+      }
+      tr.appendChild(m.gainRaffinage === null
+        ? td(m.gemme ? 'sans objet' : 'inconnu', 'nombre marche__absent')
+        : td('+' + m.gainRaffinage + ' %', 'nombre marche__gain'));
 
       var ouvrir = function () {
         var meilleur = r || b;
@@ -368,10 +390,19 @@
       }
       tr.appendChild(nom);
       tr.appendChild(td(m.nature || '-'));
-      tr.appendChild(td(a ? aUEC(a.prix) : '-', 'nombre' + (a ? '' : ' marche__absent')));
-      tr.appendChild(cellLieu(a));
-      tr.appendChild(td(v ? aUEC(v.prix) : '-', 'nombre' + (v ? '' : ' marche__absent')));
-      tr.appendChild(cellLieu(v));
+      if (a) {
+        tr.appendChild(td(aUEC(a.prix), 'nombre'));
+        tr.appendChild(cellLieu(a));
+      } else {
+        paireVide(tr, 'ne s\'achète pas', m.brute ? 'elle se ramasse, elle ne s\'achète pas' : 'aucun comptoir ne la vend');
+      }
+
+      if (v) {
+        tr.appendChild(td(aUEC(v.prix), 'nombre'));
+        tr.appendChild(cellLieu(v));
+      } else {
+        paireVide(tr, 'pas de relevé', 'aucun comptoir ne la reprend');
+      }
 
       var ouvrir = function () {
         var meilleur = v || a;
