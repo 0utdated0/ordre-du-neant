@@ -533,13 +533,18 @@ export default {
     /* Les fichiers de public/ sont normalement servis avant même
        d'atteindre le Worker. Ce renvoi couvre le reste, et produit
        le 404 des assets pour une adresse inconnue. */
-    let reponse = await env.ASSETS.fetch(request);
+    /* « fichier » et non « reponse » : une variable locale du même nom
+       que la fonction reponse() plus bas l'éclipsait dans toute la
+       méthode. Toute utilisation de reponse() avant cette ligne levait
+       alors « Cannot access before initialization », c'est-à-dire la
+       page d'erreur 1101 de Cloudflare, sans autre explication. */
+    const fichier = await env.ASSETS.fetch(request);
 
     /* Adresse inconnue : la page 404 de l'Ordre, avec son vrai statut,
        plutôt que la réponse vide de Cloudflare. Seulement pour une
        page demandée par un navigateur ; un fichier manquant (image,
        script) garde un 404 nu. */
-    if (reponse.status === 404 && request.method === 'GET' &&
+    if (fichier.status === 404 && request.method === 'GET' &&
         (request.headers.get('Accept') || '').includes('text/html')) {
       const page = await env.ASSETS.fetch(new URL('/404.html', url.origin));
       if (page.ok) {
@@ -561,13 +566,13 @@ export default {
        rien n'a bougé. Les coques, polices, images et bibliothèques
        gardent leur cache long (voir _headers). */
     if (aRevalider(url.pathname)) {
-      const entetes = new Headers(reponse.headers);
+      const entetes = new Headers(fichier.headers);
       entetes.set('Cache-Control', 'no-cache');
-      return new Response(reponse.body, {
-        status: reponse.status, statusText: reponse.statusText, headers: entetes,
+      return new Response(fichier.body, {
+        status: fichier.status, statusText: fichier.statusText, headers: entetes,
       });
     }
-    return reponse;
+    return fichier;
   },
 };
 
