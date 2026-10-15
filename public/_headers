@@ -25,3 +25,9 @@
 # Le jeu d'exemple ne doit pas masquer les vraies données.
 /exemple/*
   Cache-Control: public, max-age=60
+
+# Clé IndexNow : un fichier texte que Bing vient lire pour vérifier
+# que le site et le bot qui le signale sont bien la même maison.
+/310aeec1ef8d2edf2626e3cf143476d2.txt
+  Content-Type: text/plain; charset=utf-8
+  Cache-Control: public, max-age=86400

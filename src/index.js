@@ -1093,6 +1093,71 @@ function construireMarche(brut) {
   };
 }
 
+/* --------------------------------------------------------
+   L'histoire des prix
+   --------------------------------------------------------
+   UEX ne garde que cinq relevés par comptoir : de quoi voir
+   si un prix vient de bouger, pas de quoi suivre une tendance.
+   On garde donc notre propre trace, un instantané par jour,
+   dans l'espace KV du Worker.
+
+   Sans espace KV déclaré, tout ce qui suit ne fait rien : le
+   site marche comme avant, avec les seuls relevés d'UEX. Pour
+   l'activer, déclarer un espace KV nommé MARCHE_HISTOIRE.
+   -------------------------------------------------------- */
+const JOURS_GARDES = 180;
+
+const jourDe = (d) => new Date(d).toISOString().slice(0, 10);
+
+async function noterInstantane(env, marche) {
+  if (!env.MARCHE_HISTOIRE) return;
+  const jour = jourDe(Date.now());
+  const deja = await env.MARCHE_HISTOIRE.get('jour:' + jour);
+  if (deja) return;
+
+  /* Un instantané ne garde que l'essentiel : le meilleur prix de
+     vente et le meilleur prix d'achat du jour, par marchandise.
+     Tout le détail des comptoirs ferait des mégaoctets pour rien. */
+  const releve = {};
+  marche.tableau.forEach((m) => {
+    const vente = m.ventes[0]?.prix ?? 0;
+    const achat = m.achats[0]?.prix ?? 0;
+    if (!vente && !achat) return;
+    releve[m.id] = [vente, achat];
+  });
+
+  await env.MARCHE_HISTOIRE.put('jour:' + jour, JSON.stringify(releve), {
+    expirationTtl: JOURS_GARDES * 86400,
+  });
+
+  /* Un index des jours connus, pour relire sans lister la base. */
+  const brut = await env.MARCHE_HISTOIRE.get('jours');
+  const jours = brut ? JSON.parse(brut) : [];
+  if (!jours.includes(jour)) {
+    jours.push(jour);
+    jours.sort();
+    while (jours.length > JOURS_GARDES) jours.shift();
+    await env.MARCHE_HISTOIRE.put('jours', JSON.stringify(jours));
+  }
+}
+
+async function histoireGardee(env, idMarchandise) {
+  if (!env.MARCHE_HISTOIRE) return [];
+  const brut = await env.MARCHE_HISTOIRE.get('jours');
+  if (!brut) return [];
+  const jours = JSON.parse(brut).slice(-90);
+  const lus = await Promise.all(jours.map((j) => env.MARCHE_HISTOIRE.get('jour:' + j)));
+  const serie = [];
+  lus.forEach((texte, i) => {
+    if (!texte) return;
+    const releve = JSON.parse(texte);
+    const valeur = releve[idMarchandise];
+    if (!valeur) return;
+    serie.push({ date: Date.parse(jours[i] + 'T12:00:00Z'), vente: valeur[0], achat: valeur[1], garde: true });
+  });
+  return serie;
+}
+
 async function servirMarche(request, env, ctx) {
   const cache = caches.default;
   const cle = new Request(new URL(request.url).origin + '/api/marche', { method: 'GET' });
@@ -1114,6 +1179,10 @@ async function servirMarche(request, env, ctx) {
        message et le site affiche la raison. */
     return reponse({ erreur: 'marche', message: String(e && e.message || e) }, 502, 60);
   }
+
+  /* L'instantané part en arrière-plan : il ne doit pas retarder
+     la réponse, et un échec de KV ne doit rien casser. */
+  ctx.waitUntil(noterInstantane(env, corps).catch((e) => console.error('histoire marché:', e.message)));
 
   const sortie = reponse(corps, 200, MARCHE_CACHE_SECONDES);
   ctx.waitUntil(cache.put(cle, sortie.clone()));
@@ -1140,17 +1209,23 @@ async function servirMarcheHistorique(request, env, ctx) {
     return reponse({ erreur: 'historique', message: String(e && e.message || e) }, 502, 60);
   }
 
+  const recents = releves.map((r) => ({
+    date: (r.date_added || 0) * 1000,
+    achat: r.price_buy || 0,
+    vente: r.price_sell || 0,
+    stock: r.scu_sell_stock || 0,
+    version: r.game_version || null,
+  }));
+
+  /* Nos instantanés d'abord, les relevés d'UEX ensuite : les
+     premiers donnent la tendance, les seconds le détail récent. */
+  const gardes = await histoireGardee(env, c).catch(() => []);
   const corps = {
     maj: new Date().toISOString(),
     marchandise: releves[0]?.commodity_name || null,
     comptoir: releves[0]?.terminal_name || null,
-    releves: releves.map((r) => ({
-      date: (r.date_added || 0) * 1000,
-      achat: r.price_buy || 0,
-      vente: r.price_sell || 0,
-      stock: r.scu_sell_stock || 0,
-      version: r.game_version || null,
-    })).sort((a, b) => a.date - b.date),
+    joursGardes: gardes.length,
+    releves: [...gardes, ...recents].sort((a, b) => a.date - b.date),
   };
 
   const sortie = reponse(corps, 200, 3600);
