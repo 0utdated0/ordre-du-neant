@@ -492,12 +492,24 @@ export default {
     }
     /* Le marché : prix des minerais et des marchandises. Le bot lit
        la même adresse, pour que Discord et le site disent la même
-       chose au même moment. */
-    if (url.pathname === '/api/marche') {
-      return servirMarche(request, env, ctx, reponse);
-    }
-    if (url.pathname === '/api/marche/historique') {
-      return servirMarcheHistorique(request, env, ctx, reponse);
+       chose au même moment.
+
+       Le filet : sans lui, une erreur ici rendait la page d'erreur de
+       Cloudflare, en anglais et sans rien dire de ce qui a cassé. Le
+       site et le bot reçoivent maintenant la raison en clair, et le
+       bot garde son dernier message au lieu d'afficher du vide. */
+    if (url.pathname === '/api/marche' || url.pathname === '/api/marche/historique') {
+      try {
+        return url.pathname === '/api/marche'
+          ? await servirMarche(request, env, ctx, reponse)
+          : await servirMarcheHistorique(request, env, ctx, reponse);
+      } catch (e) {
+        return reponse({
+          erreur: 'marche',
+          message: String((e && e.message) || e),
+          pile: String((e && e.stack) || '').split('\n').slice(0, 4),
+        }, 502, 0);
+      }
     }
     if (url.pathname === '/api/radio') {
       return servirRadio(request, env, ctx);
