@@ -37,6 +37,17 @@
     "OUVERTURE": "2026-09-16T18:00:00+02:00"
   },
 
+  // Histoire des prix du marché : un instantané par jour, gardé 180
+  // jours, pour tracer des courbes plus longues que les cinq relevés
+  // qu'UEX veut bien donner. Sans ce namespace le site fonctionne
+  // quand même, il se contente de la source.
+  "kv_namespaces": [
+    {
+      "binding": "MARCHE_HISTOIRE",
+      "id": "912c3fbe0489455493c5c0c749a31f71"
+    }
+  ],
+
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
