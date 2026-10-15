@@ -964,6 +964,19 @@ function construireMarche(brut) {
   const parNom = new Map();
   marchandises.forEach((m) => parNom.set(m.name.toLowerCase(), m));
 
+  /* « Pas de prix » ne veut pas dire la même chose selon les cas : soit
+     personne n'a relevé le prix depuis longtemps, soit cette forme ne
+     se vend nulle part. Le Diamant brut, le Jaclium raffiné n'existent
+     sur aucun comptoir, et annoncer « pas de relevé » laissait croire
+     à un trou dans les données. On regarde donc tout le jeu de
+     données, avant filtre de système et d'âge, pour savoir si la forme
+     se négocie quelque part. */
+  const negocieBrut = new Set();
+  prixBruts.forEach((p) => { if (p.price_sell > 0) negocieBrut.add(p.id_commodity); });
+  prix.forEach((p) => { if (p.price_sell > 0) negocieBrut.add(p.id_commodity); });
+  const negocieComptoir = new Set();
+  prix.forEach((p) => { if (p.price_sell > 0) negocieComptoir.add(p.id_commodity); });
+
   /* Ce que l'API range en « brut » ne sort pas tout d'un gisement :
      la glace de carburant, les gravats de chantier et les déchets
      n'intéressent pas l'Extraction. */
@@ -995,6 +1008,10 @@ function construireMarche(brut) {
         code: m.code,
         nature: m.kind,
         gemme,
+        /* Ce que le marché connaît de cette matière, indépendamment
+           des relevés récents. */
+        brutNegocie: negocieBrut.has(m.id),
+        raffineNegocie: !!raffine && negocieComptoir.has(raffine.id),
         brut: brutes,
         raffine: nettes,
         gainRaffinage: gain,

@@ -285,36 +285,54 @@
       }
       tr.appendChild(nom);
 
+      /* Trois situations, trois phrases : la forme ne se vend nulle
+         part, elle se vend mais personne ne l'a relevée récemment, ou
+         le prix est là. Les deux premières ne doivent jamais se lire
+         pareil. */
       if (b) {
         tr.appendChild(td(aUEC(b.prix), 'nombre'));
         tr.appendChild(cellLieu(b));
+      } else if (m.brutNegocie) {
+        paireVide(tr, 'pas de relevé', 'aucune raffinerie relevée');
       } else {
-        paireVide(tr, 'à raffiner', 'aucune raffinerie ne l\'achète brut');
+        paireVide(tr, 'ne se vend pas brut', 'il faut le raffiner');
       }
 
       if (r) {
         tr.appendChild(td(aUEC(r.prix), 'nombre'));
         tr.appendChild(cellLieu(r));
-      } else if (m.gemme) {
-        paireVide(tr, 'se vend brute', 'sans passer par la raffinerie');
-      } else {
+      } else if (m.raffineNegocie) {
         paireVide(tr, 'pas de relevé', 'aucun comptoir relevé');
+      } else {
+        paireVide(tr, 'se vend brut', 'sans passer par la raffinerie');
       }
+      /* L'écart n'a de sens que si les deux formes se vendent. Pour
+         une gemme, pour le Jaclium, pour un minerai qui ne part qu'une
+         fois raffiné, il n'y a rien à comparer : « sans objet ». On ne
+         dit « inconnu » que lorsque la comparaison existe mais qu'un
+         prix manque au relevé. */
+      var comparable = m.brutNegocie && m.raffineNegocie;
       tr.appendChild(m.gainRaffinage === null
-        ? td(m.gemme ? 'sans objet' : 'inconnu', 'nombre marche__absent')
+        ? td(comparable ? 'inconnu' : 'sans objet', 'nombre marche__absent')
         : td('+' + m.gainRaffinage + ' %', 'nombre marche__gain'));
 
       var ouvrir = function () {
         var meilleur = r || b;
         ouvrirFiche(m.nom, m.gemme ? 'Gemme' : 'Minerai', function (hote) {
+          var p = document.createElement('p');
+          p.className = 'fiche-marche__resume';
           if (m.gainRaffinage !== null) {
-            var p = document.createElement('p');
-            p.className = 'fiche-marche__resume';
             p.textContent = 'Raffiner rapporte ' + m.gainRaffinage + ' % de plus que vendre brut, au mieux de chaque relevé.';
-            hote.appendChild(p);
+          } else if (!m.raffineNegocie) {
+            p.textContent = 'Aucune forme raffinée ne se négocie : il se vend tel qu\'il sort du sol.';
+          } else if (!m.brutNegocie) {
+            p.textContent = 'Aucune raffinerie ne l\'achète brut : il faut le raffiner avant de le vendre.';
+          } else {
+            p.textContent = 'Il manque un des deux prix au relevé : la comparaison brut contre raffiné attendra.';
           }
-          hote.appendChild(listeOffres(m.gemme ? 'Où la vendre' : 'Brut, à la raffinerie', m.brut));
-          if (!m.gemme) { hote.appendChild(listeOffres('Raffiné, au comptoir', m.raffine)); }
+          hote.appendChild(p);
+          hote.appendChild(listeOffres(m.raffineNegocie ? 'Brut, à la raffinerie' : 'Où le vendre', m.brut));
+          if (m.raffineNegocie) { hote.appendChild(listeOffres('Raffiné, au comptoir', m.raffine)); }
         }, meilleur ? { marchandise: meilleur.idMarchandise, comptoir: meilleur.idComptoir } : null);
       };
       tr.addEventListener('click', ouvrir);
