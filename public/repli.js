@@ -114,6 +114,11 @@
   /* ---------------------------------------------------------
      L'encart : comment réactiver WebGL
      --------------------------------------------------------- */
+  /* Le visiteur qui a coupé les animations lui-même sait déjà pourquoi
+     la 3D a disparu : lui expliquer comment réactiver WebGL serait un
+     contresens. */
+  if (racine.classList.contains('sobre')) { return; }
+
   var CLE = 'odn-sans-3d-vu';
   var SEMAINE = 7 * 24 * 3600 * 1000;
   try {

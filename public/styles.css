@@ -3318,6 +3318,35 @@ html.sans-3d .division__effectif::before,html.sans-3d .egaliseur i,
 html.sans-3d .radio-active .poste__onde,html.sans-3d .sceau-regle__article,html.sans-3d .sceau-regle__balai,
 html.sans-3d .poste__direct::before{animation:none}
 
+/* Le bouton qui coupe les animations : discret, toujours au même
+   endroit, et lisible sur un fond noir comme sur une scène claire. */
+.sobre-bouton{
+  position:fixed;right:16px;bottom:16px;z-index:65;
+  display:flex;align-items:center;gap:.5rem;
+  padding:.6rem .85rem;cursor:pointer;
+  background:rgba(5,5,8,.92);
+  border:1px solid rgba(238,240,244,.16);
+  color:var(--cendre);
+  font-family:var(--titre);font-size:.5rem;letter-spacing:.2em;text-transform:uppercase;
+  transition:color .2s,border-color .2s,background .2s;
+}
+.sobre-bouton:hover{color:var(--argent);border-color:rgba(238,240,244,.4)}
+.sobre-bouton:focus-visible{outline:1px solid var(--rouge);outline-offset:2px}
+.sobre-bouton[aria-pressed="true"]{border-color:rgba(224,16,32,.55);color:var(--argent)}
+.sobre-bouton__marque{font-size:.9rem;line-height:1;color:var(--rouge)}
+@media (max-width:620px){
+  .sobre-bouton{right:12px;bottom:12px;padding:.55rem .6rem}
+  .sobre-bouton__texte{display:none}
+}
+/* Mode sobre : plus rien ne bouge de soi-même. Les images fixes des
+   scènes viennent déjà du mode sans 3D. */
+html.sobre *,html.sobre *::before,html.sobre *::after{
+  animation:none!important;
+  transition:none!important;
+  scroll-behavior:auto!important;
+}
+html.sobre .fragment,html.sobre .revele,html.sobre .echelon{opacity:1!important;transform:none!important;filter:none!important}
+
 .sans3d{
   position:fixed;left:16px;bottom:16px;z-index:70;
   width:min(26rem,calc(100vw - 32px));

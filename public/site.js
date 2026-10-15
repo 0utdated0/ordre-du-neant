@@ -6,6 +6,63 @@
 (function () {
   'use strict';
 
+  /* ---------------------------------------------------------
+     Le bouton des animations
+     ---------------------------------------------------------
+     Les scènes 3D, le grain et les fondus coûtent cher sur une
+     machine modeste. Plutôt que de laisser le visiteur subir
+     douze images par seconde, il coupe tout d'un clic : le site
+     repasse sur ses images fixes, comme quand WebGL manque.
+
+     Le choix est retenu d'une visite à l'autre, et la page se
+     recharge : une scène déjà montée ne se démonte pas
+     proprement, et un rechargement vaut mieux qu'une page à
+     moitié éteinte.
+     --------------------------------------------------------- */
+  var CLE_ANIM = 'odn-animations';
+
+  function animationsCoupees() {
+    try { return localStorage.getItem(CLE_ANIM) === 'non'; } catch (e) { return false; }
+  }
+
+  function poserBoutonAnimations() {
+    var coupees = animationsCoupees();
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'sobre-bouton';
+    b.setAttribute('aria-pressed', coupees ? 'true' : 'false');
+    b.title = coupees
+      ? 'Les animations sont coupées. Cliquez pour les rallumer.'
+      : 'Coupe les scènes 3D et les animations, pour une machine modeste.';
+
+    var marque = document.createElement('span');
+    marque.className = 'sobre-bouton__marque';
+    marque.setAttribute('aria-hidden', 'true');
+    marque.textContent = coupees ? '◍' : '◉';
+
+    var texte = document.createElement('span');
+    texte.className = 'sobre-bouton__texte';
+    texte.textContent = coupees ? 'Animations coupées' : 'Animations';
+
+    b.appendChild(marque);
+    b.appendChild(texte);
+    b.addEventListener('click', function () {
+      try {
+        if (coupees) { localStorage.removeItem(CLE_ANIM); } else { localStorage.setItem(CLE_ANIM, 'non'); }
+      } catch (e) { /* navigation privée : le choix ne tiendra pas, tant pis */ }
+      /* Le bouton garde l'ancre en mémoire : on revient au même
+         endroit de la page après le rechargement. */
+      location.reload();
+    });
+    document.body.appendChild(b);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', poserBoutonAnimations);
+  } else {
+    poserBoutonAnimations();
+  }
+
   var doux = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   var tactile = window.matchMedia('(hover: none)').matches;
 
