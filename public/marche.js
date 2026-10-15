@@ -508,6 +508,15 @@
     rendreMinerais('', '');
     majRoutes();
     majTout();
+
+    /* Ceinture et bretelles : ces trois blocs sont remplis par ce
+       script, ils n'ont donc pas besoin d'attendre la révélation au
+       défilement. Un tableau de cent cinquante lignes est déjà resté
+       invisible une fois parce que ce guetteur ne se déclenchait pas ;
+       il ne peut plus rien cacher ici. */
+    Array.prototype.forEach.call(document.querySelectorAll('.marche__bloc'), function (b) {
+      b.classList.add('vu');
+    });
   }
 
   /* ---------- lecture ---------- */
