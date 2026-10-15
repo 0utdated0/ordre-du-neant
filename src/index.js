@@ -1051,9 +1051,14 @@ function construireMarche(brut) {
       interSysteme: achat.comptoir.systeme !== vente.comptoir.systeme,
     });
   });
-  /* Le contrebande se négocie mal en convoi : elle reste dans les
-     données, marquée, mais ne tient pas le haut du classement. */
-  routes.sort((a, b) => (a.illegal - b.illegal) || (b.gain - a.gain));
+  /* La contrebande se négocie mal en convoi : elle reste dans les
+     données, marquée, mais ne tient pas le haut du classement. Les
+     deux listes sont coupées séparément, sinon les quarante premières
+     places étaient toutes légales et la case « afficher les
+     marchandises illégales » de la page ne montrait jamais rien. */
+  routes.sort((a, b) => b.gain - a.gain);
+  const routesPubliees = routes.filter((r) => !r.illegal).slice(0, 40)
+    .concat(routes.filter((r) => r.illegal).slice(0, 10));
 
   /* ---- 4. Le tableau complet, pour la page du site ---- */
   const tableau = marchandises
@@ -1083,7 +1088,7 @@ function construireMarche(brut) {
       stockMin: STOCK_MIN,
     },
     minerais,
-    routes: routes.slice(0, 40),
+    routes: routesPubliees,
     tableau,
   };
 }

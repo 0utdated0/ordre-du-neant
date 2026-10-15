@@ -3199,6 +3199,8 @@ html.arrivee::after{
 .marche__filtre--actif{background:var(--rouge);border-color:var(--rouge);color:#fff}
 .marche__bascule{display:flex;align-items:center;gap:.5rem;font-size:.86rem;color:rgba(238,240,244,.74)}
 .marche__bascule input{accent-color:var(--rouge);width:1rem;height:1rem}
+.marche__bascule input:disabled{opacity:.4}
+.marche__bascule:has(input:disabled){color:rgba(134,139,149,.6)}
 
 .marche__cadre{overflow-x:auto;border:1px solid rgba(238,240,244,.1);background:rgba(3,3,5,.6)}
 .marche__table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:52rem}

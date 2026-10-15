@@ -472,6 +472,17 @@
 
     var champRou = document.getElementById('routes-recherche');
     var caseIll = document.getElementById('routes-illegal');
+
+    /* Dire combien il y en a : une case à cocher qui ne change rien
+       passe pour cassée, alors qu'il n'y a parfois rien à montrer. */
+    var nbIllegales = DONNEES.routes.filter(function (r) { return r.illegal; }).length;
+    var libelleIll = caseIll.parentNode.querySelector('span');
+    if (libelleIll) {
+      libelleIll.textContent = nbIllegales
+        ? 'Afficher les marchandises illégales (' + nbIllegales + ')'
+        : 'Aucune marchandise illégale ne passe les filtres';
+    }
+    if (!nbIllegales) { caseIll.disabled = true; }
     var champSoute = document.getElementById('routes-soute');
     var majRoutes = function () { rendreRoutes(rRech, rSys, rIll, rSoute); };
     champRou.addEventListener('input', function () { rRech = sansAccent(champRou.value); majRoutes(); });
