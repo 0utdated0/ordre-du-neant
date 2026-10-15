@@ -25,12 +25,17 @@
     return Math.round(n).toLocaleString('fr-FR').replace(/ | /g, ' ');
   }
 
+  /* Les prix de comptoir ont quelques jours, les tarifs de raffinerie
+     parfois deux ans : il faut que l'écart se voie d'un coup d'oeil. */
   function age(ms) {
     if (!ms) { return 'date inconnue'; }
     var j = Math.floor((Date.now() - ms) / 86400000);
     if (j <= 0) { return "aujourd'hui"; }
     if (j === 1) { return 'hier'; }
-    return 'il y a ' + j + ' jours';
+    if (j < 60) { return 'il y a ' + j + ' jours'; }
+    var mois = Math.round(j / 30.4);
+    if (mois < 24) { return 'il y a ' + mois + ' mois'; }
+    return 'il y a ' + (Math.round(j / 365 * 10) / 10).toString().replace('.', ',') + ' ans';
   }
 
   function sansAccent(s) {
@@ -45,7 +50,7 @@
   }
 
   function cellLieu(o, prix) {
-    if (!o) { return td('-'); }
+    if (!o) { return td('pas de relevé', 'marche__absent'); }
     var c = document.createElement('td');
     if (prix) {
       var p = document.createElement('span');
@@ -261,9 +266,9 @@
       }
       tr.appendChild(nom);
 
-      tr.appendChild(td(b ? aUEC(b.prix) : '-', 'nombre'));
+      tr.appendChild(td(b ? aUEC(b.prix) : '-', 'nombre' + (b ? '' : ' marche__absent')));
       tr.appendChild(cellLieu(b));
-      tr.appendChild(td(r ? aUEC(r.prix) : '-', 'nombre'));
+      tr.appendChild(td(r ? aUEC(r.prix) : '-', 'nombre' + (r ? '' : ' marche__absent')));
       tr.appendChild(cellLieu(r));
       tr.appendChild(td(m.gainRaffinage === null ? '-' : '+' + m.gainRaffinage + ' %', 'nombre marche__gain'));
 
@@ -363,9 +368,9 @@
       }
       tr.appendChild(nom);
       tr.appendChild(td(m.nature || '-'));
-      tr.appendChild(td(a ? aUEC(a.prix) : '-', 'nombre'));
+      tr.appendChild(td(a ? aUEC(a.prix) : '-', 'nombre' + (a ? '' : ' marche__absent')));
       tr.appendChild(cellLieu(a));
-      tr.appendChild(td(v ? aUEC(v.prix) : '-', 'nombre'));
+      tr.appendChild(td(v ? aUEC(v.prix) : '-', 'nombre' + (v ? '' : ' marche__absent')));
       tr.appendChild(cellLieu(v));
 
       var ouvrir = function () {
@@ -451,7 +456,9 @@
       if (source) {
         source.innerHTML = 'Relevés des joueurs rassemblés par <a href="' + d.source.url +
           '" target="_blank" rel="noopener">' + d.source.nom + '</a>. ' +
-          'Un relevé de plus de ' + d.reglages.ageMaxJours + ' jours est écarté. ' +
+          'Un prix de comptoir de plus de ' + d.reglages.ageMaxJours + ' jours est écarté. ' +
+          'Les tarifs de raffinerie, eux, ne bougent presque jamais : ils sont gardés jusqu\'à ' +
+          Math.round(d.reglages.ageMaxBrutJours / 30.4) + ' mois, avec leur date. ' +
           'Les routes demandent au moins ' + d.reglages.stockMin + ' SCU en rayon. ' +
           'Site non officiel, fait par la communauté.';
       }

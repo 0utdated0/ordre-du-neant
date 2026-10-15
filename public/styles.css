@@ -3218,6 +3218,7 @@ html.arrivee::after{
 .marche__lieu{display:block;color:rgba(238,240,244,.82)}
 .marche__detail{display:block;font-size:.76rem;color:var(--cendre);margin-top:.15rem}
 .marche__gain{color:var(--braise)}
+.marche__absent{color:rgba(134,139,149,.55);font-style:italic}
 .marche__vide td{color:var(--cendre);text-align:center;padding:2rem}
 .marche__marque{
   display:inline-block;margin-left:.5rem;padding:.1rem .4rem;

@@ -28,7 +28,7 @@
 <link rel="apple-touch-icon" href="/assets/embleme-180.png">
 <link rel="preload" href="/polices/michroma-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="/polices/saira-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/styles.css?v=32168623a7">
+<link rel="stylesheet" href="/styles.css?v=65753684b3">
 <!-- Sans WebGL (accélération matérielle coupée, carte graphique bloquée),
      les scènes passent en images fixes : voir repli.js. ?sans-3d simule ce cas. -->
 <script>(function(){var d=document.documentElement,ok=false;if(/[?&]sans-3d(=|&|$)/.test(location.search)){var gc=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(t){return /webgl/i.test(t)?null:gc.apply(this,arguments);};}try{var c=document.createElement('canvas'),g=c.getContext('webgl2')||c.getContext('webgl');ok=!!g;var x=g&&g.getExtension('WEBGL_lose_context');if(x){x.loseContext();}}catch(e){}if(!ok){d.className+=' sans-3d';}})();</script>
@@ -108,6 +108,8 @@
           Le prix brut est celui des raffineries, le prix raffiné celui des comptoirs.
           L&rsquo;écart dit si le passage par la raffinerie vaut l&rsquo;attente.
           Cliquez une ligne pour voir tous les points de vente et les derniers relevés.
+          Une case vide veut dire qu&rsquo;aucun relevé n&rsquo;existe, pas que le prix est nul :
+          tout vient de ce que les joueurs remontent.
         </p>
       </div>
 
@@ -290,7 +292,7 @@
 <script src="/vendor/three.min.js?v=7a7802bf4f" defer></script>
 <script src="/scene.js?v=5839ff321f" defer></script>
 <script src="/site.js?v=35d1ad2fea" defer></script>
-<script src="/marche.js?v=941497c828" defer></script>
+<script src="/marche.js?v=3af538094a" defer></script>
 <script src="/repli.js?v=2ef3c97172" defer></script>
 <script src="/radio.js?v=9bcf92d61d" defer></script>
 </body>

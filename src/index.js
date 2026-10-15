@@ -835,9 +835,16 @@ const MARCHE_CACHE_SECONDES = 900;
 const SYSTEMES = { 68: 'Stanton', 64: 'Pyro', 55: 'Nyx' };
 
 const JOUR = 86400;
-/* Un relevé plus vieux que ça ne dit plus rien d'utile : les prix
-   bougent à chaque correctif du jeu. */
+/* Un relevé de comptoir plus vieux que ça ne dit plus rien d'utile :
+   les prix d'achat et de revente bougent à chaque correctif. */
 const AGE_MAX = 21 * JOUR;
+/* Le minerai brut, lui, se vend au tarif fixe des raffineries. Ces
+   tarifs ne bougent pour ainsi dire jamais, et les relevés d'UEX ont
+   souvent un à deux ans. Les écarter au même seuil que les comptoirs
+   vidait la colonne « brut » de presque tout le tableau : vingt-trois
+   minerais sur trente-six n'avaient plus aucun prix. On les garde,
+   avec leur date affichée, pour que chacun juge. */
+const AGE_MAX_BRUT = 760 * JOUR;
 /* Sans stock, une route ne vaut rien : on ne remplit pas une soute
    avec quatre SCU. */
 const STOCK_MIN = 50;
@@ -885,9 +892,9 @@ function comptoirPublic(t) {
 /* Un relevé est retenu s'il est récent et si son prix ne sort pas
    d'un rêve : quatre fois la moyenne, c'est une faute de frappe,
    pas une occasion. */
-function fraisEtCredible(p, sens, maintenant) {
+function fraisEtCredible(p, sens, maintenant, ageMax = AGE_MAX) {
   const date = p.date_modified || p.date_added || 0;
-  if (!date || maintenant - date > AGE_MAX) return false;
+  if (!date || maintenant - date > ageMax) return false;
   const prix = sens === 'achat' ? p.price_buy : p.price_sell;
   const moyenne = sens === 'achat' ? p.price_buy_avg : p.price_sell_avg;
   if (!(prix > 0)) return false;
@@ -946,7 +953,7 @@ function construireMarche(brut) {
   prixBruts.forEach((p) => {
     const t = T.get(p.id_terminal);
     if (!t) return;
-    if (fraisEtCredible(p, 'vente', maintenant)) ranger(ventesBrutes, p.id_commodity, offre(p, t, 'vente'));
+    if (fraisEtCredible(p, 'vente', maintenant, AGE_MAX_BRUT)) ranger(ventesBrutes, p.id_commodity, offre(p, t, 'vente'));
   });
 
   [achats, ventes, ventesBrutes].forEach((carte, i) => {
@@ -1053,7 +1060,11 @@ function construireMarche(brut) {
     maj: new Date().toISOString(),
     source: { nom: 'UEX Corp', url: 'https://uexcorp.space' },
     systemes: Object.values(SYSTEMES),
-    reglages: { ageMaxJours: AGE_MAX / JOUR, stockMin: STOCK_MIN },
+    reglages: {
+      ageMaxJours: AGE_MAX / JOUR,
+      ageMaxBrutJours: AGE_MAX_BRUT / JOUR,
+      stockMin: STOCK_MIN,
+    },
     minerais,
     routes: routes.slice(0, 40),
     tableau,
