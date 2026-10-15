@@ -18,7 +18,7 @@
                      sans la liste nominative
    ========================================================= */
 
-import { servirMarche, servirMarcheHistorique } from './marche.js';
+import { servirMarche, servirMarcheHistorique, MARCHE_CACHE_SECONDES } from './marche.js';
 
 const API = 'https://discord.com/api/v10';
 const CACHE_SECONDES = 300;
@@ -498,6 +498,20 @@ export default {
        Cloudflare, en anglais et sans rien dire de ce qui a cassé. Le
        site et le bot reçoivent maintenant la raison en clair, et le
        bot garde son dernier message au lieu d'afficher du vide. */
+    /* Sonde de déploiement : /api/marche?sonde=1 répond sans rien
+       appeler d'autre. Elle dit quelle version tourne vraiment et si
+       le module du marché est bien arrivé dans le paquet déployé.
+       Sans elle, impossible de distinguer « le code casse » de « le
+       code déployé n'est pas celui du dépôt ». */
+    if (url.pathname === '/api/marche' && url.searchParams.get('sonde') === '1') {
+      return reponse({
+        sonde: 'marche-3',
+        servirMarche: typeof servirMarche,
+        servirMarcheHistorique: typeof servirMarcheHistorique,
+        constante: typeof MARCHE_CACHE_SECONDES,
+      }, 200, 0);
+    }
+
     if (url.pathname === '/api/marche' || url.pathname === '/api/marche/historique') {
       try {
         return url.pathname === '/api/marche'
