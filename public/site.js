@@ -255,15 +255,24 @@
      --------------------------------------------------------- */
   var aReveler = document.querySelectorAll('.revele');
   if ('IntersectionObserver' in window && !doux) {
+    /* Douze pour cent d'un bloc, c'est le bon seuil pour une carte ou
+       un paragraphe. Pour un tableau de cent cinquante lignes, haut de
+       vingt mille pixels, douze pour cent font deux mille trois cents
+       pixels : un écran n'en montre jamais autant, et le bloc restait
+       invisible pour toujours. On accepte donc aussi un bloc dont la
+       part visible remplit un quart de l'écran. */
     var guetteur = new IntersectionObserver(function (entrees) {
       entrees.forEach(function (e) {
-        if (e.isIntersecting) {
+        var vu = e.intersectionRect && e.intersectionRect.height;
+        var assez = e.intersectionRatio >= 0.12 ||
+                    (vu && vu >= Math.min(220, window.innerHeight * 0.25));
+        if (e.isIntersecting && assez) {
           var d = e.target.dataset.retard || 0;
           setTimeout(function () { e.target.classList.add('vu'); }, d);
           guetteur.unobserve(e.target);
         }
       });
-    }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
+    }, { rootMargin: '0px 0px -12% 0px', threshold: [0, 0.12] });
 
     aReveler.forEach(function (n) { guetteur.observe(n); });
   } else {
