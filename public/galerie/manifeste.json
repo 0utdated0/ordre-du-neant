@@ -34,5 +34,101 @@
   {
     "fichier": "sortie-eva.webp",
     "legende": "Sortie extravéhiculaire dans un champ d'astéroïdes"
+  },
+  {
+    "fichier": "croiseur-dans-le-vide.webp",
+    "legende": "Le croiseur en route dans le vide, moteurs allumés"
+  },
+  {
+    "fichier": "combat-orbite-lune.webp",
+    "legende": "Échange de tirs en orbite d'une lune, débris en suspension"
+  },
+  {
+    "fichier": "ciel-dore.webp",
+    "legende": "Silhouette à contre-jour dans un ciel doré"
+  },
+  {
+    "fichier": "survol-ville-nuit.webp",
+    "legende": "Survol d'une ville la nuit, sous une couverture de nuages"
+  },
+  {
+    "fichier": "hangar-penombre.webp",
+    "legende": "Au repos dans la pénombre d'un hangar"
+  },
+  {
+    "fichier": "chasseur-vert-brume.webp",
+    "legende": "Chasseur vert dans la brume, ailes déployées"
+  },
+  {
+    "fichier": "eva-caisse.webp",
+    "legende": "Sortie extravéhiculaire, une caisse récupérée à la main"
+  },
+  {
+    "fichier": "ceinture-asteroides.webp",
+    "legende": "Immobile dans une ceinture d'astéroïdes, la lumière au loin"
+  },
+  {
+    "fichier": "cockpit-anomalie.webp",
+    "legende": "Depuis le poste de pilotage, face à une anomalie lumineuse"
+  },
+  {
+    "fichier": "sous-la-structure.webp",
+    "legende": "Voyage quantique sous une immense structure"
+  },
+  {
+    "fichier": "nebuleuse-rose.webp",
+    "legende": "Traversée d'une nébuleuse rose et bleue"
+  },
+  {
+    "fichier": "trainee-quantique.webp",
+    "legende": "Pleine vitesse, la poussière défile le long de la coque"
+  },
+  {
+    "fichier": "seuil-du-saut.webp",
+    "legende": "Face au tourbillon d'un point de saut"
+  },
+  {
+    "fichier": "avant-poste-minier.webp",
+    "legende": "En vol stationnaire au-dessus d'un avant-poste minier"
+  },
+  {
+    "fichier": "approche-coque-rouge.webp",
+    "legende": "Approche de l'avant-poste, coque rouge dans la nuit"
+  },
+  {
+    "fichier": "cap-sur-le-soleil.webp",
+    "legende": "En route vers un soleil lointain"
+  },
+  {
+    "fichier": "coursives-polaris.webp",
+    "legende": "Dans les coursives du Polaris"
+  },
+  {
+    "fichier": "cratere-vu-du-ciel.webp",
+    "legende": "Au-dessus du cratère, vu du ciel"
+  },
+  {
+    "fichier": "vaisseau-en-detresse.webp",
+    "legende": "Contrat de sauvetage : un vaisseau en détresse parmi les astéroïdes"
+  },
+  {
+    "fichier": "cargo-en-quantique.webp",
+    "legende": "Cargaison arrimée, le cargo file en quantique"
+  },
+  {
+    "fichier": "chantier-au-crepuscule.webp",
+    "legende": "Posé près du chantier, au crépuscule"
+  },
+  {
+    "fichier": "rivage-rose.webp",
+    "legende": "Au-dessus du rivage, dans la lumière rose"
+  },
+  {
+    "fichier": "formation-de-combat.webp",
+    "legende": "En formation, les feux des adversaires en face"
+  },
+  {
+    "fichier": "surface-de-lune.webp",
+    "legende": "À pied sur la lune, le soleil rase les dunes"
   }
 ]
